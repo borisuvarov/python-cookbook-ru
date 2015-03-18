@@ -2450,3 +2450,733 @@ for part in combine(sample(), 32768):
 ```
 
 Ключевой момент в том, что первоначальный генератор не обязан знать деталей: он просто выдает части.
+
+
+
+## 2.15. Интерполяция переменных в строках
+## Задача
+Вы хотите создать строку, в которой на место переменных будут подставляться строковые представления значений этих переменных.
+
+### Решение
+В Python нет прямой поддержки простой подстановки значений переменных в строках. Однако строковый метод *format()* предоставляет приближенную по смыслу возможность: Например:
+```python
+>>> s = '{name} has {n} messages.'
+>>> s.format(name='Guido', n=37)
+'Guido has 37 messages.'
+>>>
+``` 
+
+Если значения, которые должны быть подставлены, на самом деле находятся в переменных, вы можете использовать сочетание *format_map()* и *vars()*, как показано тут:
+```python
+>>> name = 'Guido'
+>>> n = 37
+>>> s.format_map(vars())
+'Guido has 37 messages.'
+>>>
+```
+
+Стоит отметить, что *vars()* также работает с экземплярами. Например:
+```python
+>>> class Info:
+...   def __init__(self, name, n):
+...   self.name = name
+...   self.n = n
+...
+>>> a = Info('Guido',37)
+>>> s.format_map(vars(a))
+'Guido has 37 messages.'
+>>>
+```
+
+Недостаток *format()* и *format(map)* в том, что они не могут аккуратно справиться с отсутствующими значениями. Например:
+```python
+>>> s.format(name='Guido')
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+KeyError: 'n'
+>>>
+```
+
+Этого можно избежать путём определения альтернативный класс словаря с методом *__missing__()*, как показано ниже:
+```python
+class safesub(dict):
+	def __missing__(self, key):
+		return '{' + key + '}'
+```
+
+Теперь этот класс можно использовать, чтобы обернуть значения, которые подаются на вход в *format_map()*:
+```python
+>>> del n  # Make sure n is undefined
+>>> s.format_map(safesub(vars()))
+'Guido has {n} messages.'
+>>>
+``` 
+
+Если вы обнаружите, что часто делаете такие вещи в своей программе, вы можете спрятать процесс подстановки переменных в небольшую функцию, которая использует так называемый “frame hack”. Например:
+```python
+import sys
+def sub(text):
+	return text.format_map(safesub(sys._getframe(1).f_locals))
+```
+
+Теперь вы можете делать вот так:
+```python
+>>> name = 'Guido'
+>>> n = 37
+>>> print(sub('Hello {name}'))
+Hello Guido
+>>> print(sub('You have {n} messages.'))
+You have 37 messages.
+>>> print(sub('Your favorite color is {color}'))
+Your favorite color is {color}
+>>>
+```
+
+### Обсуждение
+Отсутствие настоящей интерполяции переменных в Python привело к созданию разнообразных решений. В качестве альтернативы описанным выше решениям, вы иногда можете увидеть такой подход к форматированию строк:
+```python
+>>> name = 'Guido'
+>>> n = 37
+>>> '%(name) has %(n) messages.' % vars()
+'Guido has 37 messages.'
+>>>
+```
+
+Или же вам могут попасться строки-темплейты:
+```python
+>>> import string
+>>> s = string.Template('$name has $n messages.')
+>>> s.substitute(vars())
+'Guido has 37 messages.'
+>>>
+```
+
+Однако методы *format()* и *format_map()* являеются более современными, нежели эти альтернативы, и отдавать предпочтение нужно им. Преимущество использования *format()* заключается в том, что вы также получаете все возможности форматирования строк (выравнивание, отступы, нумерация и т.п.), что недоступно для альтернативных решений, таких как строковые объекты *Template*.
+
+В этом рецепте нам также удалось показать несколько интересных продвинутых возможностей. Малоизвестный метод классов словарей и отображений *__missing()__* позволяет вам определить подход для работы с отсутствующими значениями. В классе *safesub* этот метод был определен таким образом, чтобы возвращать отсутствующие значения в форме заглушки (плейсхолдера). Вместо того, чтобы получить исключение *KeyException*, вы увидите отсутствующие значения появляющимися в строке-результате (что может оказаться полезным для дебаггинга).
+
+Функция *sub()* использует *sys._getframe(1)* чтобы вернуть фрейм стека вызывающего. Отсюда атрибут *f_locals* доступен, чтобы получить локальные переменные. Стоит отметить, что игр с фреймами стека стоит избегать. Однако для утилитарных функций типа строковой подстановки это может оказаться полезным. Отдельно заметим, что *f_locals* — это словарь, который является копией локальных переменных в вызывающей функции. Хотя вы можете изменить содержимое *f_locals*, эти изменения не станут постоянными. Поэтому, хотя доступ другому фрейму стека и может показаться адским злом, невозможно случайно переписать переменные или изменить локальное окружение вызывающей функции (caller).   
+
+## 2.16. Разбивка текста на фиксированное количество колонок
+### Задача
+У вас есть длинные строки, которые вы хотите переформатировать таким образом, чтобы они распределились по заданному пользователем количеству колонок.
+
+### Решение
+Используйте модуль *textwrap* для переформатирования выводимого текста. Предположим, например, что у вас есть такая длинная строка:
+```python
+s = "Look into my eyes, look into my eyes, the eyes, the eyes, \
+the eyes, not around the eyes, don't look around the eyes, \
+look into my eyes, you're under."
+```
+
+Вот как вы можете использовать модуль *textwrap* чтобы переформатировать её различным образом:
+```python
+>>> import textwrap
+>>> print(textwrap.fill(s, 70))
+Look into my eyes, look into my eyes, the eyes, the eyes, the eyes,
+not around the eyes, don't look around the eyes, look into my eyes,
+you're under.
+
+>>> print(textwrap.fill(s, 40))
+Look into my eyes, look into my eyes,
+the eyes, the eyes, the eyes, not around
+the eyes, don't look around the eyes,
+look into my eyes, you're under.
+
+>>> print(textwrap.fill(s, 40, initial_indent=' '))
+Look into my eyes, look into my
+eyes, the eyes, the eyes, the eyes, not
+around the eyes, don't look around the
+eyes, look into my eyes, you're under.
+
+>>> print(textwrap.fill(s, 40, subsequent_indent=' '))
+Look into my eyes, look into my eyes,
+the eyes, the eyes, the eyes, not
+around the eyes, don't look around
+the eyes, look into my eyes, you're
+under.
+```
+
+### Обсуждение
+Модуль *textwrap* — это простой способ очистить текст — особенно если вы хотите, чтобы вывод соответствовал размерам терминала. К вопросу о размере терминала: вы можете получить его, используя *os.get_terminal_size()*. Например: 
+```python
+>>> import os
+>>> os.get_terminal_size().columns
+80
+>>>
+```
+
+У метода *fill()* есть неколько дополнительных параметров, которые контролируют то, как он обращается с табуляцией, окончаниями предложений и т.д. За подробностями обратитесь к [документации класса textwrap.TextWrapper](https://docs.python.org/3.3/library/textwrap.html#textwrap.TextWrapper).
+
+
+## 2.17. Работа с HTML- и XML-сущностями в тексте
+### Задача
+Вы хотите заменить HTML- и XML-сущности, такие как *&entity;* или *&\#code;*, соответствующим текстом. Или же вам нужно произвести текст, но экранировать некоторые символы (например, <, > или &).
+
+### Решение
+Если вы производите текст, довольно просто заменить спецсимволы типа < или > с помощью функции *html.escape()*. Например:
+```python
+>>> s = 'Elements are written as "<tag>text</tag>".'
+>>> import html
+>>> print(s)
+Elements are written as "<tag>text</tag>".
+>>> print(html.escape(s))
+Elements are written as &quot;&lt;tag&gt;text&lt;/tag&gt;&quot;.
+
+>>> # Disable escaping of quotes
+>>> print(html.escape(s, quote=False))
+Elements are written as "&lt;tag&gt;text&lt;/tag&gt;".
+>>>
+```
+
+Если вы хотите произвести текст в кодировке ASCII и вставить коды символов вместо отсутствующих в ASCII символов, вы можете использовать аргумент *errors='xmlcharrefreplace'* с различными функциями ввода-вывода. Например:
+```python
+>>> s = 'Spicy Jalapeño'
+>>> s.encode('ascii', errors='xmlcharrefreplace')
+b'Spicy Jalape&#241;o'
+>>>
+```
+
+Чтобы заменить сущности в тексте, нужен другой подход. Если обрабатываете HTML или XML, попробуйте для начала настоящий парсер HTML или XML. Обычно эти инструменты автоматически позаботятся о замене значений во время парсинга, и вам не придётся об этом беспокоиться. 
+
+Если же по каким-то причинам вы получили голый текст с включением сущностей, и вы хотите заменить их вручную, вы сможете сделать это с помощью различных функций и методов, связанных с парсерами HTML и XML. Например:
+```python
+>>> s = 'Spicy &quot;Jalape&#241;o&quot.'
+>>> from html.parser import HTMLParser
+>>> p = HTMLParser()
+>>> p.unescape(s)
+'Spicy "Jalapeño".'
+>>>
+
+>>> t = 'The prompt is &gt;&gt;&gt;'
+>>> from xml.sax.saxutils import unescape
+>>> unescape(t)
+'The prompt is >>>'
+>>>
+``` 
+
+### Обсуждение
+О правильном экранировании спецсимволов при генерировании HTML или XML легко забыть. Это особенно верно, если вы генерируете вывод самостоятельно, используя *print()* или другую базовую функцию строкового форматирования. Есть простое решение — использовать функции типа *html.escape()*.
+
+Если вам нужно произвести обратное преобразование текста, к вашим услугам различные фукции типа *xml.sax.saxutils.unescape()*. Однако мы все же рекомендуем использовать парсер. Например, если при обработке HTML и XML использовать такие парсеры как *html.parser* или *xml.etree.ElementTree*, они самостоятельно позаботятся о замене сущностей в тексте.
+
+## 2.18. Токенизация текста
+### Задача
+У вас есть строка, которую вы хотите распарсить в поток токенов слева направо.
+
+### Решение
+Предположим, у вас есть вот такая строка:
+```python
+text = 'foo = 23 + 42 * 10'
+```
+
+Чтобы токенизировать строку, вам нужно нечто большее, чем простой поиск по шаблонам. Вам также нужен способ определить тип шаблона. Например, вы можете захотеть превратить строку в последовательность пар:
+```python
+tokens = [('NAME', 'foo'), ('EQ','='), ('NUM', '23'), ('PLUS','+'),
+('NUM', '42'), ('TIMES', '*'), ('NUM', 10')]
+```
+
+Для разрезания такого типа первым шагом должно быть определение всех возможных токенов, включая пробелы, с помошью шаблонов регулярных выражений, использующих именованные захватывающие группы:
+```python
+import re
+NAME = r'(?P<NAME>[a-zA-Z_][a-zA-Z_0-9]*)'
+NUM  = r'(?P<NUM>\d+)'
+PLUS = r'(?P<PLUS>\+)'
+TIMES = r'(?P<TIMES>\*)'
+EQ  = r'(?P<EQ>=)'
+WS  = r'(?P<WS>\s+)'
+
+master_pat = re.compile('|'.join([NAME, NUM, PLUS, TIMES, EQ, WS]))
+```
+
+В этих шаблонах условие *?P<TOKENNAME>* используется для присваивания имени шаблону. Это мы используем позже.
+
+Далее, для собственно токенизации, используем малоизвестный метод объектов шаблонов *scanner()*. Этот метод создает объект сканера, в котором повторно вызывается шаг *match()* для предоставленного текста, выполняя один поиск совпадения за раз. Вот интерактивный пример работы объекта сканера:
+```python
+>>> scanner = master_pat.scanner('foo = 42')
+>>> scanner.match()
+<_sre.SRE_Match object at 0x100677738>
+>>> _.lastgroup, _.group()
+('NAME', 'foo')
+>>> scanner.match()
+<_sre.SRE_Match object at 0x100677738>
+>>> _.lastgroup, _.group()
+('WS', ' ')
+>>> scanner.match()
+<_sre.SRE_Match object at 0x100677738>
+>>> _.lastgroup, _.group()
+('EQ', '=')
+>>> scanner.match()
+<_sre.SRE_Match object at 0x100677738>
+>>> _.lastgroup, _.group()
+('WS', ' ')
+>>> scanner.match()
+<_sre.SRE_Match object at 0x100677738>
+>>> _.lastgroup, _.group()
+('NUM', '42')
+>>> scanner.match()
+>>>
+```
+
+Чтобы взять это приём и использовать в программе, он должен быть очищен и упакован в генератор:
+```python
+from collections import namedtuple
+
+Token = namedtuple('Token', ['type','value'])
+
+def generate_tokens(pat, text):
+	scanner = pat.scanner(text)
+		for m in iter(scanner.match, None):
+			yield Token(m.lastgroup, m.group())
+
+# Example use
+for tok in generate_tokens(master_pat, 'foo = 42'):
+	print(tok)
+
+# Produces output
+# Token(type='NAME', value='foo')
+# Token(type='WS', value=' ')
+# Token(type='EQ', value='=')
+# Token(type='WS', value=' ')
+# Token(type='NUM', value='42')
+```
+
+Если вы хотите как-то отфильтровать поток токенов, вы можете либо определить больше генераторов, либо использовать выражение-генератор. Например, вот так можно отфильтровать все токены-пробелы:
+```python
+tokens = (tok for tok in generate_tokens(master_pat, text)
+	if tok.type != 'WS')
+for tok in tokens:
+	print(tok)
+```
+
+### Обсуждение
+Токенизация часто является первым шагом более продвинутого парсинга и обработки текста. Чтобы использовать показанные приёмы сканирования, нужно держать в уме несколько важных моментов. Во-первых, вы должны убедиться, что вы определили соответствующие шаблоны регулярных выражений для всех возможных текстовых последовательностей, которые могут встретиться во входных данных. Если встретится текст, для которого нельзя найти совпадение, сканирование просто остановится. Вот почему необходимо было определить токен пробела (WS) в примере выше.
+
+Порядок токенов в главном регулярном выражении также важен. При поиске совпадений регулярное выражение пытается отыскать совпадения с шаблонами в заданном порядке. Поэтому если шаблон окажется подстрокой более длинного шаблона, вы должны убедиться, что более длинный шаблон вписан в выражение первым. Например:
+```python
+LT = r'(?P<LT><)'
+LE = r'(?P<LE><=)'
+EQ = r'(?P<EQ>=)'
+
+master_pat = re.compile('|'.join([LE, LT, EQ]))  # Correct
+# master_pat = re.compile('|'.join([LT, LE, EQ])) # Incorrect
+```
+
+Второй шаблон неправильный, потому что он будет отыскивать совпадение с <=, поскольку за токеном LT следует токен EQ, а не LE.
+
+И последнее: вы должны следить за шаблонами, формирующими подстроки. Предположим, например, что у вас есть два шаблона:
+```python
+PRINT = r'(P<PRINT>print)'
+NAME  = r'(P<NAME>[a-zA-Z_][a-zA-Z_0-9]*)'
+
+master_pat = re.compile('|'.join([PRINT, NAME]))
+
+for tok in generate_tokens(master_pat, 'printer'):
+	print(tok)
+
+# Outputs :
+# Token(type='PRINT', value='print')
+# Token(type='NAME', value='er')
+```
+
+Для более продвинутого токенизирования вы можете обратиться к пакетам [PyParsing](http://pyparsing.wikispaces.com/) или [PLY](http://www.dabeaz.com/ply/index.html). Пример использования PLY вы найдете в следующем рецепте.
+
+## 2.19. Написание простого парсера на основе метода рекурсивного спуска
+### Задача
+Вам нужно распарсить текст в соответствии с грамматическими правилами и выполнить действия или построить абстрактное синтаксическое дерево, представляющее входные данные.
+
+### Решение
+В этой задаче мы сосредоточены на парсинге текста в соответствии с некоторой определенной грамматикой. Чтобы это сделать, вы должны начать с формальной спецификации грамматики в форме BNF (БНФ, форма Бэкуса — Наура) или EBNF (РБНФ, расширенная форма Бэкуса — Наура). Например, грамматика для простых арифметических выражений может выглядеть так:
+
+	expr ::= expr + term
+		| expr - term
+		| term
+	
+	term ::= term * factor
+		| term / factor
+		| factor
+	
+	factor ::= ( expr )
+		| NUM
+
+А вот альтернативная форма РБНФ:
+
+	expr ::= term { (+|-) term }*
+
+	term ::= factor { (*|/) factor }*
+
+	factor ::= ( expr )
+		| NUM
+
+В РБНФ части правил, заключенные в { ... }\* являются необязательными. \* означает ноль и более повторений (то есть имеет такое значение, как и в регулярных выражениях).
+
+Теперь, если вы незнакомы с механизмом работы БНФ, думайте о ней как об определении правил замены или подстановки, где символы слева могут быть заменены символами справа (или наоборот). В общем, во время парсинга вы пытаетесь сопоставить входящий текст с грамматикой, делая различные подстановки и расширения с использованием БНФ. Чтобы проиллюстрировать это, предположим, что вы парсите выражение 3 \+ 4 \* 5. Это выражение должно быть сначала разбито на поток токенов с использованием описанных в **рецепте 2.18.** приёмов. Результатом будет последовательность токенов:
+
+	NUM + NUM * NUM
+
+С этого момента парсинг начинает пытаться сопоставить грамматику с входящими токенами, делая подстановки:
+
+	expr
+	expr ::= term { (+|-) term }*
+	expr ::= factor { (*|/) factor }* { (+|-) term }*
+	expr ::= NUM { (*|/) factor }* { (+|-) term }*
+	expr ::= NUM { (+|-) term }*
+	expr ::= NUM + term { (+|-) term }*
+	expr ::= NUM + factor { (*|/) factor }* { (+|-) term }*
+	expr ::= NUM + NUM { (*|/) factor}* { (+|-) term }*
+	expr ::= NUM + NUM * factor { (*|/) factor }* { (+|-) term }*
+	expr ::= NUM + NUM * NUM { (*|/) factor }* { (+|-) term }*
+	expr ::= NUM + NUM * NUM { (+|-) term }*
+	expr ::= NUM + NUM * NUM
+
+Чтобы пройти по всем шагам подстановки и разобраться, придётся потратить время, но в целом они работают так: смотрят на входящие данные и пытаются сопоставить их с правилами грамматики. Первый входящий токен — это NUM, поэтому подстановки сначала сосредотачиваются на поиске совпадений с этой частью. Когда совпадение найдено, внимание переходит к следующему токену \+ и т.д. Некоторые части правой стороны (например, { (\*/) factor }\*) иcчезают, когда определено, что они не совпадают со следующим токеном. Парсинг проходит успешно, если правая сторона достаточно полна, чтобы охватить все входящие токены. 
+
+Со всей вышеизложенной вводной информацией перейдем к простому рецепту построения «выполнителя» выражений, работающего по методу рекурсивного спуска:
+```python
+import re
+import collections
+
+# Token specification
+NUM  = r'(?P<NUM>\d+)'
+PLUS  = r'(?P<PLUS>\+)'
+MINUS  = r'(?P<MINUS>-)'
+TIMES  = r'(?P<TIMES>\*)'
+DIVIDE = r'(?P<DIVIDE>/)'
+LPAREN = r'(?P<LPAREN>\()'
+RPAREN = r'(?P<RPAREN>\))'
+WS  = r'(?P<WS>\s+)'
+
+master_pat = re.compile('|'.join([NUM, PLUS, MINUS, TIMES,
+                                  DIVIDE, LPAREN, RPAREN, WS]))
+
+# Tokenizer
+Token = collections.namedtuple('Token', ['type','value'])
+
+def generate_tokens(text):
+	scanner = master_pat.scanner(text)
+	for m in iter(scanner.match, None):
+		tok = Token(m.lastgroup, m.group())
+		if tok.type != 'WS':
+			yield tok
+
+# Parser
+class ExpressionEvaluator:
+	'''
+	Implementation of a recursive descent parser. Each method
+	implements a single grammar rule. Use the ._accept() method
+	to test and accept the current lookahead token. Use the ._expect()
+	method to exactly match and discard the next token on on the input
+	(or raise a SyntaxError if it doesn't match).
+	'''
+
+	def parse(self,text):
+		self.tokens = generate_tokens(text)
+		self.tok = None  # Last symbol consumed
+		self.nexttok = None  # Next symbol tokenized
+		self._advance()  # Load first lookahead token
+		return self.expr()
+
+	def _advance(self):
+		'Advance one token ahead'
+		self.tok, self.nexttok = self.nexttok, next(self.tokens, None)
+
+	def _accept(self,toktype):
+		'Test and consume the next token if it matches toktype'
+		if self.nexttok and self.nexttok.type == toktype:
+			self._advance()
+			return True
+		else:
+			return False
+
+	def _expect(self,toktype):
+		'Consume next token if it matches toktype or raise SyntaxError'
+		if not self._accept(toktype):
+			raise SyntaxError('Expected ' + toktype)
+
+	# Grammar rules follow
+
+	def expr(self):
+		"expression ::= term { ('+'|'-') term }*"
+
+		exprval = self.term()
+		while self._accept('PLUS') or self._accept('MINUS'):
+			op = self.tok.type
+			right = self.term()
+			if op == 'PLUS':
+				exprval += right
+			elif op == 'MINUS':
+				exprval -= right
+			return exprval
+
+	def term(self):
+		"term ::= factor { ('*'|'/') factor }*"
+		
+		termval = self.factor()
+		while self._accept('TIMES') or self._accept('DIVIDE'):
+			op = self.tok.type
+			right = self.factor()
+			if op == 'TIMES':
+				termval *= right
+			elif op == 'DIVIDE':
+				termval /= right
+		return termval
+
+	def factor(self):
+		"factor ::= NUM | ( expr )"
+
+		if self._accept('NUM'):
+			return int(self.tok.value)
+		elif self._accept('LPAREN'):
+			exprval = self.expr()
+			self._expect('RPAREN')
+			return exprval
+		else:
+			raise SyntaxError('Expected NUMBER or LPAREN')
+```   
+
+Вот пример интерактивного использования класса ExpressionEvaluator:
+```python
+>>> e = ExpressionEvaluator()
+>>> e.parse('2')
+2
+>>> e.parse('2 + 3')
+5
+>>> e.parse('2 + 3 * 4')
+14
+>>> e.parse('2 + (3 + 4) * 5')
+37
+>>> e.parse('2 + (3 + * 4)')
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "exprparse.py", line 40, in parse
+		return self.expr()
+	File "exprparse.py", line 67, in expr
+		right = self.term()
+	File "exprparse.py", line 77, in term
+		termval = self.factor()
+	File "exprparse.py", line 93, in factor
+		exprval = self.expr()
+	File "exprparse.py", line 67, in expr
+		right = self.term()
+	File "exprparse.py", line 77, in term
+		termval = self.factor()
+	File "exprparse.py", line 97, in factor
+		raise SyntaxError("Expected NUMBER or LPAREN")
+SyntaxError: Expected NUMBER or LPAREN
+>>>
+```
+
+Если вы хотите сделать что-то другое, а не только простое вычисление, вам нужно изменить класс ExpressionEvaluator. Например, вот альтернативная имплементация, которая конструирует простое дерево разбора (парсинга):
+```python
+class ExpressionTreeBuilder(ExpressionEvaluator):
+	def expr(self):
+		"expression ::= term { ('+'|'-') term }"
+
+		exprval = self.term()
+		while self._accept('PLUS') or self._accept('MINUS'):
+			op = self.tok.type
+			right = self.term()
+			if op == 'PLUS':
+				exprval = ('+', exprval, right)
+			elif op == 'MINUS':
+				exprval = ('-', exprval, right)
+		return exprval
+
+	def term(self):
+		"term ::= factor { ('*'|'/') factor }"
+		
+		termval = self.factor()
+		while self._accept('TIMES') or self._accept('DIVIDE'):
+			op = self.tok.type
+			right = self.factor()
+			if op == 'TIMES':
+				termval = ('*', termval, right)
+			elif op == 'DIVIDE':
+				termval = ('/', termval, right)
+		return termval
+
+	def factor(self):
+		'factor ::= NUM | ( expr )'
+
+		if self._accept('NUM'):
+			return int(self.tok.value)
+		elif self._accept('LPAREN'):
+			exprval = self.expr()
+			self._expect('RPAREN')
+			return exprval
+		else:
+			raise SyntaxError('Expected NUMBER or LPAREN')
+```
+
+Вот как это работает:
+```python
+>>> e = ExpressionTreeBuilder()
+>>> e.parse('2 + 3')
+('+', 2, 3)
+>>> e.parse('2 + 3 * 4')
+('+', 2, ('*', 3, 4))
+>>> e.parse('2 + (3 + 4) * 5')
+('+', 2, ('*', ('+', 3, 4), 5))
+>>> e.parse('2 + 3 + 4')
+('+', ('+', 2, 3), 4)
+>>>
+```
+
+### Обсуждение
+Парсинг — это обширная тема, освоение которой обычно занимает у студентов первые три недели курса изучения компиляторов. Если вы ищите, где бы почерпнуть знания о грамматиках, алгоритмах разбор и прочую подобную информацию, обратитесь к книгам о компиляторах. Нет нужды говорить, что всё это втиснуть в эту книгу просто невозможно.
+
+Тем не менее, общая идея парсера на основе рекурсивного спуска проста. Для начала вы берете каждое правило грамматики и превращаете его в функцию или метод. Если ваша грамматика выглядит так:
+
+	expr ::= term { ('+'|'-') term }*
+	term ::= factor { ('*'|'/') factor }*
+	factor ::= '(' expr ')'
+	| NUM
+
+То вы начинаете с превращения её в такой набор методов:
+```python
+class ExpressionEvaluator:
+	...
+	def expr(self):
+		...
+	def term(self):
+		...
+	def factor(self):
+		...
+```
+
+Задача каждого метода проста: он должен пройти слева направо по каждой части грамматического правила, потребляя токены в процессе. Цель метода — либо потребить правило, либо сгенерировать синтаксическую ошибку в случае застревания. Чтобы реализовать это, применяются следующие приёмы:
+
+* Если следующий символ в правиле является именем другого грамматического правила (например, term или factor), вы просто вызываете метод с этим именем. Это  «спуск» алгоритма — управление спускается в другое грамматическое правило. Иногда правила могут использовать вызовы методов, которые уже выполняются (например, вызов expr в правиле factor ::= '(' expr ')'). Это «рекурсивность» алгоритма.  
+* Если следующий символ в правиле должен быть конкретным символом (например, (), вы смотрите на следующий токен и проверяете на точное совпадение. Если он не совпадает, то это синтаксическая ошибка. В этом рецепте для выполнения этих шагов используется метод *_expect()*.
+* Если следующий символ в правиле может соответствовать нескольким возможным выборам (например, \+ или -), вы должны проверить следующий токен на каждую из этих возможностей и продвигаться вперед только в том случае, если совпадение найдено. В этом рецепте за это отвечает метод *_accept()*. Он похож на более слабую версию метода *_expect()* — в том отношении, что он продвинется вперед только если совпадение найдено, но если нет, то он просто отступает, не возбуждая ошибку (что позволяет сделать другие проверки).
+* Для грамматических правил с повторяющимися частями (как, например, в правиле expr ::= term { ('\+'|'-') term }\*), повторение имплементируется циклом *while*. Тело цикла будет в общем собирать или обрабатывать все повторяющиеся значения, пока они не закончатся.
+* Если грамматическое правило потреблено, каждый метод возвращает некий результат тому, кто его вызывал. Так значения передаются во время парсинга. Например, в «вычислителе» выражений возвращаемые значения будут представлять частичные результаты разбираемого выражения. В конце концов они все объединятся в высшем методе грамматического правила, который будет выполнен.
+
+Хотя здесь мы показали простой пример, парсеры на основе рекурсивного спуска могут быть использованы для создания весьма сложных парсеров. Например, код самого Python интерпретируется парсером на основе метода рекурсивного спуска. Если вы заинтересовались, вы можете залезть в файл Grammar/Grammar в исходном коде Python и взглянуть на грамматику под капотом. При всём при этом, конечно, в ручном создании парсеров множество ограничений и ловушек.
+
+Одно из таких ограничений парсеров на основе рекурсивного спуска заключается в том, что они не могут быть написаны для грамматических правил, использующих левую рекурсию. Предположим, например, что вам нужно перевести такое правило:
+
+	items ::= items ',' item
+	| item
+
+Чтобы сделать это, вы могли бы использовать метод items():
+```python
+def items(self):
+	itemsval = self.items()
+	if itemsval and self._accept(','):
+		itemsval.append(self.item())
+	else:
+		itemsval = [ self.item() ]
+```
+
+Единственная проблема в том, что это не работает. Такой код вылетит с ошибкой бесконечной рекурсии. 
+
+Вы можете также столкнуться с хитрыми проблемами, касающимися самих грамматических правил. Например, вы можете поразмышлять над тем, могут ли выражения быть описаны вот такой более простой грамматикой:
+
+	expr ::= factor { ('+'|'-'|'*'|'/') factor }*
+
+	factor ::= '(' expression ')'
+	| NUM
+
+Эта грамматика технически «работает», но она не соблюдает стандартные правила порядка вычисления арифметических выражений. Например, для выражения “3 + 4 * 5” оно выдаст результат 35 вместо правильного 23. Чтобы решить эту проблему, нужно использовать отдельные правила expr и term.
+
+Для по-настоящему сложных грамматик лучше использовать инструменты парсинга типа [PyParsing](http://pyparsing.wikispaces.com/) или [PLY](http://www.dabeaz.com/ply/index.html). Вот как выглядит код «вычислителя» выражений, созданный с применением PLY:
+```python
+from ply.lex import lex
+from ply.yacc import yacc
+
+# Token list
+tokens = [ 'NUM', 'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'LPAREN', 'RPAREN' ]
+
+# Ignored characters
+t_ignore = ' \t\n'
+
+# Token specifications (as regexs)
+t_PLUS  = r'\+'
+t_MINUS  = r'-'
+t_TIMES  = r'\*'
+t_DIVIDE = r'/'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+
+# Token processing functions
+def t_NUM(t):
+	r'\d+'
+	t.value = int(t.value)
+	return t
+
+# Error handler
+def t_error(t):
+	print('Bad character: {!r}'.format(t.value[0]))
+	t.skip(1)
+
+# Build the lexer
+lexer = lex()
+
+# Grammar rules and handler functions
+def p_expr(p):
+	'''
+	expr : expr PLUS term
+	| expr MINUS term
+	'''
+	if p[2] == '+':
+		p[0] = p[1] + p[3]
+	elif p[2] == '-':
+		p[0] = p[1] - p[3]
+
+def p_expr_term(p):
+	'''
+	expr : term
+	'''
+	p[0] = p[1]
+
+
+def p_term(p):
+	'''
+	term : term TIMES factor
+	| term DIVIDE factor
+	'''
+	if p[2] == '*':
+		p[0] = p[1] * p[3]
+	elif p[2] == '/':
+		p[0] = p[1] / p[3]
+
+def p_term_factor(p):
+	'''
+	term : factor
+	'''
+	p[0] = p[1]
+
+def p_factor(p):
+	'''
+	factor : NUM
+	'''
+	p[0] = p[1]
+
+
+def p_factor_group(p):
+	'''
+	factor : LPAREN expr RPAREN
+	'''
+	p[0] = p[2]
+
+def p_error(p):
+	print('Syntax error')
+
+parser = yacc()
+```
+
+В этой программе вы найдете, что всё определено, но на намного более высоком уровне. Вы просто пишете регулярные выражения для токенов и высокоуровневые функции-обработчики, которые выполняются, когда возникают совпадения по различным правилам грамматики. А вся механика работы парсера, приёма токенов и так далее полностью имплементирована в библиотеке. 
+
+Вот пример использования созданного объекта парсера:
+```python
+>>> parser.parse('2')
+2
+>>> parser.parse('2+3')
+5
+>>> parser.parse('2+(3+4)*5')
+37
+>>>
+```
+
+Если вы хотите сделать свою программерскую жизнь более захватывающей, начните писать парсеры и компиляторы. Повторимся: книги про компиляторы предлагают кучу низкоуровневых подробностей и теории. Множество полезных ресурсов и информации вы также найдете в сети. А в Python есть модуль *ast*, на который также стоит посмотреть.  
