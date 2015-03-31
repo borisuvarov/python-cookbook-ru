@@ -90,6 +90,8 @@
 	- 5.10. Отображаемые в память бинарные файлы
 	- 5.11. Манипулирование путями к файлам
 	- Решение
+	- 5.12. Проверка существования файла
+	- 5.13. Получение содержимого каталога
 
 <!-- /MarkdownTOC -->
 
@@ -6344,4 +6346,128 @@ b'\x07\x00\x00\x00'
 ### Обсуждение
 Для любых манипуляций с именами файлов вы должны использовать модуль *os.path*, а не изобретать собственный велосипед из стандартных строковых операций. Во-первых, это важно для переносимости. Модуль *os.path* понимает различия между *Unix* и *Windows* и может надёжно работать с именами Data/data.csv и Data\data.csv. Во-вторых, вы не должны тратить время на велосипедостроение. Обычно лучше использовать готовые решения. 
 
-Стоит отметить, что в модуле *os.path* намного больше возможностей, чем показано в этом рецепте. Обратитесь к документации, чтобы узнать о функциях для тестирования файлов, работы с символическими ссылками и т.д. 
+Стоит отметить, что в модуле *os.path* намного больше возможностей, чем показано в этом рецепте. Обратитесь к документации, чтобы узнать о функциях для тестирования файлов, работы с символическими ссылками и т.д.
+
+## 5.12. Проверка существования файла
+### Задача
+Вам нужно выяснить, существует ли файл или каталог.
+
+### Решение
+Используйте *os.path*, чтобы проверить существование файла или каталога. Например:
+```python
+>>> import os
+>>> os.path.exists('/etc/passwd')
+True
+>>> os.path.exists('/tmp/spam')
+False
+>>>
+``` 
+
+Вы можете выполнить дополнительные тесты, чтобы проверить тип файла. Эти проверки возвращают *False*, если файл не существует:
+```python
+>>> # Is a regular file
+>>> os.path.isfile('/etc/passwd')
+True
+
+>>> # Is a directory
+>>> os.path.isdir('/etc/passwd')
+False
+
+>>> # Is a symbolic link
+>>> os.path.islink('/usr/local/bin/python3')
+True
+
+>>> # Get the file linked to
+>>> os.path.realpath('/usr/local/bin/python3')
+'/usr/local/bin/python3.3'
+>>>
+```
+
+Если вам нужно получить метаданные (например, размер или дату изменения файла), это тоже можно сделать с помощью модуля *os.path*:
+```python
+>>> os.path.getsize('/etc/passwd')
+3669
+>>> os.path.getmtime('/etc/passwd')
+1272478234.0
+>>> import time
+>>> time.ctime(os.path.getmtime('/etc/passwd'))
+'Wed Apr 28 13:10:34 2010'
+>>>
+```
+
+### Обсуждение
+Проверка файлов с помощью *os.path* становится очень простой операцией. Единственное, о чем стоит помнить, так это о разрешениях — особенно при операциях получения метаданных. Например:
+```python
+>>> os.path.getsize('/Users/guido/Desktop/foo.txt')
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "/usr/local/lib/python3.3/genericpath.py", line 49, in getsize
+		return os.stat(filename).st_size
+PermissionError: [Errno 13] Permission denied: '/Users/guido/Desktop/foo.txt'
+>>>
+``` 
+
+## 5.13. Получение содержимого каталога
+### Задача
+Вы хотите получить список файлов, содержащихся в каталоге файловой системы. 
+
+### Решение
+Используйте функцию *os.listdir()* для получения списка файлов в каталоге:
+```python
+import os
+names = os.listdir('somedir')
+```
+
+Вы получите «сырой» список содержимого каталога, включающий все файлы, подкаталоги, символические ссылки и т.п. Если вам нужно как-то отфильровать эти данные, используйте генератор списков вместе с различными функциями библиотеки *os.path()*. Например:
+```python
+import os.path
+# Get all regular files
+names = [name for name in os.listdir('somedir')
+		 if os.path.isfile(os.path.join('somedir', name))]
+
+# Get all dirs
+dirnames = [name for name in os.listdir('somedir')
+			if os.path.isdir(os.path.join('somedir', name))]
+```
+
+Строковые методы *startswith()* и *endswith()* также могут быть полезны для фильтрации содержимого каталога. Например:
+```python
+pyfiles = [name for name in os.listdir('somedir')
+		   if name.endswith('.py')]
+```
+
+Для поиска совпадений по имени файла вы можете использовать модули *glob* или *fnmatch*. Например:
+```python
+import glob
+pyfiles = glob.glob('somedir/*.py')
+
+from fnmatch import fnmatch
+pyfiles = [name for name in os.listdir('somedir')
+		   if fnmatch(name, '*.py')]
+```
+
+### Обсуждение
+Получить содержимое каталога просто, но эта операция даёт вам просто имена элементов в каталоге. Если вы хотите получить дополнительные метаданные, такие как размеры файлов, даты изменений и т.д., вам нужны либо дополнительные функции модуля *os.path*, либо функция *os.stat()*. Например:
+```python
+# Example of getting a directory listing
+
+import os
+import os.path
+import glob
+
+pyfiles = glob.glob('*.py')
+
+# Get file sizes and modification dates
+name_sz_date = [(name, os.path.getsize(name), os.path.getmtime(name))
+				for name in pyfiles]
+
+for name, size, mtime in name_sz_date:
+	print(name, size, mtime)
+
+# Alternative: Get file metadata
+file_metadata = [(name, os.stat(name)) for name in pyfiles]
+for name, meta in file_metadata:
+	print(name, meta.st_size, meta.st_mtime)
+``` 
+
+И последнее: в работе с именами файлов есть тонкие моменты, связанные с кодировками. Обычно записи, возвращаемые функциями типа *os.listdir()*, декодируются согласно установленной по умолчанию в системе кодировки имен файлов. Однако возможно, что при некоторых обстоятельствах вам придётся столкнуться с недекодируемыми именами файлов. Рецепты **5.14.** и **5.15.** содержат дополнительную информацию о работе с такими именами.  
