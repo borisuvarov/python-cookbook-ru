@@ -104,6 +104,7 @@
 	- 6.1. Чтение и запись данных в формате CSV
 	- 6.2. Чтение и запись в формате JSON
 	- 6.3. Парсинг простых XML-данных
+	- 6.4. Инкрементальный парсинг очень больших XML-файлов
 
 <!-- /MarkdownTOC -->
 
@@ -7506,6 +7507,153 @@ http://feedproxy.google.com/~r/EmptysquarePython/~3/_DOZT2Kd0hQ/
 ```  
 
 Стоит отметить, что *xml.etree.ElementTree* — не единственный способ парсинга XML. Для более продвинутых приложений вы можете попробовать [lxml](http://pypi.python.org/pypi/lxml). Эта библиотека использует тот же интерфейс, что и *ElementTree*, так что вышеприведённые примеры будут работать так же. Вы просто должны изменить первую инструкцию import на *from lxml.etree import parse*. Библиотека *lxml* имеет преимущество в виде полного соответствия стандартам XML. Она также чрезвычайно быстро работает и предоставляет поддержку такиз возможностей как валидация, XSLT и XPath. 
+
+## 6.4. Инкрементальный парсинг очень больших XML-файлов
+### Задача
+Вам нужно извлечь данные из огромного XML-документа, используя как можно меньше памяти.
+
+### Решение
+Каждый раз, когда вы сталкиваетесь с инкрементальной обработкой данных, вы должны вспоминать об итераторах и генераторах. Вот простая функция, которая может быть использована для инкрементальной обработки огромных XML-файлов при очень небольшом потреблении памяти:
+```python
+from xml.etree.ElementTree import iterparse
+
+def parse_and_remove(filename, path):
+	path_parts = path.split('/')
+	doc = iterparse(filename, ('start', 'end'))
+	# Skip the root element
+	next(doc)
+
+tag_stack = []
+elem_stack = []
+for event, elem in doc:
+	if event == 'start':
+		tag_stack.append(elem.tag)
+		elem_stack.append(elem)
+	elif event == 'end':
+		if tag_stack == path_parts:
+			yield elem
+			elem_stack[-2].remove(elem)
+		try:
+			tag_stack.pop()
+			elem_stack.pop()
+		except IndexError:
+			pass
+```
+
+Чтобы протестировать функцию, вам потребуется большой XML-файл. Часто такие файлы можно найти на государственных сайтах и ресурсах с открытой информацией. Например, вы можете скачать [базу данных выбоин на дорогах Чикаго](http://bit.ly/YQh2Oh) в формате XML. Когда писалась эта книга, этот файл состоял из более чем 100 000 строк данных, который были закодированы так:
+```xml
+<response>
+	<row>
+		<row ...>
+			<creation_date>2012-11-18T00:00:00</creation_date>
+			<status>Completed</status>
+			<completion_date>2012-11-18T00:00:00</completion_date>
+			<service_request_number>12-01906549</service_request_number>
+			<type_of_service_request>Pot Hole in Street</type_of_service_request>
+			<current_activity>Final Outcome</current_activity>
+			<most_recent_action>CDOT Street Cut ... Outcome</most_recent_action>
+			<street_address>4714 S TALMAN AVE</street_address>
+			<zip>60632</zip>
+			<x_coordinate>1159494.68618856</x_coordinate>
+			<y_coordinate>1873313.83503384</y_coordinate>
+			<ward>14</ward>
+			<police_district>9</police_district>
+			<community_area>58</community_area>
+			<latitude>41.808090232127896</latitude>
+			<longitude>-87.69053684711305</longitude>
+			<location latitude="41.808090232127896"
+					  longitude="-87.69053684711305" />
+		/row>
+		<row ...>
+			<creation_date>2012-11-18T00:00:00</creation_date>
+			<status>Completed</status>
+			<completion_date>2012-11-18T00:00:00</completion_date>
+			<service_request_number>12-01906695</service_request_number>
+			<type_of_service_request>Pot Hole in Street</type_of_service_request>
+			<current_activity>Final Outcome</current_activity>
+			<most_recent_action>CDOT Street Cut ... Outcome</most_recent_action>
+			<street_address>3510 W NORTH AVE</street_address>
+			<zip>60647</zip>
+			<x_coordinate>1152732.14127696</x_coordinate>
+			<y_coordinate>1910409.38979075</y_coordinate>
+			<ward>26</ward>
+			<police_district>14</police_district>
+			<community_area>23</community_area>
+			<latitude>41.91002084292946</latitude>
+			<longitude>-87.71435952353961</longitude>
+			<location latitude="41.91002084292946"
+					  longitude="-87.71435952353961" />
+		</row>
+	</row>
+</response>
+```
+
+Предположим, что вы хотите написать скрипт, который отсортирует ZIP-коды по количеству отчётов о выбоинах. Чтобы сделать это, вы можете написать такой код:
+```python
+from xml.etree.ElementTree import parse
+from collections import Counter
+
+potholes_by_zip = Counter()
+
+doc = parse('potholes.xml')
+for pothole in doc.iterfind('row/row'):
+	potholes_by_zip[pothole.findtext('zip')] += 1
+for zipcode, num in potholes_by_zip.most_common():
+	print(zipcode, num)
+```
+
+Единственная проблема с этим скриптом заключается в том, что он читает в память XML-файл целиком. На нашем компьютере при запуске он отъел 450 мегабайт оперативной памяти. Если же применить код из этого рецепта, программа изменится совсем чуть-чуть:
+```python
+rom collections import Counter
+potholes_by_zip = Counter()
+
+data = parse_and_remove('potholes.xml', 'row/row')
+for pothole in data:
+	potholes_by_zip[pothole.findtext('zip')] += 1
+
+for zipcode, num in potholes_by_zip.most_common():
+	print(zipcode, num)
+```
+
+При этом эта версия занимает при запуске всего 7 мегабайт оперативной памяти — огромная экономия налицо!
+
+### Обсуждение
+Этот рецепт основывается на двух базовых возможностях модуля *ElementTree*. Метод *iterparse()* позволяет обрабатывать XML-документы инкрементально. Чтобы использовать его, вы передаете имя файла вместе со списком событий, состоящим из одного или более следующих аргументов: *start*, *end*, *start-ns* и *end-ns*. Итератор, созданный *iterparse()*, производит кортежи формата *(event, elem)*, где *event* — одно из событий списка, а *elem* — полученный XML-элемент. Например:
+```python
+>>> data = iterparse('potholes.xml',('start','end'))
+>>> next(data)
+('start', <Element 'response' at 0x100771d60>)
+>>> next(data)
+('start', <Element 'row' at 0x100771e68>)
+>>> next(data)
+('start', <Element 'row' at 0x100771fc8>)
+>>> next(data)
+('start', <Element 'creation_date' at 0x100771f18>)
+>>> next(data)
+('end', <Element 'creation_date' at 0x100771f18>)
+>>> next(data)
+('start', <Element 'status' at 0x1006a7f18>)
+>>> next(data)
+('end', <Element 'status' at 0x1006a7f18>)
+>>>
+```
+
+События *start* создаются, когда элемент создан, но еще не наполнен любыми другими данными (например, элементами-потомками). События *end* создаются, когда элемент завершен. Хотя в этом рецепте это и не показано, события *start-ns* и *end-ns* используются для работы с объявлениями пространств имён XML.
+
+В этом рецепте события *start* и *end* используются для управления стеками элементов и тегов. Стеки представляют текущую иерархическую структуру документа в процессе его парсинга, а также используются для определения того, совпадает ли элемент с запрашиваемым путём, переданным в функцию *parse_and_remove()*. Если совпадение произошло, *yield* выдаёт его обратно вызывавшему. 
+
+Следующая инструкция после *yield* — базовая возможность *Element.Tree*, которая позволяет этому рецепту экономить память:
+```python
+elem_stack[-2].remove(elem)
+``` 
+
+Эта инструкция удаляет выданный ранее элемент из его родителя. Предполагая, что нигде более на него не осталось ссылок, элемент уничтожается, а память высвобождается.
+
+Конечный эффект итеративного парсинга и удаления узлов — крайне эффективный инкрементальный проход по документу. Ни на одном этапе не создается полное дерево документа. Однако возможно написать код, который обрабатывает XML-данные в прямолинейной манере.
+
+Главный недостаток этого рецепта — производительность. При тестировании версия, которая читает весь документ в память отработала в 2 раза быстрее, чем инкрементальная. Однако она потребовала в 60 раз больше памяти. Так что если память важна, инкрементальный подход дает большой выигрыш. 
+
+
 
 
 
