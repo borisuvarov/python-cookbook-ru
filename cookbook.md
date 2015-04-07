@@ -105,6 +105,9 @@
 	- 6.2. Чтение и запись в формате JSON
 	- 6.3. Парсинг простых XML-данных
 	- 6.4. Инкрементальный парсинг очень больших XML-файлов
+	- 6.5. Преобразование словарей в XML
+	- 6.6. Парсинг, изменение и перезапись XML
+	- 6.7. Парсинг XML-документов с пространствами имён
 
 <!-- /MarkdownTOC -->
 
@@ -1511,7 +1514,7 @@ KeyError: "Key not found in the first mapping: 'y'"
 >>>
 ``` 
 
-*ChainMap* особенно полезны для работы с ограниченным набором значений, таких как переменные языка программирования (глобальные, локальные и т.п.) На самом деле даже существуют методы, которые всё упрощают:
+*ChainMap* особенно полезны для работы со значениями, принадлежащими областям видимости, такими как переменные языка программирования (глобальные, локальные и т.п.) На самом деле даже существуют методы, которые всё упрощают:
 ```python
 >>> values = ChainMap()
 >>> values['x'] = 1
@@ -7652,6 +7655,290 @@ elem_stack[-2].remove(elem)
 Конечный эффект итеративного парсинга и удаления узлов — крайне эффективный инкрементальный проход по документу. Ни на одном этапе не создается полное дерево документа. Однако возможно написать код, который обрабатывает XML-данные в прямолинейной манере.
 
 Главный недостаток этого рецепта — производительность. При тестировании версия, которая читает весь документ в память отработала в 2 раза быстрее, чем инкрементальная. Однако она потребовала в 60 раз больше памяти. Так что если память важна, инкрементальный подход дает большой выигрыш. 
+
+
+## 6.5. Преобразование словарей в XML
+### Задача
+Вы хотите взять данные из словаря Python и превратить их в XML.
+
+### Решение
+Хотя библиотека *xml.etree.ElementTree* обычно используется для парсинга, её также можно применить для создания XML-документов. Например, посмотрите на такую функцию:
+```python
+from xml.etree.ElementTree import Element
+
+def dict_to_xml(tag, d):
+	'''
+	Turn a simple dict of key/value pairs into XML
+	'''
+	elem = Element(tag)
+	for key, val in d.items():
+		child = Element(key)
+		child.text = str(val)
+		elem.append(child)
+	return elem
+```
+
+Вот пример её работы:
+```python
+>>> s = { 'name': 'GOOG', 'shares': 100, 'price':490.1 }
+>>> e = dict_to_xml('stock', s)
+>>> e
+<Element 'stock' at 0x1004b64c8>
+>>>
+```
+
+Результатом этого преобразования является экземпляр *Element*. Для ввода-вывода его можно легко конвертировать в байтовую строку — для этого нужно использовать функцию *tostring()* из модуля *xml.etree.ElementTree*. Например:
+```python
+>>> from xml.etree.ElementTree import tostring
+>>> tostring(e)
+b'<stock><price>490.1</price><shares>100</shares><name>GOOG</name></stock>'
+>>>
+```
+
+Если вы хотите прикрепить атрибуты к элементу, используйте метод *set()*:
+```python
+>>> e.set('_id','1234')
+>>> tostring(e)
+b'<stock _id="1234"><price>490.1</price><shares>100</shares><name>GOOG</name>
+</stock>'
+>>>
+```
+
+Если порядок элементов имеет значение, подумайте над созданием *OrderedDict* вместо обычного словаря (см. **рецепт 1.7.**)
+
+### Обсуждение
+При генерации XML вы можете склоняться к простому созданию строк. Например:
+```python
+def dict_to_xml_str(tag, d):
+	'''
+	Turn a simple dict of key/value pairs into XML
+	'''
+	parts = ['<{}>'.format(tag)]
+	for key, val in d.items():
+		parts.append('<{0}>{1}</{0}>'.format(key,val))
+		parts.append('</{}>'.format(tag))
+	return ''.join(parts)
+```
+
+Проблема в том, что вы влезете в большие неприятности, если попытаетесь сделать это вручную. Например, что случится, если значение словаря содержат спецсимволы? Например:
+```python
+>>> d = { 'name' : '<spam>' }
+
+>>> # String creation
+>>> dict_to_xml_str('item',d)
+'<item><name><spam></name></item>'
+
+>>> # Proper XML creation
+>>> e = dict_to_xml('item',d)
+>>> tostring(e)
+b'<item><name>&lt;spam&gt;</name></item>'
+>>>
+```
+
+Обратите внимание, как в последнем примере символы < и > заменяются на \&lt; и \&gt;. 
+
+Для справки: если вам когда-либо потребуется вручную экранировать или деэкранировать такие символы, мы можете использовать функции *escape()* и *unescape()* из модуля *xml.sax.saxutils*. Например:
+```python
+>>> from xml.sax.saxutils import escape, unescape
+>>> escape('<spam>')
+'&lt;spam&gt;'
+>>> unescape(_)
+'<spam>'
+>>>
+```
+
+Если оставить в стороне создание правильного вывода, другая причина создавать экземпляры *Element* вместо строк заключается в том, что они могут быть легче объединены друг с другом создания более крупного документа. Получающиеся экземпляры *Element* также могут быть обработаны различными способами без необходимости парсить XML-текст. Вы можете провести всю обработку данных высокоуровневым способом, а затем в самом конце вывести их в строковой форме.
+
+## 6.6. Парсинг, изменение и перезапись XML
+### Задача
+Вы хотите прочесть XML-документ, изменить его, а затем записать обратно как XML.
+
+### Решение
+Модуль *xml.etree.ElementTree* облегчает выполнение таких задач. Вы можете начать путем парсинга документа обычным способом. Предположим, например, что у вас есть документ под названием pred.xml, который выглядит так:
+```xml
+<?xml version="1.0"?>
+<stop>
+	<id>14791</id>
+	<nm>Clark &amp; Balmoral</nm>
+	<sri>
+		<rt>22</rt>
+		<d>North Bound</d>
+		<dd>North Bound</dd>
+	</sri>
+	<cr>22</cr>
+	<pre>
+		<pt>5 MIN</pt>
+		<fd>Howard</fd>
+		<v>1378</v>
+		<rn>22</rn>
+	</pre>
+	<pre>
+		<pt>15 MIN</pt>
+		<fd>Howard</fd>
+		<v>1867</v>
+		<rn>22</rn>
+	</pre>
+</stop>
+```
+
+Вот пример того, как можно использовать *ElementTree* для прочтения и документа и изменения его структуры:
+```python
+>>> from xml.etree.ElementTree import parse, Element
+>>> doc = parse('pred.xml')
+>>> root = doc.getroot()
+>>> root
+<Element 'stop' at 0x100770cb0>
+
+>>> # Remove a few elements
+>>> root.remove(root.find('sri'))
+>>> root.remove(root.find('cr'))
+
+
+# Insert a new element after <nm>...</nm>
+>>> root.getchildren().index(root.find('nm'))
+1
+>>> e = Element('spam')
+>>> e.text = 'This is a test'
+>>> root.insert(2, e)
+
+
+>>> # Write back to a file
+>>> doc.write('newpred.xml', xml_declaration=True)
+>>>
+```
+
+Результатом этих операций будет новый XML-файл, который выглядит так:
+```python
+<?xml version='1.0' encoding='us-ascii'?>
+<stop>
+	<id>14791</id>
+	<nm>Clark &amp; Balmoral</nm>
+	<spam>This is a test</spam>
+	<pre>
+		<pt>5 MIN</pt>
+		<fd>Howard</fd>
+		<v>1378</v>
+		<rn>22</rn>
+	</pre>
+	<pre>
+		<pt>15 MIN</pt>
+		<fd>Howard</fd>
+		<v>1867</v>
+		<rn>22</rn>
+	</pre>
+</stop>
+```
+
+### Обсуждение
+Изменение структуры XML-документа — незамысловатый процесс, но вы должны помнить, что все изменения в общем применяются к родительскому элементу, обращаясь с ним как со списком. Например, если вы уберете элемент, он будет убран из его непосредственного родителя путём использования метода *remove()* родителя. Если вы вставляете или добавляете новые элементы в конец, вы так же применяете методы *insert()* и *append()* к родителю. Также можно манипулировать элементами с помощью операций индексирования и извлечения среза, таких как *element[i]* или *element[j:j]*.  
+
+Если вы хотите создать новые элементы, используйте класс *Element*, как показано в этом рецепте. Это также описано в **рецепте 6.5.**
+
+## 6.7. Парсинг XML-документов с пространствами имён
+### Задача
+Вам нужно распарсить XML-документ, но он использует пространства имён XML.
+
+### Решение
+Предположим, что у нас есть документ, использующий пространства имён:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<top>
+	<author>David Beazley</author>
+		<content>
+			<html xmlns="http://www.w3.org/1999/xhtml">
+				<head>
+					<title>Hello World</title>
+				</head>
+				<body>
+					<h1>Hello World!</h1>
+				</body>
+			</html>
+		</content>
+</top>
+```
+
+Если вы парсите этот документ и пытаетесь выполнить обычные запросы, вы обнаружите, что это не работает так просто, поскольку всё становится невероятно многословным:
+```python
+>>> # Some queries that work
+>>> doc.findtext('author')
+'David Beazley'
+>>> doc.find('content')
+<Element 'content' at 0x100776ec0>
+
+>>> # A query involving a namespace (doesn't work)
+>>> doc.find('content/html')
+
+>>> # Works if fully qualified
+>>> doc.find('content/{http://www.w3.org/1999/xhtml}html')
+<Element '{http://www.w3.org/1999/xhtml}html' at 0x1007767e0>
+
+>>> # Doesn't work
+>>> doc.findtext('content/{http://www.w3.org/1999/xhtml}html/head/title')
+
+>>> # Fully qualified
+>>> doc.findtext('content/{http://www.w3.org/1999/xhtml}html/'
+... '{http://www.w3.org/1999/xhtml}head/{http://www.w3.org/1999/xhtml}title')
+'Hello World'
+>>>
+```
+
+Часто вы можете упростить дело путем оборачивания работы с пространством имён во вспомогательный класс:
+```python
+class XMLNamespaces:
+	def __init__(self, **kwargs):
+		self.namespaces = {}
+		for name, uri in kwargs.items():
+			self.register(name, uri)	
+	def register(self, name, uri):
+		self.namespaces[name] = '{'+uri+'}'
+	def __call__(self, path):
+		return path.format_map(self.namespaces)
+``` 
+
+Чтобы использовать этот класс, вы можете поступить так:
+```python
+>>> ns = XMLNamespaces(html='http://www.w3.org/1999/xhtml')
+>>> doc.find(ns('content/{html}html'))
+<Element '{http://www.w3.org/1999/xhtml}html' at 0x1007767e0>
+>>> doc.findtext(ns('content/{html}html/{html}head/{html}title'))
+'Hello World'
+>>>
+```
+
+### Обсуждение
+Парсинг XML-документов, содержащих пространства имён, может быть запутанным. Класс *XMLNamespaces* на самом деле предназначен для облегчения этого дела: он позволяет использовать сокращённые имена для пространств имён в последующих операциях, а не полные URI.
+
+К несчастью, в базовом парсере *ElementTree* нет механизма для получения дополнительной информации о пространствах имён. Однако вы можете получить немного больше информации об области видимости обработки пространств имён, если будете использовать функцию *iterparse()*. Например:
+```python
+>>> from xml.etree.ElementTree import iterparse
+>>> for evt, elem in iterparse('ns2.xml', ('end', 'start-ns', 'end-ns')):
+... print(evt, elem)
+...
+end <Element 'author' at 0x10110de10>
+start-ns ('', 'http://www.w3.org/1999/xhtml')
+end <Element '{http://www.w3.org/1999/xhtml}title' at 0x1011131b0>
+end <Element '{http://www.w3.org/1999/xhtml}head' at 0x1011130a8>
+end <Element '{http://www.w3.org/1999/xhtml}h1' at 0x101113310>
+end <Element '{http://www.w3.org/1999/xhtml}body' at 0x101113260>
+end <Element '{http://www.w3.org/1999/xhtml}html' at 0x10110df70>
+end-ns None
+end <Element 'content' at 0x10110de68>
+end <Element 'top' at 0x10110dd60>
+# This is the topmost element
+>>> elem
+<Element 'top' at 0x10110dd60>
+>>>
+```
+
+Последнее замечание: если текст, который вы парсите, использует пространства имён в дополнение к другим продвинутым возможностям XML, вам лучше перейти с *ElementTree* на библиотеку lxml. Например, она предоставляет улучшенную поддержку валидации документов по DTD, более полную поддержку XPath и другие продвинутые возможности. А этот рецепт — просто небольший фикс для облегчения парсинга. 
+
+
+
+
+
+
+
+
 
 
 
