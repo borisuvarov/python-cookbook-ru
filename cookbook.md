@@ -135,6 +135,11 @@
 	- 8.5. Инкапсуляция имён в классе
 	- 8.6. Создание управляемых атрибутов
 	- 8.7. Вызов метода родительского класса
+	- 8.8. Расширение свойства в подклассе
+	- 8.9. Создание нового типа атрибута класса или экземпляра
+	- 8.10. Использование лениво вычисляемых свойств
+	- 8.11. Упрощение инициализации структур данных
+	- 8.12. Определение интерфейса или абстрактного базового класса
 
 <!-- /MarkdownTOC -->
 
@@ -10468,32 +10473,755 @@ B.spam
 
 Использование *super()* таким способом наиболее часто можно встретить в классах-миксинах (примесях). См. рецепт *8.13.* и рецепт *8.18.*  
 
-Но поскольку *super()* может вызывать метод, который вы не ожидаете, есть несколько общих правил, которым вам нужно попытаться следовать. Во-первых, убедитесь, что все методы с одинаковыми именами в иерархии наследования имеют совместимые сигнатуры вызова (то есть одинаковое количество аргументов, имена аргументов). Это позволяет удостовериться, что *super()* не сломается, если попытается вызвать метод класса, который не является прямым родителем. Во-вторых, обычно является хорошей идеей убедиться, что класс верхнего уровня предоставляет реализацию метода, так что цепь поиска, которая идёт по цепи ПРМ, завершится каким-то конкретным методом. 
+Но поскольку *super()* может вызывать метод, который вы не ожидаете, есть несколько общих правил, которым вам нужно попытаться следовать. Во-первых, убедитесь, что все методы с одинаковыми именами в иерархии наследования имеют совместимые сигнатуры вызова (то есть одинаковое количество аргументов, имена аргументов). Это позволяет удостовериться, что *super()* не сломается, если попытается вызвать метод класса, который не является прямым родителем. Во-вторых, обычно является хорошей идеей убедиться, что класс верхнего уровня предоставляет реализацию метода, так что поиск, который идёт по цепи ПРМ, завершится каким-то конкретным методом. 
 
 Использование *super()* иногда становится источником дебатов в сообществе Python. Однако при всех прочих равных вам стоит использовать её в современном коде. Рэймонд Хеттингер написал отличный пост [“Python’s super() Considered Super!”](http://rhettinger.wordpress.com/2011/05/26/super-considered-super), в котором вы найдёте ещё больше примеров того, почему *super()* может быть суперкрутой штукой.
 
 
+## 8.8. Расширение свойства в подклассе
+### Задача
+Внутри подкласса вы хотите расширить функциональность свойства, определённого в родительском классе.
 
+### Решение
+Рассмотрите следующий код, в котором определяется свойство:
+```python
+class Person:
+	def __init__(self, name):
+		self.name = name
+	
+	# Getter function
+	@property
+	def name(self):
+		return self._name
+	
+	# Setter function
+	@name.setter
+	def name(self, value):
+		if not isinstance(value, str):
+			raise TypeError('Expected a string')
+		self._name = value
+	
+	# Deleter function
+	@name.deleter
+	def name(self):
+		raise AttributeError("Can't delete attribute")
+```
 
+Вот пример класса, который наследует от *Person* и расширяет свойство *name* новой функциональностью:
+```python
+class SubPerson(Person):
+	@property
+	def name(self):
+		print('Getting name')
+		return super().name
+	
+	@name.setter
+	def name(self, value):
+		print('Setting name to', value)
+		super(SubPerson, SubPerson).name.__set__(self, value)
+	
+	@name.deleter
+	def name(self):
+		print('Deleting name')
+		super(SubPerson, SubPerson).name.__delete__(self)
+```
 
+Вот пример использования нового класса:
+```python
+>>> s = SubPerson('Guido')
+Setting name to Guido
+>>> s.name
+Getting name
+'Guido'
+>>> s.name = 'Larry'
+Setting name to Larry
+>>> s.name = 42
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "example.py", line 16, in name
+		raise TypeError('Expected a string')
+TypeError: Expected a string
+>>>
+```
 
+Если вы хотите расширить только один из методов свойства, используйте такой код:
+```python
+class SubPerson(Person):
+	@Person.name.getter
+	def name(self):
+		print('Getting name')
+		return super().name
+```
 
+Или, альтернативно, только для сеттера, используйте такой код:
+```python
+class SubPerson(Person):
+	@Person.name.setter
+	def name(self, value):
+		print('Setting name to', value)
+		super(SubPerson, SubPerson).name.__set__(self, value)
+```
 
+### Обсуждение
+Расширение свойства в подклассе заставляет столнуться с достаточно большим количеством тонких проблем, связанных с тем фактом, что свойство определяется как коллекция из геттера, сеттера и делитера, а не как один метод. Поэтому при расширении свойства вам нужно понять, будете ли вы переопределять все методы или только один.
 
+В первом примере все методы свойства переопределяются вместе. В каждом методе используется *super()* для вызова предыдущей реализации. Использование *super(SubPerson, SubPerson).name.__set__(self, value)* в функции-сеттере — это не ошибка. Чтобы делегировать предыдущую реализацию сеттера, поток управления должен пройти через метод *__set__()* ранее определённого свойства *name*. Однако единственный способ получить этот метод — это доступ к нему как к переменной класса, а не как к переменной экземпляра. Это происходит в операции *super(SubPerson, SubPerson)*.
 
+Если хотите переопределить только один из методов, недостаточно использовать само *@property*. Например, вот такой код не работает:
+```python
+class SubPerson(Person):
+	@property					# Doesn't work
+	def name(self):
+		print('Getting name')
+		return super().name
+``` 
 
+Если вы попробуете использовать получившийся код, вы обнаружите, что функция-сеттер полностью исчезла:
+```python
+>>> s = SubPerson('Guido')
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "example.py", line 5, in __init__
+		self.name = name
+AttributeError: can't set attribute
+>>>
+```
 
- 
+Вместо этого вы должны были изменить код так, как показано в решении:
+```python
+class SubPerson(Person):
+	@Person.getter
+	def name(self):
+		print('Getting name')
+		return super().name
+```
 
+Когда вы это сделаете, все ранее определённые методы свойства будут скопированы, а функция-геттер заменена. Теперь оно работает так, как ожидается:
+```python
+>>> s = SubPerson('Guido')
+>>> s.name
+Getting name
+'Guido'
+>>> s.name = 'Larry'
+>>> s.name
+Getting name
+'Larry'
+>>> s.name = 42
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "example.py", line 16, in name
+		raise TypeError('Expected a string')
+TypeError: Expected a string
+>>>
+```
 
+В этом конкретном решении нет способа заменить жестко прописанное имя класса *Person* чем-то более общим. Если вы не знаете, в каком базовом классе определено свойство, вы должны использовать решение, в котором все методы свойства переопределяются, а *super()* используется для передачи управления предыдущей реализации.
 
+Стоит отметить, что первый приём, показанный в этом рецепте, также может быть использован для расширения дескриптора, как описано в **рецепте 8.9.** Например:
+```python
+# A descriptor
+class String:
+	def __init__(self, name):
+		self.name = name
 
+	def __get__(self, instance, cls):
+		if instance is None:
+			return self
+		return instance.__dict__[self.name]
 
+	def __set__(self, instance, value):
+		if not isinstance(value, str):
+			raise TypeError('Expected a string')
+		instance.__dict__[self.name] = value
 
+# A class with a descriptor
+class Person:
+	name = String('name')
+	def __init__(self, name):
+		self.name = name
 
+# Extending a descriptor with a property
+class SubPerson(Person):
+	@property
+	def name(self):
+		print('Getting name')
+		return super().name
+	
+	@name.setter
+	def name(self, value):
+		print('Setting name to', value)
+		super(SubPerson, SubPerson).name.__set__(self, value)
+	
+	@name.deleter
+	def name(self):
+		print('Deleting name')
+		super(SubPerson, SubPerson).name.__delete__(self)
+``` 
 
+Наконец, стоит отметить, что к тому моменту, когда вы это прочитаете, расширение сеттеров и делитеров в подклассах может быть уже как-то упрощено. Показанное решение работает, но баг, описанный на [странице проблем Python](http://bugs.python.org/issue14965), может быть исправлен путём реализации более ясного подхода в будущих версиях Python.
 
+## 8.9. Создание нового типа атрибута класса или экземпляра
+### Задача
+Вы хотите создать новый тип атрибута экземпляра с некой дополнительной функциональностью — например, с проверкой типа.
 
+### Решение
+Если вы хотите создать полностью новый тип атрибута экземпляра, определите его функциональность в форме класса-дескриптора. Вот пример:
+```python
+# Descriptor attribute for an integer type-checked attribute
+class Integer:
+	def __init__(self, name):
+		self.name = name
+	
+	def __get__(self, instance, cls):
+		if instance is None:
+			return self
+		else:
+			return instance.__dict__[self.name]
+	
+	def __set__(self, instance, value):
+		if not isinstance(value, int):
+			raise TypeError('Expected an int')
+		instance.__dict__[self.name] = value
+	
+	def __delete__(self, instance):
+		del instance.__dict__[self.name]
+```
+
+Дескриптор — это класс, который реализует три ключевых операции доступа к атрибутам (получение, установки и удаления) в форме специальных методов *__get__()*, *__set__()* и *__delete__()*. Эти методы работают путем получения экземпляра на вход. Затем происходит манипуляции над словарём экземпляра. 
+
+Чтобы использовать дескриптор, экземпляры дескриптора размещаются в определении класса как переменные класса. Например:
+```python
+class Point:
+	x = Integer('x')
+	y = Integer('y')
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+```
+
+Когда вы это делаете, все попытки доступа к атрибуту дескриптора (то есть *x* или *y*) перехватываются методами *__get__()*, *__set__()* и *__delete__()*. Например:
+```python
+>>> p = Point(2, 3)
+>>> p.x 			# Calls Point.x.__get__(p,Point)
+2
+>>> p.y = 5 		# Calls Point.y.__set__(p, 5)
+>>> p.x = 2.3		# Calls Point.x.__set__(p, 2.3)
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "descrip.py", line 12, in __set__
+		raise TypeError('Expected an int')
+TypeError: Expected an int
+>>>
+```
+
+На вход каждый метод дескриптора получает экземпляр, над которым нужно провести какие-то манипуляции. Чтобы провести запрошенную операцию, соответствующим образом меняется словарь экземпляра (атрибут *__dict__*). Атрибут дескриптора *self.name* содержит ключ словаря, который используется для хранения реальных данных в словаре экземпляра.
+
+### Обсуждение
+Дескрипторы предоставляют «подкапотную» магию для большинства возможностей классов *Python*, включая *@classmethod*, *@staticmethod*, *@property* и даже *__slots__*.
+
+Путём определения дескриптора вы можете перехватить базовые операции экземпляров (получение, установку, удаление) на очень низком уровне и полностью кастомизировать то, как они работают. Это дает вам огромные возможности, и это один из самых важных инструментов, используемых создателями продвинутых библиотек и фреймворков.
+
+Путаница с дескрипторами иногда возникает по причине того, что они могут быть определены только на уровне класса, но не на уровне экземпляра. Поэтому вот такой код работать не будет:
+```python
+# Does NOT work
+class Point:
+	def __init__(self, x, y):	
+		self.x = Integer('x') 	# No! Must be a class variable
+		self.y = Integer('y')
+		self.x = x
+		self.y = y
+``` 
+
+А реализация метода *__get__()* сложнее, чем может показаться:
+```python
+# Descriptor attribute for an integer type-checked attribute
+class Integer:
+	...
+	def __get__(self, instance, cls):
+		if instance is None:
+			return self
+		else:
+		return instance.__dict__[self.name]
+	...
+```
+
+Причина того, что *__get__()* выглядит довольно сложным, заключается в различии между переменными экземпляра и переменными класса. Если доступ к дескриптору осуществляется как к переменной класса, аргумент *instance* имеет значение *None*. В этом случае стандартным подходом будет просто вернуть сам экземпляр дескриптора (хотя разрешается также любой тип нестандартной обработки). Например:
+```python
+>>> p = Point(2,3)
+>>> p.x 			# Calls Point.x.__get__(p, Point)
+2
+>>> Point.x 		# Calls Point.x.__get__(None, Point)
+<__main__.Integer object at 0x100671890>
+>>>
+```  
+
+Дескрипторы часто являются одним из компонентов крупного фреймворка, использующего декораторы или метаклассы. В этом случае их использование может быть практически незаметно. В качестве примера приведём более продвинутый код, основанный на дескрипторах, использующий декоратор класса:
+```python
+# Descriptor for a type-checked attribute
+class Typed:
+	def __init__(self, name, expected_type):
+		self.name = name
+		self.expected_type = expected_type
+
+	def __get__(self, instance, cls):
+		if instance is None:
+			return self
+		else:
+			return instance.__dict__[self.name]
+
+	def __set__(self, instance, value):
+		if not isinstance(value, self.expected_type):
+			raise TypeError('Expected ' + str(self.expected_type))
+		instance.__dict__[self.name] = value
+
+	def __delete__(self, instance):
+		del instance.__dict__[self.name]
+
+# Class decorator that applies it to selected attributes
+def typeassert(**kwargs):
+	def decorate(cls):
+		for name, expected_type in kwargs.items():
+			# Attach a Typed descriptor to the class
+			setattr(cls, name, Typed(name, expected_type))
+		return cls
+	return decorate
+
+# Example use
+@typeassert(name=str, shares=int, price=float)
+class Stock:
+	def __init__(self, name, shares, price):
+		self.name = name
+		self.shares = shares
+		self.price = price
+```
+
+Стоит подчеркнуть, что вам, вероятно, не стоит писать дескриптор, если вы хотите просто кастомизировать доступ к одному атрибуту конкретного класса. Для этого проще использовать свойство, как описано в **рецепте 8.6.** Дескрипторы более полезны в ситуациях, где предполагается много переиспользовать код (то есть если вы хотите использовать функциональность, предоставленную дескриптором, в сотнях мест в вашем коде или предоставить ее как возможность библиотеки).
+
+## 8.10. Использование лениво вычисляемых свойств
+### Задача
+Вы хотите определить доступный только для чтения атрибут как свойство, которое вычисляется при доступе к нему. Однако после произошедшего доступа значение должно кэшироваться и не пересчитываться при следующих запросах.
+
+### Решение
+Эффективный путь определения ленивых атрибутов — это использование класса-дескриптора:
+```python
+class lazyproperty:
+	def __init__(self, func):
+		self.func = func
+	
+	def __get__(self, instance, cls):
+		if instance is None:
+			return self
+		else:
+			value = self.func(instance)
+			setattr(instance, self.func.__name__, value)
+			return value
+```
+
+Чтобы использовать этот код, вы можете применить его в классе:
+```python
+import math
+
+class Circle:
+	def __init__(self, radius):
+		self.radius = radius
+
+	@lazyproperty
+	def area(self):
+		print('Computing area')
+		return math.pi * self.radius ** 2
+
+	@lazyproperty
+	def perimeter(self):
+		print('Computing perimeter')
+		return 2 * math.pi * self.radius
+```
+
+Вот пример использования в интерактивном сеансе:
+```python
+>>> c = Circle(4.0)
+>>> c.radius
+4.0
+>>> c.area
+Computing area
+50.26548245743669
+>>> c.area
+50.26548245743669
+>>> c.perimeter
+Computing perimeter
+25.132741228718345
+>>> c.perimeter
+25.132741228718345
+>>>
+```
+
+Обратите внимание, что сообщения “Computing area” и “Computing perimeter” появляются только один раз.
+
+### Обсуждение
+Во многих случаях цель применения лениво вычисляемых атрибутов заключается в увеличении производительности. Например, вы можете избежать вычисления значений, если только они действительно где-то не нужны. Показанное решение делает именно это, используя тонкую особенность дескриптора, чтобы реализовать функциональность самым эффективным способом. 
+
+Как показано в других рецептах (например, в **рецепте 8.9.**), когда дескриптор помещается в определение класса, его методы *__get__()*, *__set__()* и *__delete__() задействуются при доступе к атрибуту. Но если дескриптор определяет только метод *__get__()*, то у него намного более слабое связывание, нежели обычно. В частности, метод *__get__()* срабатывает только если атрибут, к которому осуществляется доступ, отсутствует в словаре экземпляра.
+
+Класс *lazyproperty* использует это путём того, что заставляет метод *__get__()* сохранять вычисленное значение в экземпляре, используя то же имя, что и само свойство. С помощью этого значение сохраняется в словаре экземпляра и отключает будущие вычисления свойства. Вы можете понаблюдать за этим в таком примере:
+```python
+>>> c = Circle(4.0)
+>>> # Get instance variables
+>>> vars(c)
+{'radius': 4.0}
+
+>>> # Compute area and observe variables afterward
+>>> c.area
+Computing area
+50.26548245743669
+>>> vars(c)
+{'area': 50.26548245743669, 'radius': 4.0}
+
+>>> # Notice access doesn't invoke property anymore
+>>> c.area
+50.26548245743669
+
+>>> # Delete the variable and see property trigger again
+>>> del c.area
+>>> vars(c)
+{'radius': 4.0}
+>>> c.area
+Computing area
+50.26548245743669
+>>>
+```
+
+Возможный недостаток этого рецепта в том, что вычисленное значение становится изменяемым после создания. Например:
+```python
+>>> c.area
+Computing area
+50.26548245743669
+>>> c.area = 25
+>>> c.area
+25
+>>>
+```
+
+Если это проблема, вы можете использовать немного менее эффективную реализацию:
+```python
+def lazyproperty(func):
+	name = '_lazy_' + func.__name__
+	@property
+	def lazy(self):
+		if hasattr(self, name):
+			return getattr(self, name)
+		else:
+			value = func(self)
+			setattr(self, name, value)
+			return value
+	return lazy
+```
+
+Если вы используете эту версию, вы обнаружите, что операции установки недоступны. Например:
+```python
+>>> c = Circle(4.0)
+>>> c.area
+Computing area
+50.26548245743669
+>>> c.area
+50.26548245743669
+>>> c.area = 25
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+AttributeError: can't set attribute
+>>>
+```
+
+Недостаток такого подхода в том, что все операции получения значения проводятся функцию-геттер свойства. Это менее эффективно, чем простой поиск значения в словаре экземпляра, как сделано в первом решении.
+
+За сведениями о свойствах и управлении атрибутами обратесь к **рецепту 8.6.** Дескрипторы описаны в **рецепте 8.9.**
+
+## 8.11. Упрощение инициализации структур данных
+### Задача
+Вы создаете много классов, которые служат структурами данных, но уже устали от написания повторяющихся и шаблонных функций *__init__()*.
+
+### Решение
+Часто вы можете обобщить инициализацию структур данных в единственной функции *__init__()*, определённой в общем базовом классе. Например:
+```python
+class Structure:
+	# Class variable that specifies expected fields
+	_fields= []
+	def __init__(self, *args):
+		if len(args) != len(self._fields):
+			raise TypeError('Expected {} arguments'.format(len(self._fields)))
+	
+		# Set the arguments
+		for name, value in zip(self._fields, args):
+			setattr(self, name, value)
+
+# Example class definitions
+if __name__ == '__main__':
+	class Stock(Structure):
+		_fields = ['name', 'shares', 'price']
+
+	class Point(Structure):
+	_fields = ['x','y']
+
+	class Circle(Structure):
+		_fields = ['radius']
+		def area(self):
+			return math.pi * self.radius ** 2
+```
+
+Если вы будете использовать эти классы, то обнаружите, что они легко конструируются. Например:
+```python
+>>> s = Stock('ACME', 50, 91.1)
+>>> p = Point(2, 3)
+>>> c = Circle(4.5)
+>>> s2 = Stock('ACME', 50)
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "structure.py", line 6, in __init__
+		raise TypeError('Expected {} arguments'.format(len(self._fields)))
+TypeError: Expected 3 arguments
+```
+
+Если вы решите реализовать поддержку именованных аргументов, то для этого есть несколько способов проектирования. Один из них — такое отображение именованных аргументов, чтобы они соответстовали только именам атрибутов, определённым в *_fields*. Например:
+```python
+class Structure:
+	_fields= []
+	def __init__(self, *args, **kwargs):
+		if len(args) > len(self._fields):
+			raise TypeError('Expected {} arguments'.format(len(self._fields)))
+	
+		# Set all of the positional arguments
+		for name, value in zip(self._fields, args):
+			setattr(self, name, value)
+		
+		# Set the remaining keyword arguments
+		for name in self._fields[len(args):]:
+			setattr(self, name, kwargs.pop(name))
+		
+		# Check for any remaining unknown arguments
+		if kwargs:
+			raise TypeError('Invalid argument(s): {}'.format(','.join(kwargs)))
+
+# Example use
+if __name__ == '__main__':
+	class Stock(Structure):
+		_fields = ['name', 'shares', 'price']
+
+	s1 = Stock('ACME', 50, 91.1)
+	s2 = Stock('ACME', 50, price=91.1)
+	s3 = Stock('ACME', shares=50, price=91.1)
+``` 
+
+Другой возможный выбор — использование именованных аргументов как средства добавления дополнительных атрибутов, не определённых в *_fields*, к структуре. Например:
+```python
+class Structure:
+	# Class variable that specifies expected fields
+	_fields= []
+	def __init__(self, *args, **kwargs):
+		if len(args) != len(self._fields):
+			raise TypeError('Expected {} arguments'.format(len(self._fields)))
+
+		# Set the arguments
+		for name, value in zip(self._fields, args):
+			setattr(self, name, value)
+
+		# Set the additional arguments (if any)
+		extra_args = kwargs.keys() - self._fields
+		for name in extra_args:
+			setattr(self, name, kwargs.pop(name))
+		if kwargs:
+			raise TypeError('Duplicate values for {}'.format(','.join(kwargs)))
+
+# Example use
+if __name__ == '__main__':
+	class Stock(Structure):
+		_fields = ['name', 'shares', 'price']
+
+	s1 = Stock('ACME', 50, 91.1)
+	s2 = Stock('ACME', 50, 91.1, date='8/2/2012')
+```
+
+### Обсуждение
+Приём определения метода *__init__()* общего назначения может оказаться чрезвычайно полезным, если вы когда-либо будете писать программу, построенную на основе большого количества маленьких структур данных. Так вы напишете намного меньше кода, чем при ручном создании таких методов *__init__()*:
+```python
+class Stock:
+	def __init__(self, name, shares, price):
+		self.name = name
+		self.shares = shares
+		self.price = price
+
+class Point:
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+
+class Circle:
+	def __init__(self, radius):
+		self.radius = radius
+		def area(self):
+		return math.pi * self.radius ** 2
+```
+
+Тонкий аспект реализации касается механизма, который используется для установки значений с помощью функции *setattr()*. Вместо этого вы можете склоняться к прямому доступу к словарю экземпляра. Например:
+```python
+class Structure:
+# Class variable that specifies expected fields
+	_fields= []
+	def __init__(self, *args):
+		if len(args) != len(self._fields):
+			raise TypeError('Expected {} arguments'.format(len(self._fields)))
+		
+		# Set the arguments (alternate)
+		self.__dict__.update(zip(self._fields,args))
+```
+
+Хотя это работает, часто небезопасно делать предположения о реализации подкласса. Если подкласс решит использовать *__slots__* или обернёт конкретный атрибут в свойство (или дескриптор), прямой доступ к словарю экземпляра поломается. Приведённое в рецепте решение обладает максимально общей областью применения и не делает предположений по поводу подклассов. 
+
+Потенциальный недостаток этого приёма заключается в воздействии на документацию и справочные возможности IDE. Если пользователей вызывает справку по конкретному классу, требуемые аргументы не будут описаны обычным способом. Например:
+```python
+>>> help(Stock)
+Help on class Stock in module __main__:
+
+class Stock(Structure)
+...
+| Methods inherited from Structure:
+|
+| __init__(self, *args, **kwargs)
+|
+...
+>>>
+```
+
+Многие из этих проблем могут быть исправлены путём прикрепления или принудительного использования сигнатуры типов в функции *__init__()*. **См. рецепт 9.16.**
+
+Также нужно отметить, что можно автоматически инициализировать переменные экземпляра, используя вспомогательную функцию и так называемый «фреймхак». Например:
+```python
+def init_fromlocals(self):
+	import sys
+	locs = sys._getframe(1).f_locals
+	for k, v in locs.items():
+		if k != 'self':
+			setattr(self, k, v)
+
+class Stock:
+	def __init__(self, name, shares, price):
+		init_fromlocals(self)
+```
+
+В этом варианте функция *init_fromlocals()* использует *sys._getframe()*, чтобы подсмотреть локальные переменные вызывающего метода. Если использовать её как первый шаг в методе *__init__()*, локальные переменные будут такими же, как и переданные аргументы, и смогут быть легко использованы для установки атрибутов с такими же именами. Хотя этот подход обходит проблему получения правильной сигнатуры вызова в IDE, он работает на 50% медленнее, чем представленное в рецепте решение, и использует больше сложной «подкапотной» магии. Если вашему коду не нужна эта дополнительная способность, в большинстве случаев более простое решение работает просто отлично.
+
+## 8.12. Определение интерфейса или абстрактного базового класса
+### Задача
+Вы хотите определить класс, который будет служить интерфейсом, или абстрактный базовый класс, из которого вы сможете производить проверку типов и убеждаться, что некоторые методы реализованы в подклассах.
+
+### Решение
+Чтобы определить абстрактный базовый класс, воспользуйтесь модулем *abc*. Например:
+```python
+from abc import ABCMeta, abstractmethod
+
+class IStream(metaclass=ABCMeta):
+	@abstractmethod
+	def read(self, maxbytes=-1):
+		pass
+	@abstractmethod
+	def write(self, data):
+		pass
+```
+
+Главная возможность абстрактного базового класса в том, что он не может напрямую порождать экземпляры. Если вы попробуете это сделать, то получите ошибку:
+```python
+a = IStream() 	# TypeError: Can't instantiate abstract class
+				# IStream with abstract methods read, write
+```
+
+Вместо этого абстрактный базовый класс предназначен для использования в качестве базового класса для других классов, от которых ожидается реализация требуемых методов. Например:
+```python
+class SocketStream(IStream):
+	def read(self, maxbytes=-1):
+		...
+	def write(self, data):
+		...
+```
+
+В основном абстрактные базовые классы используются в коде, где нужно принудительно реализовать ожидаемый программный интерфейс. Например, можно посмотреть на базовый класс *IStream* как на высокоуровневую спецификацию для интерфейса, который позволяет читать и записывать данные. Код, который явно проверяет наличие этого интерфейса, может быть написан так:
+```python
+def serialize(obj, stream):
+	if not isinstance(stream, IStream):
+		raise TypeError('Expected an IStream')
+...
+``` 
+
+Вы можете подумать, что такого рода проверка типов работает только путем создания подкласса абстрактного базового класса, но абстрактный базовый класс позволяет другим классам регистрироваться как реализовывающим требуемый интерфейс. Например, вы можете сделать так:
+```python
+import io
+
+# Register the built-in I/O classes as supporting our interface
+IStream.register(io.IOBase)
+
+# Open a normal file and type check
+f = open('foo.txt')
+isinstance(f, IStream)		# Returns True
+``` 
+
+Нужно отметить, что *@abstractmethod* может быть также применён к статическим методам, методам класса и свойствам. Вам нужно просто убедиться, что вы применяете его в правильной последовательности, где *@abstractmethod* появляется сразу перед определением функции, как показано тут:
+```python
+from abc import ABCMeta, abstractmethod
+
+class A(metaclass=ABCMeta):
+	@property
+	@abstractmethod
+	def name(self):
+		pass
+
+	@name.setter
+	@abstractmethod
+	def name(self, value):
+		pass
+
+	@classmethod
+	@abstractmethod
+	def method1(cls):
+		pass
+
+	@staticmethod
+	@abstractmethod
+	def method2():
+		pass
+```
+
+### Обсуждение
+Предопределенные абстрактные базовые классы можно найти во многих местах стандартной библиотеки. Модуль *collections* определяет разнообразные абстрактные базовые классы, относящиеся к контейнерам и итераторам (последовательности, отображения, множества и т.п.), библиотека *numbers* определяет абстрактные базовые классы, связанные с числовыми объектами (целые числа, числа с плавающей точкой, дроби и т.п.), библиотека *io* — связанные с управлением вводом-выводом.
+
+Вы можете использовать предопределённые абстрактные базовые классы для выполнения более обобщённой проверки типов. Вот несколько примеров:
+```python
+import collections
+
+# Check if x is a sequence
+if isinstance(x, collections.Sequence):
+	...
+
+# Check if x is iterable
+if isinstance(x, collections.Iterable):
+	...
+
+# Check if x has a size
+if isinstance(x, collections.Sized):
+...
+
+# Check if x is a mapping
+if isinstance(x, collections.Mapping):
+	...
+```
+
+Стоит отметить, что на момент написания этой книги некоторые библиотечные модули не используют эти предопределённые классы так, как вы могли бы предположить. Например:
+```python
+from decimal import Decimal
+import numbers
+
+x = Decimal('3.4')
+isinstance(x, numbers.Real)		# Returns False
+```
+
+Хотя значение 3.4 технически является реальным числом, результат проверки типов не подтверждает этого, чтобы помочь избежать случайного смешивания чисел с плавающих точкой и десятичных дробей. Поэтому если вы используете функциональность абстрактных базовых классов, стоит аккуратно писать тесты, которые проверяют, что поведение именно таково, какое вам требуется.
+
+Хотя абстрактные базовые классы облегчают проверку типов, это не стоит слишком часто использовать в программах. В своей основе Python является гибким динамическим языком. Попытки устроить повсюду принудительные ограничения типов ведут к более сложному коду, нежели необходимо. Вы должны принять гибкость Python.
 
 
 
