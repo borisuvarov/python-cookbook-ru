@@ -140,6 +140,8 @@
 	- 8.10. Использование лениво вычисляемых свойств
 	- 8.11. Упрощение инициализации структур данных
 	- 8.12. Определение интерфейса или абстрактного базового класса
+	- 8.13. Реализации модели данных или системы типов
+	- 8.14. Реализация собственных контейнеров
 
 <!-- /MarkdownTOC -->
 
@@ -8147,10 +8149,8 @@ if __name__ == '__main__':
 				(12, 13.4, 56.7) ]
 
 with open('data.b', 'wb') as f:
-	write_records(records, '< idd', f)
+	write_records(records, '<idd', f)
 ```
-
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕН ЛИШНИЙ ПРОБЕЛ! УБЕРИТЕ ПРОБЕЛ МЕЖДУ < И idd В ПОСЛЕДНЕЙ СТРОКЕ.**
 
 Есть несколько подходов к обратному превращению этого файла в список кортежей. Во-первых, если вы читаете файл кусочками (чанками) инкрементально, вы можете написать такой код:
 ```python
@@ -8164,12 +8164,10 @@ def read_records(format, f):
 # Example
 if __name__ == '__main__':
 	with open('data.b','rb') as f:
-		for rec in read_records('< idd', f):
+		for rec in read_records('<idd', f):
 			# Process rec
 			...
 ```
-
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕН ЛИШНИЙ ПРОБЕЛ! УБЕРИТЕ ПРОБЕЛ МЕЖДУ < И idd В ПОСЛЕДНЕЙ СТРОКЕ.**
 
 Если вы хотите прочесть файл целиком в байтовую строку за один проход и конвертировать его кусочек за кусочком, вы можете сделать это так:
 ```python
@@ -8184,12 +8182,10 @@ def unpack_records(format, data):
 if __name__ == '__main__':
 	with open('data.b', 'rb') as f:
 		data = f.read()
-			for rec in unpack_records('< idd', data):
+			for rec in unpack_records('<idd', data):
 			# Process rec
 			...
 ```
-
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕН ЛИШНИЙ ПРОБЕЛ! УБЕРИТЕ ПРОБЕЛ МЕЖДУ < И idd В ПОСЛЕДНЕЙ СТРОКЕ.**
 
 В обоих случаях результатом будет итерируемый объект, который производит кортежи, которые были сохранены в файле при его создании.
 
@@ -8198,9 +8194,8 @@ if __name__ == '__main__':
 В программах, которые должны кодировать и декодировать бинарные данные, обычно используют модуль *struct*. Чтобы объявить новую структуру, просто создайте экземпляр *Struct*, как показано ниже:
 ```python
 # Little endian 32-bit integer, two double precision floats
-record_struct = Struct('< idd')
+record_struct = Struct('<idd')
 ```
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕН ЛИШНИЙ ПРОБЕЛ! УБЕРИТЕ ПРОБЕЛ МЕЖДУ < И idd В ПОСЛЕДНЕЙ СТРОКЕ.**
 
 Структуры всегда определяются путём использования набора кодов структур, таких как *i*, *d*, *f* и так далее (см. документацию [Python](http://docs.python.org/3/library/struct.html)). Эти коды соответствуют определенным бинарным типам данных, таким как 32-битные целые числа, 64-битные числа с плавающей точкой, 32-битные числа с плавающей точкой и т.д. Символ < в качестве первого символа определяет порядок следования байтов. В этом примере он задает порядок little endian. Замените символ на >, чтобы задать big endian, или на ! для сетевого порядка байтов.
 
@@ -8276,12 +8271,11 @@ from collections import namedtuple
 Record = namedtuple('Record', ['kind','x','y'])
 
 with open('data.p', 'rb') as f:
-	records = (Record(*r) for r in read_records('< idd', f))
+	records = (Record(*r) for r in read_records('<idd', f))
 
 for r in records:
 	print(r.kind, r.x, r.y)
 ```
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕН ЛИШНИЙ ПРОБЕЛ! УБЕРИТЕ ПРОБЕЛ МЕЖДУ < И idd.**
 
 Если вы пишите программу, которой нужно работать с большим количеством бинарных данных, вам стоит использовать библиотеку типа *numpy*. Например, вместо чтения бинарного файла в список кортежей вы можете прочесть его в структурированный массив:
 ```python
@@ -8372,7 +8366,7 @@ def read_polys(filename):
 	# Read the header
 		header = f.read(40)
 		file_code, min_x, min_y, max_x, max_y, num_polys = \
-			struct.unpack('< iddddi', header)
+			struct.unpack('<iddddi', header)
 
 	polys = []
 	for n in range(num_polys):
@@ -8384,8 +8378,6 @@ def read_polys(filename):
 		polys.append(poly)
 	return polys
 ``` 
-
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕН ЛИШНИЙ ПРОБЕЛ! УБЕРИТЕ ПРОБЕЛ МЕЖДУ < И iddddi.**
 
 Хотя этот код работает, он представляет собой довольно-таки беспорядочный набор небольших операций чтения, распаковки структур и т.п. Если такой код используется для обработки реального файла с данными, он быстро станет еще более запутанным. Это делает очевидным необходимость поиска альтернативного решения, которое могло бы упростить некоторые шаги и позволить программисту сосредоточиться на более важных вещах.
 
@@ -8422,14 +8414,13 @@ class Structure:
 Этот код позволит вам определить структуру как высокоуровневый класс, который отражает информацию, найденную в таблицах, которые описывают ожидаемый формат файла. Например:
 ```python
 class PolyHeader(Structure):
-	file_code = StructField('< i', 0)
-	min_x = StructField('< d', 4)
-	min_y = StructField('< d', 12)
-	max_x = StructField('< d', 20)
-	max_y = StructField('< d', 28)
-	num_polys = StructField('< i', 36)
+	file_code = StructField('<i', 0)
+	min_x = StructField('<d', 4)
+	min_y = StructField('<d', 12)
+	max_x = StructField('<d', 20)
+	max_y = StructField('<d', 28)
+	num_polys = StructField('<i', 36)
 ```
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕНЫ ЛИШНИЕ ПРОБЕЛЫ! УБЕРИТЕ ПРОБЕЛЫ МЕЖДУ < И i И < и d.**
 
 Вот пример использования этого класса для чтения заголовка из данных о многоугольниках, которые мы записали ранее:
 ```python
@@ -8484,7 +8475,7 @@ def from_file(cls, f):
 ```python
 class PolyHeader(Structure):
 	_fields_ = [
-		('< i', 'file_code'),
+		('<i', 'file_code'),
 		('d', 'min_x'),
 		('d', 'min_y'),
 		('d', 'max_x'),
@@ -8492,7 +8483,6 @@ class PolyHeader(Structure):
 		('i', 'num_polys')
 	]
 ```
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕН ЛИШНИЙ ПРОБЕЛ! УБЕРИТЕ ПРОБЕЛ МЕЖДУ < И i.**
 
 Как вы можете видеть, эта спецификация намного компактнее. Добавленный метод класса *from_file()* также делает более чтение данных из файла без необходимости знать какие-либо детали о размере или структуре данных. Например:
 ```python
@@ -8565,20 +8555,18 @@ class StructureMeta(type):
 ```python
 class Point(Structure):
 	_fields_ = [
-			('< d', 'x'),
+			('<d', 'x'),
 			('d', 'y')
 	]
 	
 class PolyHeader(Structure):
 	_fields_ = [
-		('< i', 'file_code'),
+		('<i', 'file_code'),
 		(Point, 'min'),
 		(Point, 'max'),
 		('i', 'num_polys')
 	]
 ``` 
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕНЫ ЛИШНИЕ ПРОБЕЛЫ! УБЕРИТЕ ПРОБЕЛЫ МЕЖДУ < И d, А ТАКЖЕ МЕЖДУ < И i.**
-
 
 Удивительно, но код всё еще работает так, как вы ожидаете. Например:
 ```python
@@ -8692,13 +8680,13 @@ Polygon 2
 ```python
 class Point(Structure):
 	_fields_ = [
-		('< d', 'x'),
+		('<d', 'x'),
 		('d', 'y')
 		]
 
 class PolyHeader(Structure):
 	_fields_ = [
-		('< i', 'file_code'),
+		('<i', 'file_code'),
 		(Point, 'min'),
 		(Point, 'max'),
 		('i', 'num_polys')
@@ -8709,13 +8697,12 @@ def read_polys(filename):
 	with open(filename, 'rb') as f:
 		phead = PolyHeader.from_file(f)
 		for n in range(phead.num_polys):
-			rec = SizedRecord.from_file(f, '< i')
+			rec = SizedRecord.from_file(f, '<i')
 			poly = [ (p.x, p.y)
 					  for p in rec.iter_as(Point) ]
 			polys.append(poly)
 	return polys
 ```
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕНЫ ЛИШНИЕ ПРОБЕЛЫ! УБЕРИТЕ ПРОБЕЛЫ МЕЖДУ < И d, А ТАКЖЕ МЕЖДУ < И i.**
 
 ### Обсуждение
 Этот рецепт предоставляет практическое применение различных продвинутых приёмов программирования, в том числе дескрипторов, ленивых вычислений, метаклассов, переменных класса и просмотрщиков памяти (memory-views). И все они служат очень четко определенной цели.
@@ -8730,7 +8717,7 @@ class ShapeFile(Structure):
 	_fields_ = [ ('>i', 'file_code'),
 		 		 ('20s', 'unused'),
 				 ('i', 'file_length'),
-				 ('< i', 'version'),
+				 ('<i', 'version'),
 				 ('i', 'shape_type'),
 				 ('d', 'min_x'),
 				 ('d', 'min_y'),
@@ -8741,7 +8728,6 @@ class ShapeFile(Structure):
 				 ('d', 'min_m'),
 				 ('d', 'max_m') ]
 ```
-**ПРИМ. ПЕР.: ВНИМАНИЕ! ИЗ-ЗА БАГА В MARKDOWN В КОД ДОБАВЛЕН ЛИШНИЙ ПРОБЕЛ! УБЕРИТЕ ПРОБЕЛ МЕЖДУ < И i.**
 
 Как было отмечено, использование *memoryview()* в решении позволяет избавиться от копий в памяти. Когда структуры начинают вкладываться одна в другую, просмотрщики памяти (memoryviews) могут быть использованы для наложения разных частей определения структуры на одну и ту же область памяти. Этот аспект решения довольно тонкий, он касается различий работы со срезами при использовании просмотрщиков памяти и при использовании обычных байтовых массивов. Если вы извлекаете срез из байтовой строки или массива, вы обычно получаете копию данных. А с просмотрщиком памяти это не так: срезы просто накладываются на существующую память. Поэтому этот подход эффективнее.
 
@@ -11222,6 +11208,446 @@ isinstance(x, numbers.Real)		# Returns False
 Хотя значение 3.4 технически является реальным числом, результат проверки типов не подтверждает этого, чтобы помочь избежать случайного смешивания чисел с плавающих точкой и десятичных дробей. Поэтому если вы используете функциональность абстрактных базовых классов, стоит аккуратно писать тесты, которые проверяют, что поведение именно таково, какое вам требуется.
 
 Хотя абстрактные базовые классы облегчают проверку типов, это не стоит слишком часто использовать в программах. В своей основе Python является гибким динамическим языком. Попытки устроить повсюду принудительные ограничения типов ведут к более сложному коду, нежели необходимо. Вы должны принять гибкость Python.
+
+
+## 8.13. Реализации модели данных или системы типов
+### Решение
+Вы хотите определить различные структуры данных, но вы хотите установить принудительные ограничения на значения, которые можно назначить определенным атрибутам.
+
+### Решение
+В этой задаче вы сталкиваетесь с необходимостью разместить проверки или ассерты (assertions), которые вызываются при установке (присваивании значения) определенным атрибутам экземпляра. Чтобы сделать это, вам нужно кастомизировать установку атрибутов отдельно для каждого атрибута. Для этого нужно использовать дескрипторы.
+
+Следующий пример иллюстрирует использование дескрипторов для реализации системы типов и фреймворка проверки значений:
+```python
+# Base class. Uses a descriptor to set a value
+class Descriptor:
+	def __init__(self, name=None, **opts):
+		self.name = name
+		for key, value in opts.items():
+			setattr(self, key, value)
+	def __set__(self, instance, value):
+		instance.__dict__[self.name] = value
+
+# Descriptor for enforcing types
+class Typed(Descriptor):
+	expected_type = type(None)
+
+	def __set__(self, instance, value):
+		if not isinstance(value, self.expected_type):
+			raise TypeError('expected ' + str(self.expected_type))
+		super().__set__(instance, value)
+
+# Descriptor for enforcing values
+class Unsigned(Descriptor):
+	def __set__(self, instance, value):
+		if value < 0:
+			raise ValueError('Expected >= 0')
+		super().__set__(instance, value)
+
+class MaxSized(Descriptor):
+	def __init__(self, name=None, **opts):
+		if 'size' not in opts:
+			raise TypeError('missing size option')
+		super().__init__(name, **opts)
+
+	def __set__(self, instance, value):
+		if len(value) >= self.size:
+			raise ValueError('size must be < ' + str(self.size))
+		super().__set__(instance, value)
+``` 
+
+Эти классы нужно рассматривать как базовые строительные блоки, из которых вы создаете модель данных или систему типов. Продолжая пример, приведём код, который реализует некоторые другие типы данных:
+```python
+class Integer(Typed):
+	expected_type = int
+
+class UnsignedInteger(Integer, Unsigned):
+	pass
+
+class Float(Typed):
+	expected_type = float
+
+class UnsignedFloat(Float, Unsigned):
+	pass
+
+class String(Typed):
+	expected_type = str
+
+class SizedString(String, MaxSized):
+	pass
+```
+
+Используя эти объекты типов, можно определить такой класс:
+```python
+class Stock:
+	# Specify constraints
+	name = SizedString('name',size=8)
+	shares = UnsignedInteger('shares')
+	price = UnsignedFloat('price')
+	def __init__(self, name, shares, price):
+		self.name = name
+		self.shares = shares
+		self.price = price
+```
+
+Применив ограничения, вы обнаружите, что присвоение атрибутов теперь валидируется. Например:
+```python
+>>> s = Stock('ACME', 50, 91.1)
+>>> s.name
+'ACME'
+>>> s.shares = 75
+>>> s.shares = -10
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "example.py", line 17, in __set__
+		super().__set__(instance, value)
+	File "example.py", line 23, in __set__
+		raise ValueError('Expected >= 0')
+ValueError: Expected >= 0
+>>> s.price = 'a lot'
+raceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "example.py", line 16, in __set__
+		raise TypeError('expected ' + str(self.expected_type))
+TypeError: expected <class 'float'>
+>>> s.name = 'ABRACADABRA'
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "example.py", line 17, in __set__
+		super().__set__(instance, value)
+	File "example.py", line 35, in __set__
+		raise ValueError('size must be < ' + str(self.size))
+ValueError: size must be < 8
+>>>
+```
+
+Есть несколько приёмов для упрощения спецификации ограничений в классах. Один из них — это использование декоратора класса:
+```python
+# Class decorator to apply constraints
+def check_attributes(**kwargs):
+	def decorate(cls):
+		for key, value in kwargs.items():
+			if isinstance(value, Descriptor):
+				value.name = key
+				setattr(cls, key, value)
+			else:
+				setattr(cls, key, value(key))
+		return cls
+	return decorate
+
+# Example
+@check_attributes(name=SizedString(size=8),
+				  shares=UnsignedInteger,
+				  price=UnsignedFloat)
+class Stock:
+	def __init__(self, name, shares, price):
+		self.name = name
+		self.shares = shares
+		self.price = price
+```
+
+Ещё один подход к упрощению спецификации ограничений — использование метакласса:
+```python
+# A metaclass that applies checking
+class checkedmeta(type):
+	def __new__(cls, clsname, bases, methods):
+		# Attach attribute names to the descriptors
+		for key, value in methods.items():
+			if isinstance(value, Descriptor):
+				value.name = key
+		return type.__new__(cls, clsname, bases, methods)
+
+# Example
+class Stock(metaclass=checkedmeta):
+	name = SizedString(size=8)
+	shares = UnsignedInteger()
+	price = UnsignedFloat()
+	def __init__(self, name, shares, price):
+		self.name = name
+		self.shares = shares
+		self.price = price
+```
+
+### Обсуждение
+Этот рецепт использует несколько продвинутых приёмов, включая дескрипторы, классы-миксины (примеси), функцию *super()*, декораторы классов и метаклассы. Здесь мы не можем раскрыть эти темы, но примеры вы можете найти в других рецептах (см. **рецепты 8.9., 8.18., 9.12. и 9.19.**). Однако несколько тонких моментов всё же стоит осветить.
+
+Во-первых, в базовом классе *Descriptor* есть метод *__set__()*, но нет соответствующего *__get__()*. Если дескриптор не делает ничего, кроме как извлекает значение с таким же именем из словаря экземпляра, определять *__get__()* не нужно — на самом деле это сделает программу медленнее. Поэтому этот рецепт сосредоточен только на реализации *__set__()*.
+
+Различные классы-дескрипторы в общем проектируются на базе классов-миксин (примесей). Например, классы *Unsigned* и *MaxSized* предназначены для смешивания с другими классами-дескрипторами, полученными от *Typed*. Чтобы обрабатывать конкретные типы данных, для получения нужной функциональности используется множественное наследование. 
+
+Вы также заметите, что все методы *__init__()* различных дескрипторов запрограммированы так, чтобы иметь одинаковую сигнатуру вызовов, использующую именованные аргументы \*\*opts. Класс *MaxSized* ищет требуемые атрибуты в *opts*, но просто передает их базовому классу *Descriptor*, который их устанавливает. Сложность в композиции таких классов (и миксин в особенности) состоит в том, что вы не всегда знаете, как классы будут связаны друг с другом, или что будет вызывать функция *super()*. Поэтому вам нужно заставить всё это работать для любой возможной комбинации классов.
+
+Определения различных типов классов, таких как *Integer*, *Float* и *String*, иллюстрируют полезный приём использования переменных класса для кастомизации реализации. Дескриптор *Typed* просто ищет атрибут *expected_type*, который предоставляется каждым из этих подклассов.
+
+Использование декоратора класса или метакласса часто является полезным для упрощения спецификации пользователем. Вы заметите, что в этих примерах пользователь больше не должен прописывать имя атрибута больше, нежели один раз:
+```python
+# Normal
+class Point:
+	x = Integer('x')
+	y = Integer('y')
+
+# Metaclass
+class Point(metaclass=checkedmeta):
+	x = Integer()
+	y = Integer()
+```
+
+Код декоратора класса и метакласса просто сканирует словарь класса в поиске дескрипторов. Когда дескриптор найден, они просто заполняют имя дескриптора, основываясь на значении ключа.
+
+Из всех этих подходов решение с декоратором класса может предоставить наилучшую гибкость и ясность. Во-первых оно не рассчитывает ни на какую продвинутую магию типа метаклассов. Во-вторых, декоратор может быть легко добавлен или удалён из определения класса. Например, внутри декоратора может быть возможность просто пропустить все добавленные проверки. Это может позволить проверкам стать чем-то, что можно выключить или выключить в зависимости от текущих потребностей (например, во время дебаггинга выключить, а в продакшне включить).
+
+И последнее: подход с использованием декоратора класса может быть также применён в качестве замены классам-миксинам (примесям), множественному наследованию и сложному использованию функции *super()*. Вот альтернативная реализация этого рецепта, использующая декораторы классов:
+```python
+# Base class. Uses a descriptor to set a value
+class Descriptor:
+	def __init__(self, name=None, **opts):
+		self.name = name
+		for key, value in opts.items():
+			setattr(self, key, value)
+
+	def __set__(self, instance, value):
+		instance.__dict__[self.name] = value
+
+# Decorator for applying type checking
+def Typed(expected_type, cls=None):
+	if cls is None:
+		return lambda cls: Typed(expected_type, cls)
+	
+	super_set = cls.__set__
+	def __set__(self, instance, value):
+		if not isinstance(value, expected_type):
+			raise TypeError('expected ' + str(expected_type))
+		super_set(self, instance, value)
+	cls.__set__ = __set__
+	return cls
+
+# Decorator for unsigned values
+def Unsigned(cls):
+	super_set = cls.__set__
+
+	def __set__(self, instance, value):
+		if value < 0:
+			raise ValueError('Expected >= 0')
+		super_set(self, instance, value)
+	cls.__set__ = __set__
+	return cls
+
+# Decorator for allowing sized values
+def MaxSized(cls):
+	super_init = cls.__init__
+	def __init__(self, name=None, **opts):
+		if 'size' not in opts:
+			raise TypeError('missing size option')
+		super_init(self, name, **opts)
+	cls.__init__ = __init__
+
+	super_set = cls.__set__
+	def __set__(self, instance, value):
+		if len(value) >= self.size:
+			raise ValueError('size must be < ' + str(self.size))
+		super_set(self, instance, value)
+	cls.__set__ = __set__
+	return cls
+
+# Specialized descriptors
+@Typed(int)
+class Integer(Descriptor):
+	pass
+
+@Unsigned
+class UnsignedInteger(Integer):
+	pass
+
+@Typed(float)
+class Float(Descriptor):
+	pass
+
+@Unsigned
+class UnsignedFloat(Float):
+	pass
+
+@Typed(str)
+class String(Descriptor):
+	pass
+
+@MaxSized
+class SizedString(String):
+	pass
+```
+
+Классы, определённые в этом альтернативном решении, работают так же, как и раньше (ранее показанный в примерах код не изменился), за исключением того, что всё работает намного быстрее. Например, простая проверка времени исполнения установки типизированного атрибута обнаруживает, что подход с использованием декораторов классов работает почти на 100% быстрее, чем использование миксин (примесей). Теперь-то вы рады, что дочитали весь этот рецепт до конца?
+
+## 8.14. Реализация собственных контейнеров
+### Задача
+Вы хотите реализовать собственный кастомный класс, который копирует поведение обычного встроенного типа контейнера, такого как список или словарь. Однако вы не полностью уверены, что знаете, какие методы нужно реализовать.
+
+### Решение
+Библиотека *collections* определяет разнообразные абстрактные базовые классы, которые чрезвычайно полезны при реализации собственных классов контейнеров. Для примера предположим, что вы хотите создать класс с поддержкой итераций. Чтобы сделать это, унаследуйте его от *collections.Iterable*, как показано тут:
+```python
+import collections
+
+class A(collections.Iterable):
+	pass
+```
+
+Наследование от *collections.Iterable* проверяет, что вы реализовали все требуемые специальные методы. Если вы не сделаете этого, то получите ошибку при создании экземпляра:
+```python
+>>> a = A()
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+TypeError: Can't instantiate abstract class A with abstract methods __iter__
+>>>
+```
+
+Чтобы исправить эту ошибку, просто дайте классу требуемый метод *__iter__()* и реализуйте его так, как хотите (см. **рецепты 4.2. и 4.7.**)
+
+Другие важные классы, определённые в *collections*, это *Sequence*, *MutableSequence*, *Mapping*, *MutableMapping*, *Set* и *MutableSet*. Многие из этих классов формируют иерархии с увеличивающими уровнями функциональности (одна из таких иерархий — *Container*, *Iterable*, *Sized*, *Sequence* и *MutableSequence*). Ещё раз: просто создайте экземпляр любого из этих классов, чтобы увидеть, какие методы нужны, чтобы реализовать собственный контейнер с требуемым поведением:
+```python
+>>> import collections
+>>> collections.Sequence()
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+TypeError: Can't instantiate abstract class Sequence with abstract methods \
+__getitem__, __len__
+>>>
+```
+
+Вот простой пример класса, который реализует предшествующие методы, чтобы создать последовательность, в которой элементы хранятся в отсортированном порядке (это не самая эффективная реализация, но она иллюстрирует общую идею):
+```python
+import collections
+import bisect
+
+class SortedItems(collections.Sequence):
+	def __init__(self, initial=None):
+		self._items = sorted(initial) if initial is None else []
+	
+	# Required sequence methods
+	def __getitem__(self, index):
+		return self._items[index]
+	
+	def __len__(self):
+		return len(self._items)
+	
+	# Method for adding an item in the right location
+	def add(self, item):
+		bisect.insort(self._items, item)
+```
+
+Вот пример использования этого класса:
+```python
+>>> items = SortedItems([5, 1, 3])
+>>> list(items)
+[1, 3, 5]
+>>> items[0]
+1
+>>> items[-1]
+5
+>>> items.add(2)
+>>> list(items)
+[1, 2, 3, 5]
+>>> items.add(-10)
+>>> list(items)
+[-10, 1, 2, 3, 5]
+>>> items[1:4]
+[1, 2, 3]
+>>> 3 in items
+True
+>>> len(items)
+5
+>>> for n in items:
+...
+print(n)
+...
+-10
+1
+2
+3
+5
+>>>
+```
+
+Как вы можете видеть, экземпляры *SortedItems* ведут себя в точности как обычная последовательность и поддерживают все обычные операции, включая индексирование, итерирование, *len()*, проверку на содержание (оператор *in*) и даже извлечение срезов.
+
+А вот модуль *bisect*, использованный в этом рецепте, даёт удобный способ поддерживать отсортированность элементов в списке. Поскольку *bisect.insort()* вставляет элемент в список, последовательность остается отсортированной.
+
+### Обсуждение
+Наследование от одного из абстрактных базовых классов из *collections* позволяет удостовериться, что ваш собственный контейнер реализует все требуемые методы, которые нужны контейнеру. Также наследование упрощает проверку типов.
+
+Например, ваш собственный контейнер будет удовлетворять различным проверкам типов:
+```python
+>>> items = SortedItems()
+>>> import collections
+>>> isinstance(items, collections.Iterable)
+True
+>>> isinstance(items, collections.Sequence)
+True
+>>> isinstance(items, collections.Container)
+True
+>>> isinstance(items, collections.Sized)
+True
+>>> isinstance(items, collections.Mapping)
+False
+>>>
+```
+
+Многие абстрактные базовые классы из *collections* также предоставляют дефолтные реализации обычных методов контейнеров. Предположим, например, что у вас есть класс, который наследует от *collections.MutableSequence*:
+```python
+class Items(collections.MutableSequence):
+	def __init__(self, initial=None):
+		self._items = list(initial) if initial is None else []
+	
+	# Required sequence methods
+	def __getitem__(self, index):
+		print('Getting:', index)
+		return self._items[index]
+
+	def __setitem__(self, index, value):
+		print('Setting:', index, value)
+		self._items[index] = value
+
+	def __delitem__(self, index):
+		print('Deleting:', index)
+		del self._items[index]
+
+	def insert(self, index, value):
+		print('Inserting:', index, value)
+		self._items.insert(index, value)
+
+	def __len__(self):
+		print('Len')
+		return len(self._items)
+``` 
+
+Если вы создадите экземпляр *Items*, то вы обнаружите, что он поддерживает практически все основные методы (например, *append()*, *remove()*, *count()* и т.д.) Эти методы реализованы таким образом, что они используют только требуемые. Вот интерактивный сеанс, которая демонстрирует это:
+```python
+>>> a = Items([1, 2, 3])
+>>> len(a)
+Len
+3
+>>> a.append(4)
+Len
+Inserting: 3 4
+>>> a.append(2)
+Len
+Inserting: 4 2
+>>> a.count(2)
+Getting: 0
+Getting: 1
+Getting: 2
+Getting: 3
+Getting: 4
+Getting: 5
+2
+>>> a.remove(3)
+Getting: 0
+Getting: 1
+Getting: 2
+Deleting: 2
+>>>
+```
+
+Этот рецепт — лишь небольшой экскурс в функциональность абстрактных базовых классов Python. Модуль *numbers* предоставляет похожую коллекцию абстрактных классов, связанных с числовыми типами данных. См. **рецепт 8.12.**, чтобы получить больше сведений о создании собственных абстрактных базовых классов. 
+
 
 
 
