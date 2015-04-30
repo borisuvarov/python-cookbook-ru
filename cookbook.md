@@ -144,6 +144,8 @@
 	- 8.16. Определение более одного конструктора в классе
 	- 8.17. Создание экземпляра без вызова *init*
 	- 8.18. Расширение классов с помощью миксин (примесей)
+	- 8.19. Реализация объектов с состоянием или конечных автоматов
+	- 8.20. Вызов метода объекта с передачей имени метода в строке
 
 <!-- /MarkdownTOC -->
 
@@ -3334,7 +3336,7 @@ parser = yacc()
 
 Если вы хотите сделать свою программерскую жизнь более захватывающей, начните писать парсеры и компиляторы. Повторимся, книги про компиляторы предлагают кучу низкоуровневых подробностей и теории. Множество полезных ресурсов и всякой информации вы также найдете в сети. А в Python есть модуль *ast*, на который также стоит посмотреть.
 
-  
+
 ## 2.20. Выполнение текстовых операций над байтовыми строками
 ### Задача
 Вы хотите выполнить стандартные текстовые операции (срезание символов, поиск, замену) над строками байтов.
@@ -12184,6 +12186,342 @@ class LoggedDict(dict):
 Если вы попробуете это в работе, то получите такое же поведение, как и ранее, но без использования множественного наследования. Вместо него декоратор просто выполняет небольшую хирургическую операцию на определении класса для замены некоторых методов. Дополнительную информацию о декораторах вы можете почерпнуть в **рецепте 9.12.**
 
 См. также **рецепт 8.13.**, где приведен продвинутый способ, использующий миксины и декораторы классов одновременно. 
+
+
+## 8.19. Реализация объектов с состоянием или конечных автоматов
+### Задача
+Вы хотите реализовать конечный автомат или объект, который может находиться в определенном количестве различных состояний, но не хотите замусоривать код большим количеством условий.
+
+### Решение
+В некоторых приложениях вам могут понадобиться объекты, которые работают по-разному в зависимости от некого внутреннего состояния. Например, рассмотрим простой класс, представляющий соединение:
+```python
+class Connection:
+	def __init__(self):
+		self.state = 'CLOSED'
+	
+	def read(self):
+		if self.state != 'OPEN':
+			raise RuntimeError('Not open')
+		print('reading')
+	
+	def write(self, data):
+		if self.state != 'OPEN':
+			raise RuntimeError('Not open')
+		print('writing')
+	
+	def open(self):
+		if self.state == 'OPEN':
+			raise RuntimeError('Already open')
+		self.state = 'OPEN'
+	
+	def close(self):
+		if self.state == 'CLOSED':
+			raise RuntimeError('Already closed')
+		self.state = 'CLOSED'
+```
+
+Эта реализация вводит несколько трудных моментов. Во-первых, код переусложнён большим количеством условных проверок состояния. Во-вторых, производительность страдает из-за большого количества операций (например, *read()* и *write()* всегда проверяют состояние перед выполнением).
+
+Более элегантный подход — закодировать каждое операционное состояние как отдельный класс, а класс *Connection* заставить делегировать операции классу состояния. Например:
+```python
+class Connection:
+	def __init__(self):
+		self.new_state(ClosedConnectionState)
+	
+	def new_state(self, newstate):
+		self._state = newstate
+	
+	# Delegate to the state class
+	def read(self):
+		return self._state.read(self)
+	
+	def write(self, data):
+		return self._state.write(self, data)
+	
+	def open(self):
+		return self._state.open(self)
+	
+	def close(self):
+		return self._state.close(self)
+
+
+# Connection state base class
+class ConnectionState:
+	@staticmethod
+	def read(conn):
+		raise NotImplementedError()
+
+	@staticmethod
+	def write(conn, data):
+		raise NotImplementedError()
+
+	@staticmethod
+	def open(conn):
+		raise NotImplementedError()
+
+	@staticmethod
+	def close(conn):
+		raise NotImplementedError()
+
+# Implementation of different states
+class ClosedConnectionState(ConnectionState):
+	@staticmethod
+	def read(conn):
+		raise RuntimeError('Not open')
+	
+	@staticmethod
+	def write(conn, data):
+		raise RuntimeError('Not open')
+	
+	@staticmethod
+	def open(conn):
+		conn.new_state(OpenConnectionState)
+	
+	@staticmethod
+	def close(conn):
+		raise RuntimeError('Already closed')
+
+class OpenConnectionState(ConnectionState):
+	@staticmethod
+	def read(conn):
+		print('reading')
+	
+	@staticmethod
+	def write(conn, data):
+		print('writing')
+	
+	@staticmethod
+	def open(conn):
+		raise RuntimeError('Already open')
+	
+	@staticmethod
+	def close(conn):
+		conn.new_state(ClosedConnectionState)
+``` 
+
+Вот пример использования этих классов:
+```python
+>>> c = Connection()
+>>> c._state
+<class '__main__.ClosedConnectionState'>
+>>> c.read()
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "example.py", line 10, in read
+		return self._state.read(self)
+	File "example.py", line 43, in read
+		raise RuntimeError('Not open')
+RuntimeError: Not open
+>>> c.open()
+>>> c._state
+<class '__main__.OpenConnectionState'>
+>>> c.read()
+reading
+>>> c.write('hello')
+writing
+>>> c.close()
+>>> c._state
+<class '__main__.ClosedConnectionState'>
+>>>
+```
+
+### Обсуждение
+Код с большим количеством сложных проверок выполнения условий и связанных вместе состояний трудно поддерживать и понимать. Представленное решение обходит эту проблему путём выделения индивидуальных состояний в отдельные классы.
+
+Это может показаться немного странным, однако каждое состояние реализовано как класс со статическими методами, каждый из которых принимает экземпляр *Connection* первым аргументом. Это проектировочное решение основано на отказе от хранения любых данных экземпляра в состояниях других классов. Вместо этого все данные экземпляра должны храниться в экземляре *Connection*. Группирование состояний в общем базовом классе часто помогает упорядочить код и убедиться, что нужные методы реализованы. Исключение *NotImplementedError* возбуждается в методах базового класса и помогает убедиться, что подклассы предоставляет реализацию требуемых методов. В качестве альтернативы вы можете рассмотреть использование абстрактного базового класса, как то описано в **рецепте 8.12.**
+
+Альтернативная реализация затрагивает прямое управление атрибутом *__class__* в экземплярах. Рассмотрите такой пример:
+```python
+class Connection:
+	def __init__(self):
+		self.new_state(ClosedConnection)
+
+	def new_state(self, newstate):
+		self.__class__ = newstate
+
+	def read(self):
+		raise NotImplementedError()
+
+	def write(self, data):
+		raise NotImplementedError()
+
+	def open(self):
+		raise NotImplementedError()
+
+	def close(self):
+		raise NotImplementedError()
+
+class ClosedConnection(Connection):
+	def read(self):
+		raise RuntimeError('Not open')
+	
+	def write(self, data):
+		raise RuntimeError('Not open')
+	
+	def open(self):
+		self.new_state(OpenConnection)
+	
+	def close(self):
+		raise RuntimeError('Already closed')
+	
+class OpenConnection(Connection):
+	def read(self):
+		print('reading')
+	def write(self, data):
+		print('writing')
+	def open(self):
+		raise RuntimeError('Already open')
+	def close(self):
+		self.new_state(ClosedConnection)
+```  
+
+Основная фишка этой реализации в том, что она устраняет дополнительный слой «косвенности» (indirection). Вместо создания отдельных классов *Connection* и *ConnectionState* вы сливаете эти классы вместе. Когда меняется состояние, экземпляр изменяет свой тип, как показано тут:
+```python
+>>> c = Connection()
+>>> c
+<__main__.ClosedConnection object at 0x1006718d0>
+>>> c.read()
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "state.py", line 15, in read
+		raise RuntimeError('Not open')
+RuntimeError: Not open
+>>> c.open()
+>>> c
+<__main__.OpenConnection object at 0x1006718d0>
+>>> c.read()
+reading
+>>> c.close()
+>>> c
+<__main__.ClosedConnection object at 0x1006718d0>
+>>>
+```
+
+Пуристы от объектно-ориентированного программирования могут быть оскорблены идеей простого изменения атрибута экземпляра *__class__()*. Однако это технически возможно. Также это может ускорить выполнение программы, поскольку методы не используют дополнительный шаг делегирования.
+
+И, наконец, каждый из этих приёмов полезен в реализации более сложных конечных автоматов — особенно в коде, который может послужить альтернативой огромным блокам *if-elif-else*. Например:
+```python
+# Original implementation
+class State:
+	def __init__(self):
+		self.state = 'A'
+
+	def action(self, x):
+		if state == 'A':
+			# Action for A
+			...
+			state = 'B'
+		elif state == 'B':
+			# Action for B
+			...
+			state = 'C'
+		elif state == 'C':
+			# Action for C
+			...
+			state = 'A'
+
+# Alternative implementation
+class State:
+	def __init__(self):
+		self.new_state(State_A)
+
+	def new_state(self, state):
+		self.__class__ = state
+	
+	def action(self, x):
+		raise NotImplementedError()
+
+
+class State_A(State):
+	def action(self, x):
+		# Action for A
+		...
+		self.new_state(State_B)
+
+
+class State_B(State):
+	def action(self, x):
+		# Action for B
+		...
+		self.new_state(State_C)
+
+class State_C(State):
+	def action(self, x):
+		# Action for C
+		...
+		self.new_state(State_A)
+```
+
+Этот рецепт основан на паттерне проектирования состояния из книги «[Приёмы объектно-ориентированного проектирования. Паттерны проектирования](https://ru.wikipedia.org/wiki/Design_Patterns)» Эриха Гаммы, Ричарда Хелма, Ральфа Джонсона и Джона Влиссидеса.
+
+
+## 8.20. Вызов метода объекта с передачей имени метода в строке
+### Задача
+У вас есть имя метода, который вы хотите вызвать у объекта, хранящееся в виде строки, и вы хотите выполнить этот метод.
+
+### Решение
+В простых случаях вы можете использовать *getattr()*:
+```python
+import math
+
+class Point:
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+
+	def __repr__(self):
+		return 'Point({!r:},{!r:})'.format(self.x, self.y)
+
+	def distance(self, x, y):
+		return math.hypot(self.x - x, self.y - y)
+
+p = Point(2, 3)
+d = getattr(p, 'distance')(0, 0)	# Calls p.distance(0, 0)
+```
+
+Альтернативный подход — использование *operator.methodcaller()*. Например:
+```python
+import operator
+operator.methodcaller('distance', 0, 0)(p)
+```
+
+*operator.methodcaller()* может оказаться полезным, если вы хотите искать метод по имени и раз за разом предоставлять одни и те же аргументы. Например, если вам нужно отсортировать целый список точек:
+```python
+points = [
+	Point(1, 2),
+	Point(3, 0),
+	Point(10, -3),
+	Point(-5, -7),
+	Point(-1, 8),
+	Point(3, 2)
+]
+
+# Sort by distance from origin (0, 0)
+points.sort(key=operator.methodcaller('distance', 0, 0))
+```
+
+### Обсуждение
+Вызов метода на самом деле состоит из двух отдельных шагов: поиска атрибута и вызова функции. Поэтому чтобы вызвать метод, вы просто ищете атрибут, используя *getattr()*, как и для любого другого атрибута. Чтобы вызывать результат как метод, просто обращайтесь с результатом поиска как с функцией.
+
+operator.methodcaller() создаёт вызываемый объет, а также фиксирует аргументы, которые будут предоставлен методу. Вам остаётся только предоставить подходящий аргумент *self*. Например:
+```python
+>>> p = Point(3, 4)
+>>> d = operator.methodcaller('distance', 0, 0)
+>>> d(p)
+5.0
+>>>
+```
+
+Вызов методов с использованием имен, содержащихся в строках, является обычным в коде, который эмулирует объявления случаев или вариантах паттерна «Посетитель». См. следующий рецепт, где приведён более продвинутый пример.
+
+
+
+
+
+
+
+
+
 
 
 
