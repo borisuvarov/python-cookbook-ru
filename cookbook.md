@@ -149,6 +149,8 @@
 	- 8.21. Реализация паттерна «Посетитель»
 	- 8.22. Реализация шаблона «посетитель» без рекурсии
 	- 8.23. Управление памятью в циклических структурах данных
+	- 8.24. Заставляем классы поддерживать операции сравнения
+	- 8.25. Создание кэшированных экземпляров
 
 <!-- /MarkdownTOC -->
 
@@ -13127,6 +13129,285 @@ None
 ``` 
 
 Если вы будете использовать слабые ссылки, как показано в решении, то вы обнаружите, что ссылочные циклы не возникают, и сборка мусора происходит сразу же после того, как узел перестает использоваться. См. **рецепт 8.25.**, чтобы получить ещё один пример ипользования слабых ссылок.
+
+## 8.24. Заставляем классы поддерживать операции сравнения
+### Задача
+Вы бы хотели сравнивать экземпляры вашего класса, используя обычные операторы сравнения (т.е., >=, !=, <= и т.д.), но без написания большого количества специальных методов.
+
+### Решение
+Классы Python могут поддерживать сравнение путём реализации специального метода для каждого из операторов сравнения. Например, чтобы обеспечить поддержку оператора >=, вам нужно определить в классах метод *__ge__()*. Хотя определение одного метода обычно не является проблемой, реализация методов для всех возможных операторов сравнения может быстро надоесть.
+
+Декоратор *functools.total_ordering* может помочь упростить этот процесс. Вы декорируете им класс и определяете метод *__eq__()*, а также один из методов сравнения (*__lt__*, *__le__*, *__gt__* или *__ge__*). Затем декоратор заполнит другие методы за вас. 
+
+В качестве примера давайте построим несколько домов и добавим в них несколько комнат, а затем выполним сравнения:
+```python
+from functools import total_ordering
+
+class Room:
+	def __init__(self, name, length, width):
+		self.name = name
+		self.length = length
+		self.width = width
+		self.square_feet = self.length * self.width
+
+@total_ordering
+class House:
+	def __init__(self, name, style):
+		self.name = name
+		self.style = style
+		self.rooms = list()
+	
+	@property
+	def living_space_footage(self):
+		return sum(r.square_feet for r in self.rooms)
+	
+	def add_room(self, room):
+		self.rooms.append(room)
+	
+	def __str__(self):
+		return '{}: {} square foot {}'.format(self.name,
+											  self.living_space_footage,
+											  self.style)
+	
+	def __eq__(self, other):
+		return self.living_space_footage == other.living_space_footage
+	
+	def __lt__(self, other):
+		return self.living_space_footage < other.living_space_footage
+```
+
+Здесь класс *House* был декорирован с помощью *@total_ordering*. Определения *__eq__()* и *__lt__()* предоставлены для сравнения домов на основе общего метража их комнат. Это минимальное определение — всё, что требуется, чтобы заставить работать другие операции сравнения. Например:
+```python
+# Build a few houses, and add rooms to them
+h1 = House('h1', 'Cape')
+h1.add_room(Room('Master Bedroom', 14, 21))
+h1.add_room(Room('Living Room', 18, 20))
+h1.add_room(Room('Kitchen', 12, 16))
+h1.add_room(Room('Office', 12, 12))
+
+h2 = House('h2', 'Ranch')
+h2.add_room(Room('Master Bedroom', 14, 21))
+h2.add_room(Room('Living Room', 18, 20))
+h2.add_room(Room('Kitchen', 12, 16))
+
+h3 = House('h3', 'Split')
+h3.add_room(Room('Master Bedroom', 14, 21))
+h3.add_room(Room('Living Room', 18, 20))
+h3.add_room(Room('Office', 12, 16))
+h3.add_room(Room('Kitchen', 15, 17))
+
+houses = [h1, h2, h3]
+
+print('Is h1 bigger than h2?', h1 > h2) # prints True
+print('Is h2 smaller than h3?', h2 < h3) # prints True
+print('Is h2 greater than or equal to h1?', h2 >= h1) # Prints False
+print('Which one is biggest?', max(houses)) # Prints 'h3: 1101-square-foot Split
+print('Which is smallest?', min(houses)) # Prints 'h2: 846-square-foot Ranch'
+```
+
+### Обсуждение
+Если вы написали код, который заставляет класс поддерживать все основные операторы сравнения, тогда *total_ordering*, вероятно, уже не кажется вам такой уж магией: он буквально определяет отображение каждого метода поддержки сравнений на все другие, которые потребуются. Так что если вы определили *__lt__()* в вашем классе, как показано в решении, этот метод используется для построения всех других операторов сравнения. Он просто заполняет класс методами:
+```python
+class House:
+	def __eq__(self, other):
+	...
+	def __lt__(self, other):
+	...
+
+	# Methods created by @total_ordering
+	__le__ = lambda self, other: self < other or self == other
+	__gt__ = lambda self, other: not (self < other or self == other)
+	__ge__ = lambda self, other: not (self < other)
+	__ne__ = lambda self, other: not self == other
+```
+
+Несложно, конечно, написать такие методы вручную, но *@total_ordering* убирает «угадайку».
+
+## 8.25. Создание кэшированных экземпляров
+### Задача
+При создании экземпляров класса вы хотите возвращать кэшированную ссылку на предыдущий экземпляр, созданный с теми же аргументами (если они есть).
+
+### Решение
+Проблема, которую решает этот рецепт, иногда возникает, когда хотите убедиться, что создается только один экземпляр класса для некого набора агрументов. В качестве практического примера можно привести поведение библиотек, таких как модуль *logging*, которая создает только один экземпляр логгера с неким конкретным именем. Например:
+```python
+>>> import logging
+>>> a = logging.getLogger('foo')
+>>> b = logging.getLogger('bar')
+>>> a is b
+False
+>>> c = logging.getLogger('foo')
+>>> a is c
+True
+>>>
+```  
+
+Чтобы реализовать такое поведение, вы должны использовать фабричную функцию, отделённую от самого класса. Например:
+```python
+# The class in question
+class Spam:
+	def __init__(self, name):
+		self.name = name
+
+# Caching support
+import weakref
+_spam_cache = weakref.WeakValueDictionary()
+
+def get_spam(name):
+	if name not in _spam_cache:
+		s = Spam(name)
+		_spam_cache[name] = s
+	else:
+		s = _spam_cache[name]
+	return s
+```
+
+Если вы используете эту реализацию, то обнаружите, что она ведет себя так же, как было показано ранее:
+```python
+>>> a = get_spam('foo')
+>>> b = get_spam('bar')
+>>> a is b
+False
+>>> c = get_spam('foo')
+>>> a is c
+True
+>>>
+```
+
+### Обсуждение
+Написание специальной фабричной функции часто является простым подходом изменения обычных правил создания экземпляра. Но часто возникает и вопрос: есть ли более элегантное решение?
+
+Например, вы можете подумать о решении, которое переопределяет метод *__new__()* в классе:
+```python
+# Note: This code doesn't quite work
+import weakref
+class Spam:
+	_spam_cache = weakref.WeakValueDictionary()
+	def __new__(cls, name):
+		if name in cls._spam_cache:
+			return cls._spam_cache[name]
+		else:
+			self = super().__new__(cls)
+			cls._spam_cache[name] = self
+			return self
+	
+	def __init__(self, name):
+		print('Initializing Spam')
+		self.name = name
+```
+
+На первый взгляд кажется, что этот код может заработать. Однако есть большая проблема: метод *__init__()* вызывается всегда — без оглядки на то, кэширован ли экземпляр. Например:
+```python
+>>> s = Spam('Dave')
+Initializing Spam
+>>> t = Spam('Dave')
+Initializing Spam
+>>> s is t
+True
+>>>
+```	
+
+Такое поведение, вероятно, будет нежелательным. Чтобы решить задачу кэширования без переинициализации, вам нужно попробовать немного другой подход.
+
+Использование слабых ссылок в этом рецепте служит важной цели, связанной со сборкой мусора, что описано в **рецепте 8.23.** Поддерживая кэш экземпляров, вы обычно хотите держать их в кэше только до тех пор, пока они используются где-то в программе. Экземпляр *WeakValueDictionary* содержит только элементы, которые существуют где-то ещё. Ключи словаря исчезают, когда экземпляры выходят из употребления. Смотрите:
+```python
+>>> a = get_spam('foo')
+>>> b = get_spam('bar')
+>>> c = get_spam('foo')
+>>> list(_spam_cache)
+['foo', 'bar']
+>>> del a
+>>> del c
+>>> list(_spam_cache)
+['bar']
+>>> del b
+>>> list(_spam_cache)
+[]
+>>>
+```
+
+Для большого количества программ минимального кода, показанного в этом рецепте, будет достаточно. Однако есть несколько более продвинутых реализаций этого приёма, которые могут быть рассмотрены. 
+
+При использовании этого рецепта сразу же возникает опасение по поводу использования глобальных переменных и отделённости фабричной функции от определения класса. Хороший способ подчистить эти недостатки — это поместить кэширующий код в отдельный управляющий класс и склеить всё вместе:
+```python
+import weakref
+
+class CachedSpamManager:
+	def __init__(self):
+		self._cache = weakref.WeakValueDictionary()
+	def get_spam(self, name):
+		if name not in self._cache:
+			s = Spam(name)
+			self._cache[name] = s
+		else:
+			s = self._cache[name]
+		return s
+
+	def clear(self):
+		self._cache.clear()
+
+class Spam:
+	manager = CachedSpamManager()
+	def __init__(self, name):
+		self.name = name
+
+	def get_spam(name):
+		return Spam.manager.get_spam(name)
+```   
+
+Преимущество такого подхода в потенциальной гибкости. Например, могут быть реализованы различные схемы управления (как отдельные классы) и прикреплены к классу *Spam* как замена реализации кэширования по умолчанию. Никакой другой код (например, *get_spam*) не нужно будет менять, чтобы всё продолжило работать.
+
+Ещё одно сомнение по поводу проектирования в этом случае заключается в том, открывать ли пользователям определение класса. Если вы ничего не предпримете, пользователь сможет легко создавать экземпляры в обход механизма кэширования:
+```python
+>>> a = Spam('foo')
+>>> b = Spam('foo')
+>>> a is b
+False
+>>>
+```
+
+Если для вас важно предотвратить это, вы можете это сделать. Например, вы можете дать классу имя, начинающееся с нижнего подчеркивания, такое как *_Spam*, что по крайней мере сообщит пользователю о нежелательности прямого доступа. 
+
+В качестве альтернативы вы можете дать пользователям ещё более сильный намёк о том, что они не должны создавать экземпляры *Spam*: вы можете заставить метод *__init__()* возбуждать исключение и использовать метод класса в качестве альтернативного конструктора:
+```python
+class Spam:
+	def __init__(self, *args, **kwargs):
+		raise RuntimeError("Can't instantiate directly")
+
+# Alternate constructor
+	@classmethod
+	def _new(cls, name):
+		self = cls.__new__(cls)
+		self.name = name
+```
+
+Далее вы меняете кэширующий код, чтобы использовать *Spam._new()* для создания экземпляров вместо обычного вызова *Spam()*. Например:
+```python
+import weakref
+
+class CachedSpamManager:
+	def __init__(self):
+		self._cache = weakref.WeakValueDictionary()
+	def get_spam(self, name):
+		if name not in self._cache:
+			s = Spam._new(name)			# Modified creation
+			self._cache[name] = s
+		else:
+			s = self._cache[name]
+		return s
+``` 
+
+Хотя есть и более экстремальные меры, которые можно предпринять для скрытия класса *Spam*, но, вероятно, лучше не зацикливаться на этой проблеме. Использования нижнего подчёркивания в имени или определения конструктора как метода класса обычно достаточно, чтобы программисты поняли намёк.
+
+Кэширование и другие паттерны создания часто могут быть реализованы в более элегантной (хотя и более продвинутой) манере — через использование метаклассов. См. **рецепт 9.13.**
+
+
+
+
+
+
+
+
+
 
 
 
