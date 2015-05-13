@@ -161,6 +161,7 @@
 	- 9.7. Принудительная проверка типов в функции с использованием декоратора
 	- 9.8. Определение декораторов как части класса
 	- 9.9. Определение декораторов как классов
+	- 9.10. Применение декораторов к методам класса и статическим методам
 
 <!-- /MarkdownTOC -->
 
@@ -14261,6 +14262,104 @@ def add(x, y):
 2
 >>>
 ```
+
+## 9.10. Применение декораторов к методам класса и статическим методам
+### Задача
+Вы хотите применить декоратор к методу класса или статическому методу.
+
+### Решение
+Применение декораторов к методам класса и статическим методам выполняется как обычно, но нужно убедиться, что ваши декораторы применяются к методам перед *@classmethod* и *@staticmethod*. Например:
+```python
+import time
+from functools import wraps
+
+# A simple decorator
+def timethis(func):
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		start = time.time()
+		r = func(*args, **kwargs)
+		end = time.time()
+		print(end-start)
+		return r
+	return wrapper
+
+# Class illustrating application of the decorator to different kinds of methods
+class Spam:
+	@timethis
+	def instance_method(self, n):
+		print(self, n)
+		while n > 0:
+			n -= 1
+	
+	@classmethod
+	@timethis
+	def class_method(cls, n):
+		print(cls, n)
+		while n > 0:
+			n -= 1
+	
+	@staticmethod
+	@timethis
+	def static_method(n):
+		print(n)
+		while n > 0:
+			n -= 1
+```
+
+Получившиеся метод класса и статический метод должны работать как обычно, но с добавлением дополнительной функциональности:
+```python
+>>> s = Spam()
+>>> s.instance_method(1000000)
+<__main__.Spam object at 0x1006a6050> 1000000
+0.11817407608032227
+>>> Spam.class_method(1000000)
+<class '__main__.Spam'> 1000000
+0.11334395408630371
+>>> Spam.static_method(1000000)
+1000000
+0.11740279197692871
+>>>
+```
+
+### Обсуждение
+Если вы перепутаете порядок применения декораторов, то получите ошибку. Например, если вы сделаете так:
+```python
+class Spam:
+	...
+	@timethis
+	@staticmethod
+	def static_method(n):
+		print(n)
+		while n > 0:
+			n -= 1
+```
+
+...то статический метод вызовет ошибку:
+```python
+>>> Spam.static_method(1000000)
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "timethis.py", line 6, in wrapper
+		start = time.time()
+TypeError: 'staticmethod' object is not callable
+>>>
+```
+
+Проблема в том, что *@classmethod* и *@staticmethod* на самом деле не создают объекты, которые можно вызывать напрямую. Вместо этого они создают специальные объекты дескрипторов, как описано в **рецепте 8.9.** Так что если вы попытаетесь использовать их как функции в другом декораторе, ваш декоратор упадёт с ошибкой. Убедитесь, что эти декораторы идут первыми по порядку в списке декораторов, и это решит проблему.
+
+Есть ситуация, где этот рецепт имеет чрезвычайную важность: при определении классов и статических методов в абстрактных базовых классах, как описано в **рецепте 8.12.** Например, если вы хотите определить метод абстрактного класса, вы можете использовать такой код:
+```python
+from abc import ABCMeta, abstractmethod
+
+class A(metaclass=ABCMeta):
+	@classmethod
+	@abstractmethod
+	def method(cls):
+		pass
+```
+
+В этом фрагменте порядок *@classmethod* и *@abstractmethod* имеет значение. Если вы поменяете местами эти декораторы, всё поломается.
 
 
 
