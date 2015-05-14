@@ -162,6 +162,7 @@
 	- 9.8. Определение декораторов как части класса
 	- 9.9. Определение декораторов как классов
 	- 9.10. Применение декораторов к методам класса и статическим методам
+	- 9.11. Написание декораторов, которые добавляют аргументы обёрнутым функциям
 
 <!-- /MarkdownTOC -->
 
@@ -14360,6 +14361,141 @@ class A(metaclass=ABCMeta):
 ```
 
 В этом фрагменте порядок *@classmethod* и *@abstractmethod* имеет значение. Если вы поменяете местами эти декораторы, всё поломается.
+
+## 9.11. Написание декораторов, которые добавляют аргументы обёрнутым функциям
+### Задача
+Вы хотите написать декоратор, который добавляет дополнительный аргумент в сигнатуру вызова обёртываемой функции. Однако добавленный аргумент не может перекрываться с существующими условиями вызова функции.
+
+### Решение
+Дополнительные аргументы могут быть внедрены в сигнатуру вызова путём использования обязательных именованных аргументов. Рассмотрите такой декоратор:
+```python
+from functools import wraps
+
+def optional_debug(func):
+	@wraps(func)
+	def wrapper(*args, debug=False, **kwargs):
+		if debug:
+			print('Calling', func.__name__)
+		return func(*args, **kwargs)
+	return wrapper
+``` 
+
+Вот пример его работы:
+```python
+>>> @optional_debug
+... def spam(a,b,c):
+... 	print(a,b,c)
+...
+>>> spam(1,2,3)
+1 2 3
+>>> spam(1,2,3, debug=True)
+Calling spam
+1 2 3
+>>>
+```
+
+### Обсуждение
+Добавление аргументов в сигнатуру обёрнутой функции — не самое распространённое применение декораторов. Однако это может оказаться полезным приёмом для избежания некоторых шаблонов повторения кода. Например, если у вас есть такой код:
+```python
+def a(x, debug=False):
+	if debug:
+		print('Calling a')
+	...
+
+def b(x, y, z, debug=False):
+	if debug:
+		print('Calling b')
+	...
+
+def c(x, y, debug=False):
+	if debug:
+		print('Calling c')
+	...
+```
+
+...то вы можете отрефакторить его вот так:
+```python
+@optional_debug
+def a(x):
+	...
+
+@optional_debug
+def b(x, y, z):
+	...
+
+@optional_debug
+def c(x, y):
+	...
+```
+
+Реализация этого рецепта базируется на том факте, что обязательные именованные аргументы легко добавить в функции, которые также принимают параметры \*args и \*\*kwargs. При использовании обязательного именованного аргумента он выделяется в специальный случай и удаляется из последующих вызовов, которые используют только оставшиеся позиционные и именованные аргументы.
+
+Здесь есть хитрость, которая касается потенциального конфликта имён между добавленным аргументом и аргументами оборачиваемой функции. Например, если декоратор *@optional_debug* был применён к функции, которая уже имела аргумент *debug*, тогда всё поломается. Если это вызывает опасения, то можно добавить дополнительную проверку:
+```python
+from functools import wraps
+import inspect
+
+def optional_debug(func):
+	if 'debug' in inspect.getargspec(func).args:
+		raise TypeError('debug argument already defined')
+	
+	@wraps(func)
+	def wrapper(*args, debug=False, **kwargs):
+		if debug:
+			print('Calling', func.__name__)
+		return func(*args, **kwargs)
+	return wrapper
+``` 
+
+Последнее уточнение касается правильного управления сигнатурами функций. Проницательный программист поймёт, что сигнатура обёрнутых функций будет неправильной. Например:
+```python
+>>> @optional_debug
+... def add(x,y):
+...		return x+y
+...
+>>> import inspect
+>>> print(inspect.signature(add))
+(x, y)
+```
+
+Это может быть исправлено с помощью такой модификации:
+```python
+from functools import wraps
+import inspect
+
+def optional_debug(func):
+	if 'debug' in inspect.getargspec(func).args:
+		raise TypeError('debug argument already defined')
+	
+	@wraps(func)
+	def wrapper(*args, debug=False, **kwargs):
+		if debug:
+			print('Calling', func.__name__)
+		return func(*args, **kwargs)
+	
+	sig = inspect.signature(func)
+	parms = list(sig.parameters.values())
+	parms.append(inspect.Parameter('debug',
+									inspect.Parameter.KEYWORD_ONLY,
+									default=False))
+	wrapper.__signature__ = sig.replace(parameters=parms)
+	return wrapper
+```
+
+Теперь сигнатура обёртки будет правильно отражать присутствие аргумента *debug*. Например:
+```python
+>>> @optional_debug
+... def add(x,y):
+... 	return x+y
+>>> print(inspect.signature(add))
+(x, y, *, debug=False)
+>>> add(2,3)
+5
+>>>
+```
+
+Обратитесь к **рецепту 9.16.** за информацией о сигнатурах функций. 
+
 
 
 
