@@ -164,6 +164,8 @@
 	- 9.10. Применение декораторов к методам класса и статическим методам
 	- 9.11. Написание декораторов, которые добавляют аргументы обёрнутым функциям
 	- 9.12. Использование декораторов как патчей определений классов
+	- 9.13. Использование метакласса для управления созданием экземпляров
+	- Обсуждение
 
 <!-- /MarkdownTOC -->
 
@@ -14560,7 +14562,136 @@ class A(LoggedGetattribute):
 
 См. **рецепт 8.13.**, где приведён ещё один пример использования декораторов классов.
 
+## 9.13. Использование метакласса для управления созданием экземпляров
+### Задача
+Вы хотите изменить процесс создания экземпляров с целью реализовать синглтон, кэширование или другие похожие возможности.
 
+### Решение
+Любой Python-разработчик знает, что если определить класс, то можно вызывать его как функцию и создавать экземпляры. Например:
+```python
+class Spam:
+def __init__(self, name):
+	self.name = name
+	a = Spam('Guido')
+	b = Spam('Diana')
+```
+
+Если вы хотите кастомизировать этот шаг, то вы можете определить метакласс и нужным образом заново реализовать его метод *__call__()*. Чтобы проиллюстрировать это, предположим, что вы не хотите никому позволять создавать экземпляры:
+```python
+class NoInstances(type):
+	def __call__(self, *args, **kwargs):
+		raise TypeError("Can't instantiate directly")
+	
+# Example
+class Spam(metaclass=NoInstances):
+	@staticmethod
+	def grok(x):
+		print('Spam.grok')
+```
+
+В этом случае пользователи могут вызвать определённый статический метод, но создать экземпляр обычным путём невозможно. Например:
+```python
+>>> Spam.grok(42)
+Spam.grok
+>>> s = Spam()
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "example1.py", line 7, in __call__
+		raise TypeError("Can't instantiate directly")
+TypeError: Can't instantiate directly
+>>>
+```
+
+А теперь предположим, что вы хотите реализовать синглтон (шаблон проектирования «Одиночка») — класс, из которого можно создать только один экземпляр. Это делается относительно прямолинейно:
+```python
+class Singleton(type):
+	def __init__(self, *args, **kwargs):
+		self.__instance = None
+		super().__init__(*args, **kwargs)
+	
+	def __call__(self, *args, **kwargs):
+		if self.__instance is None:
+			self.__instance = super().__call__(*args, **kwargs)
+			return self.__instance
+		else:
+			return self.__instance
+
+# Example
+class Spam(metaclass=Singleton):
+	def __init__(self):
+		print('Creating Spam')
+``` 
+
+В этом случае будет возможно создание только одного экземпляра. Например:
+```python 
+>>> a = Spam()
+Creating Spam
+>>> b = Spam()
+>>> a is b
+True
+>>> c = Spam()
+>>> a is c
+True
+>>>
+```
+
+И, наконец, предположим, что вы хотите создавать кэшированные экземпляры, как описано в **рецепте 8.25.** Вот метакласс, который это реализует:
+```python
+import weakref
+
+class Cached(type):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.__cache = weakref.WeakValueDictionary()
+	
+	def __call__(self, *args):
+		if args in self.__cache:
+			return self.__cache[args]
+		else:
+			obj = super().__call__(*args)
+			self.__cache[args] = obj
+			return obj
+
+# Example
+class Spam(metaclass=Cached):
+	def __init__(self, name):
+		print('Creating Spam({!r})'.format(name))
+		self.name = name
+```
+
+Вот как это работает:
+```python
+>>> a = Spam('Guido')
+Creating Spam('Guido')
+>>> b = Spam('Diana')
+Creating Spam('Diana')
+>>> c = Spam('Guido') 	# Cached
+>>> a is b
+False
+>>> a is c 				# Cached value returned
+True
+>>>
+```
+## Обсуждение
+Использование метаклассов для реализации различных паттернов создания экземпляров часто может оказаться более элегантным решением, нежели другие подходы, не использующие метаклассы. Если, например, вы не используете метакласс, то вам может оказаться необходимо спрятать классы за какой-то дополнительной фабричной функцией. Чтобы создать синглтон, вам потребуется такой хак:
+```python
+class _Spam:
+	def __init__(self):
+		print('Creating Spam')
+	
+	_spam_instance = None
+	def Spam():
+		global _spam_instance
+		if _spam_instance is not None:
+			return _spam_instance
+		else:
+			_spam_instance = _Spam()
+			return _spam_instance
+``` 
+
+Хотя решение с метаклассами использует намного более продвинутую концепцию, получающийся код будет чище и менее «хакнутым».
+
+См. **рецепт 8.25.**, где приведена информация о создании кэшированных экземпляров, слабых ссылках и прочих деталях.
 
 
 
