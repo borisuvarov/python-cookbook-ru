@@ -166,6 +166,7 @@
 	- 9.12. Использование декораторов как патчей определений классов
 	- 9.13. Использование метакласса для управления созданием экземпляров
 	- Обсуждение
+	- 9.14. Захват порядка определения атрибутов класса
 
 <!-- /MarkdownTOC -->
 
@@ -14693,6 +14694,143 @@ class _Spam:
 
 См. **рецепт 8.25.**, где приведена информация о создании кэшированных экземпляров, слабых ссылках и прочих деталях.
 
+## 9.14. Захват порядка определения атрибутов класса
+### Задача
+Вы хотите автоматически записывать порядок, в котором внутри тела класса определяются атрибуты и методы, что полезно при различных операциях (например, сериалиации, отображении в базы данных и т.п.)
+
+### Решение
+Захват информации о теле определения класса легко реализуется через использование метакласса. Вот пример метакласса, который использует *OrderedDict* для захвата порядка определения дескрипторов:
+```python
+from collections import OrderedDict
+
+# A set of descriptors for various types
+class Typed:
+	_expected_type = type(None)
+	def __init__(self, name=None):
+		self._name = name
+	
+	def __set__(self, instance, value):
+		if not isinstance(value, self._expected_type):
+			raise TypeError('Expected ' + str(self._expected_type))
+		instance.__dict__[self._name] = value
+	
+class Integer(Typed):
+	_expected_type = int
+
+class Float(Typed):
+	_expected_type = float
+
+class String(Typed):
+	_expected_type = str
+
+# Metaclass that uses an OrderedDict for class body
+class OrderedMeta(type):
+	def __new__(cls, clsname, bases, clsdict):
+		d = dict(clsdict)
+		order = []
+		for name, value in clsdict.items():
+			if isinstance(value, Typed):
+				value._name = name
+				order.append(name)
+		d['_order'] = order
+		return type.__new__(cls, clsname, bases, d)
+
+	@classmethod
+	def __prepare__(cls, clsname, bases):
+		return OrderedDict()
+``` 
+
+В этом метаклассе порядок определения дескрипторов захватывается путём использования *OrderedDict* при выполнении тела класса. Получившийся порядок имён затем извлекается из словаря и сохраняется в атрибуте класса *_order*. Далее он может быть использован методами класса самыми разнообразными способами. Например, вот простой класс, который использует эту информацию о порядке для реализации метода для сериализации данных экземпляра в строчки CSV-данных:
+```python
+class Structure(metaclass=OrderedMeta):
+	def as_csv(self):
+		return ','.join(str(getattr(self,name)) for name in self._order)
+
+# Example use
+class Stock(Structure):
+	name = String()
+	shares = Integer()
+	price = Float()
+	def __init__(self, name, shares, price):
+		self.name = name
+		self.shares = shares
+		self.price = price
+```
+
+Вот как работает этот класс *Stock*:
+```python
+>>> s = Stock('GOOG',100,490.1)
+>>> s.name
+'GOOG'
+>>> s.as_csv()
+'GOOG,100,490.1'
+>>> t = Stock('AAPL','a lot', 610.23)
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "dupmethod.py", line 34, in __init__
+TypeError: shares expects <class 'int'>
+>>>
+``` 
+
+### Обсуждение
+Краеугольный камень этого рецепта — метод *__prepare__()*, который определён в метаклассе *OrderedMeta*. Этот метод немедленно вызывается при старте определения класса вместе с именем класса и базовыми классами. Он должен вернуть объект отображения для использования во время выполнения тела класса. Путём возвращения *OrderedDict* вместо обычного словаря порядок определения легко захватить и сохранить.
+
+Возможно дополнительно расширить эту функциональность — если вы хотите сделать свои собственные «словареподобные» объекты. Например, рассмотрите такой вариант решения, которое отвергает дублирующиеся определения:
+```python
+from collections import OrderedDict
+
+class NoDupOrderedDict(OrderedDict):
+	def __init__(self, clsname):
+		self.clsname = clsname
+		super().__init__()
+	def __setitem__(self, name, value):
+		if name in self:
+			raise TypeError('{} already defined in {}'.format(name, self.clsname))
+		super().__setitem__(name, value)
+
+class OrderedMeta(type):
+	def __new__(cls, clsname, bases, clsdict):
+		d = dict(clsdict)
+		d['_order'] = [name for name in clsdict if name[0] != '_']
+		return type.__new__(cls, clsname, bases, d)
+	
+	@classmethod
+	def __prepare__(cls, clsname, bases):
+		return NoDupOrderedDict(clsname)
+``` 
+
+Вот что произойдет, если вы используете этот метакласс и создадите класс с дублирующимися записями:
+```python
+>>> class A(metaclass=OrderedMeta):
+...
+def spam(self):
+...
+pass
+...
+def spam(self):
+...
+pass
+...
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "<stdin>", line 4, in A
+	File "dupmethod2.py", line 25, in __setitem__
+		(name, self.clsname))
+TypeError: spam already defined in A
+>>>
+```
+
+Последний важный аспект этого рецепта касается обращения с модифицированным словарём в методе метакласса *__new__()*. Хотя класс определён с использованием альтернативного словаря, вы всё равно должны преобразовать этот словарь в правильный экземпляр *dict* при создании конечного объекта класса. В этом назначение инструкции *d = dict(clsdict)*. 
+
+Возможность захвата порядка определения — тонкость, которая весьма важна для некоторых приложений. Например, в реализации объектно-реляционного отображения классы могут быть написаны в стиле, который похож на показанный в примере:
+```python
+class Stock(Model):
+	name = String()
+	shares = Integer()
+	price = Float()
+```
+
+Под капотом код может пожелать захватить порядок определения, чтобы отобразить объекты на кортежи или строки в таблице базы данных (похожим образом работает метод *as_csv()* в примере). Показанное решение весьма бесхитростно и чаще будет проще альтернатив (обычно это поддержание скрытых счётчиков в классах-дескрипторах).
 
 
 
