@@ -168,6 +168,7 @@
 	- Обсуждение
 	- 9.14. Захват порядка определения атрибутов класса
 	- 9.15. Определение метакласса, принимающего необязательные аргументы
+	- 9.16. Принудительная установка аргументной сигнатуры при использовании \*args и \*\*kwargs
 
 <!-- /MarkdownTOC -->
 
@@ -14898,5 +14899,150 @@ class Spam(metaclass=MyMeta):
 
 Преимущество предоставления таких параметров как аргументов в том, что они не загрязняют пространство имён класса дополнительнымии именами, которые имеют отношение только к созданию класса, а не к последующему выполнению инструкций в классе. Также они доступны методу *__prepare__()*, который запускается до начала обработки любой инструкции в теле класса. Переменные класса, с другой стороны, будут доступны только в методах метакласса *__new__()* и *__init__()*.
 
+
+## 9.16. Принудительная установка аргументной сигнатуры при использовании \*args и \*\*kwargs
+### Задача
+Вы написали функцию или метод, который использует \*args и \*\*kwargs, чтобы обеспечить максимально общее назначение, но вы также хотели бы иметь возможность проверять передаваемые аргументы, чтобы убедиться, что они совпадают с определённой сигнатурой вызова функции.
+
+### Решение
+Для любой задачи, где вы хотите манипулировать сигнатурами вызова функций, вы должны использовать связанные с сигнатурами возможности из модуля inspect. Особенный интерес представляют два класса — *Signature* и *Parameter*. Вот интерактивный пример создания сигнатуры функции:
+```python
+>>> from inspect import Signature, Parameter
+>>> # Make a signature for a func(x, y=42, *, z=None)
+>>> parms = [ Parameter('x', Parameter.POSITIONAL_OR_KEYWORD),
+... 		  Parameter('y', Parameter.POSITIONAL_OR_KEYWORD, default=42),
+... 		  Parameter('z', Parameter.KEYWORD_ONLY, default=None) ]
+>>> sig = Signature(parms)
+>>> print(sig)
+y=42, *, z=None)
+>>> 
+```
+
+Когда вы получаете объект сигнатуры, вы легко можете связать его с \*args и \*\*kwargs, используя метод сигнатур *bind()*, как показано в этом простом примере:
+```python
+>>> def func(*args, **kwargs):
+...		bound_values = sig.bind(*args, **kwargs)
+...		for name, value in bound_values.arguments.items():
+...			print(name,value)
+...
+>>> # Try various examples
+>>> func(1, 2, z=3)
+x 1
+y 2
+z 3
+>>> func(1)
+x 1
+>>> func(1, z=3)
+x 1
+z 3
+>>> func(y=2, x=1)
+x 1
+y 2
+>>> func(1, 2, 3, 4)
+Traceback (most recent call last):
+...
+	File "/usr/local/lib/python3.3/inspect.py", line 1972, in _bind
+		raise TypeError('too many positional arguments')
+TypeError: too many positional arguments
+>>> func(y=2)
+Traceback (most recent call last):
+...
+	File "/usr/local/lib/python3.3/inspect.py", line 1961, in _bind
+		raise TypeError(msg) from None
+TypeError: 'x' parameter lacking default value
+>>> func(1, y=2, x=3)
+Traceback (most recent call last):
+...
+	File "/usr/local/lib/python3.3/inspect.py", line 1985, in _bind
+		'{arg!r}'.format(arg=param.name))
+TypeError: multiple values for argument 'x'
+>>>
+```
+
+Как вы можете видеть, привязка сигнатуры к передаваемым аргументам обеспечивает принудительное выполнение всех обычных правил вызова функции, касающихся требуемых аргументов, значений по умолчанию, дубликатов и т.д.
+
+Вот более конкретный пример принудительного использования сигнатур функций. В этом коде базовый класс определяет *__init__()* максимально широкого назначения, но подклассы должны предоставить ожидаемую сигнатуру.
+```python
+from inspect import Signature, Parameter
+
+def make_sig(*names):
+	parms = [Parameter(name, Parameter.POSITIONAL_OR_KEYWORD)
+			 for name in names]
+	return Signature(parms)
+
+class Structure:
+	__signature__ = make_sig()
+	def __init__(self, *args, **kwargs):
+		bound_values = self.__signature__.bind(*args, **kwargs)
+		for name, value in bound_values.arguments.items():
+			setattr(self, name, value)
+
+# Example use
+class Stock(Structure):
+	__signature__ = make_sig('name', 'shares', 'price')
+
+class Point(Structure):
+	__signature__ = make_sig('x', 'y')
+
+``` 
+
+Вот пример работы класса *Stock*:
+```python
+>>> import inspect
+>>> print(inspect.signature(Stock))
+(name, shares, price)
+>>> s1 = Stock('ACME', 100, 490.1)
+>>> s2 = Stock('ACME', 100)
+Traceback (most recent call last):
+...
+TypeError: 'price' parameter lacking default value
+>>> s3 = Stock('ACME', 100, 490.1, shares=50)
+Traceback (most recent call last):
+...
+TypeError: multiple values for argument 'shares'
+>>>
+```
+
+### Обсуждение
+Использование функций с \*args и \*\*kwargs очень распространено при создании библиотек общего назначения, написании декораторов или реализации прокси. Однако одним из недостатков таких функций будет то, что если вы захотите реализовать собственную проверку аргументов, всё быстро превратиться в нераспутываемый беспорядок. В качестве примера см. **рецепт 8.11.** Использование объекта сигнатуры это упрощает.
+
+В последнем примере этого решения имеет смысл создать объекты сигнатур через использование кастомных метаклассов. Вот альтернативная реализация, которая показывает, как это сделать:
+```python
+from inspect import Signature, Parameter
+
+def make_sig(*names):
+	parms = [Parameter(name, Parameter.POSITIONAL_OR_KEYWORD)
+			 for name in names]
+	return Signature(parms)
+
+class StructureMeta(type):
+	def __new__(cls, clsname, bases, clsdict):
+		clsdict['__signature__'] = make_sig(*clsdict.get('_fields',[]))
+		return super().__new__(cls, clsname, bases, clsdict)
+
+class Structure(metaclass=StructureMeta):
+	_fields = []
+	def __init__(self, *args, **kwargs):
+		bound_values = self.__signature__.bind(*args, **kwargs)
+		for name, value in bound_values.arguments.items():
+			setattr(self, name, value)
+
+# Example
+class Stock(Structure):
+	_fields = ['name', 'shares', 'price']
+
+class Point(Structure):
+	_fields = ['x', 'y']
+```
+
+При определении собственных сигнатур часто бывает полезно сохранить сигнатуру в специальном атрибуте *__signature__*, как показано выше. Если вы сделаете это, то код, использующий модуль *inspect* для интроспекции, увидит сигнатуру и сообщит о ней как об условии вызова. Например:
+```python
+>>> import inspect
+>>> print(inspect.signature(Stock))
+(name, shares, price)
+>>> print(inspect.signature(Point))
+(x, y)
+>>>
+```
 
 
