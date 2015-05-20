@@ -172,6 +172,7 @@
 	- 9.17. Принуждение к использованию соглашений о кодировании в классах
 	- 9.18. Программное определение классов
 	- 9.19. Инициализация членов класса во время определения
+	- 9.20. Реализация множественной диспетчеризации с помощью аннотаций функций
 
 <!-- /MarkdownTOC -->
 
@@ -15388,6 +15389,290 @@ s = Stock(('ACME', 50, 91.1)) 		# Error
 
 [PEP 422](http://www.python.org/dev/peps/pep-0422) может предоставить дополнительные средства для решения поставленной в этом рецепте задачи. Однако на момент написания книги он не был внедрён (прим. пер. — на момент перевода предложение отозвано).
 
+## 9.20. Реализация множественной диспетчеризации с помощью аннотаций функций
+### Задача
+Вы узнали об аннотациях аргументов функций и задумались, нельзя ли использовать их для реализации множественной диспетчеризации (перегрузки методов) на основе типов. Однако вы не уверены, что тут нужно использовать (и хорошая ли это идея в принципе).
 
+### Решение
+Этот рецепт базируется на простом наблюдении — поскольку Python позволяет аннотировать аргументы, то можно написать такой код:
+```python
+class Spam:
+	def bar(self, x:int, y:int):
+		print('Bar 1:', x, y)
+	def bar(self, s:str, n:int = 0):
+		print('Bar 2:', s, n)
+
+s = Spam()
+s.bar(2, 3) 		# Prints Bar 1: 2 3
+s.bar('hello')		# Prints Bar 2: hello 0
+```
+
+Вот начало решения, которое делает то же самое, но с использованием комбинации метакласов и дескрипторов:
+```python
+# multiple.py
+import inspect
+import types
+
+class MultiMethod:
+	'''
+	Represents a single multimethod.
+	'''
+	def __init__(self, name):
+	self._methods = {}
+	self.__name__ = name
+
+	def register(self, meth):
+		'''
+		Register a new method as a multimethod
+		'''
+		sig = inspect.signature(meth)
+
+		# Build a type signature from the method's annotations
+		types = []
+		for name, parm in sig.parameters.items():
+			if name == 'self':
+				continue
+			if parm.annotation is inspect.Parameter.empty:
+				raise TypeError(
+					'Argument {} must be annotated with a type'.format(name)
+				)
+			if not isinstance(parm.annotation, type):
+				raise TypeError(
+						'Argument {} annotation must be a type'.format(name)
+				)
+			if parm.default is not inspect.Parameter.empty:
+				self._methods[tuple(types)] = meth
+			types.append(parm.annotation)
+		
+		self._methods[tuple(types)] = meth
+	
+	def __call__(self, *args):
+		'''
+		Call a method based on type signature of the arguments
+		'''
+		types = tuple(type(arg) for arg in args[1:])
+		meth = self._methods.get(types, None)
+		if meth:
+			return meth(*args)
+		else:
+			raise TypeError('No matching method for types {}'.format(types))
+		
+	def __get__(self, instance, cls):
+		'''
+		Descriptor method needed to make calls work in a class
+		'''
+		if instance is not None:
+			return types.MethodType(self, instance)
+		else:
+			return self
+
+class MultiDict(dict):
+	'''
+	Special dictionary to build multimethods in a metaclass
+	'''
+	def __setitem__(self, key, value):
+		if key in self:
+			# If key already exists, it must be a multimethod or callable
+			current_value = self[key]
+			if isinstance(current_value, MultiMethod):
+				current_value.register(value)
+			else:
+				mvalue = MultiMethod(key)
+				mvalue.register(current_value)
+				mvalue.register(value)
+				super().__setitem__(key, mvalue)
+		else:
+			super().__setitem__(key, value)
+
+class MultipleMeta(type):
+	'''
+	Metaclass that allows multiple dispatch of methods
+	'''
+	def __new__(cls, clsname, bases, clsdict):
+		return type.__new__(cls, clsname, bases, dict(clsdict))
+
+	@classmethod
+	def __prepare__(cls, clsname, bases):
+		return MultiDict()
+```
+
+Чтобы использовать этот класс, напишите такой код:
+```python
+class Spam(metaclass=MultipleMeta):
+	def bar(self, x:int, y:int):
+		print('Bar 1:', x, y)
+	def bar(self, s:str, n:int = 0):
+		print('Bar 2:', s, n)
+
+# Example: overloaded __init__
+import time
+class Date(metaclass=MultipleMeta):
+	def __init__(self, year: int, month:int, day:int):
+		self.year = year
+		self.month = month
+		self.day = day
+	def __init__(self):
+		t = time.localtime()
+		self.__init__(t.tm_year, t.tm_mon, t.tm_mday)
+```
+
+Вот интерактивный сеанс, в котором мы проверяем, что всё работает:
+```python
+>>> s = Spam()
+>>> s.bar(2, 3)
+Bar 1: 2 3
+>>> s.bar('hello')
+Bar 2: hello 0
+>>> s.bar('hello', 5)
+Bar 2: hello 5
+>>> s.bar(2, 'hello')
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "multiple.py", line 42, in __call__
+		raise TypeError('No matching method for types {}'.format(types))
+TypeError: No matching method for types (<class 'int'>, <class 'str'>)
+>>> # Overloaded __init__
+>>> d = Date(2012, 12, 21)
+>>> # Get today's date
+>>> e = Date()
+>>> e.year
+2012
+>>> e.month
+12
+>>> e.day
+3
+>>>
+```
+
+### Обсуждение
+Если честно, то в этом рецепте слишком много магии, чтобы применять его  в реальном мире. Однако он позволяет погрузиться во внутреннюю работу метаклассов и дескрипторов, улучшая ваше понимание этих концепций. Так что если вы и не будете применять этот рецепт напрямую, многие его идеи могут повлиять на другие приёмы программирования, использующие метаклассы, дескрипторы и аннотации функций. 
+
+Основная идея этой реализации относительно проста. Метакласс *MultipleMeta* использует свой метод *__prepare__()*, чтобы предоставить кастомный словарь класса как экземпляр *MultiDict*. В отличие от обычного словаря, *MultiDict* во время установки значений проверяет, существуют ли уже эти записи. Если они уже существуют, дублированные записи сливаются вместе внутри экземпляра *MultiMethod*.
+
+Экземпляры *MultiMethod* собирают методы путём построения отображения из сигнатур типов в функции. Во время создания аннотации функции используются для сбора этих сигнатур и построения отображения. Это происходит в методе *MultiMethod.register()*. Важнейший аспект этого рецепта заключается в том, что для мультиметодов типы должны быть определены на всех аргумента, иначе возникнет ошибка.
+
+Чтобы заставить экземпляры *MultiMethod* эмулировать поведение вызываемого объекта, в них реализован метод *__call__()*. Этот метод строит кортеж типов из всех аргументов, за исключением *self*, ищет метод во внутреннем отображении и вызывает подходящий метод. Метод *__get__()* нужен, чтобы заставить экземпляры *MultiMethod* правильно работать внутри определений классов. В данной реализации он был использован для создания правильных связанных методов. Например:
+```python
+>>> b = s.bar
+>>> b
+<bound method Spam.bar of <__main__.Spam object at 0x1006a46d0>>
+>>> b.__self__
+<__main__.Spam object at 0x1006a46d0>
+>>> b.__func__
+<__main__.MultiMethod object at 0x1006a4d50>
+>>> b(2, 3)
+Bar 1: 2 3
+>>> b('hello')
+Bar 2: hello 0
+>>>
+``` 
+
+Будьте уверены, в этом рецепте много «движущихся частей». Однако это не спасает от большого количества ограничений. Например, это решение не работает с именованными аргументами:
+```python
+>>> s.bar(x=2, y=3)
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+TypeError: __call__() got an unexpected keyword argument 'y'
+>>> s.bar(s='hello')
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+TypeError: __call__() got an unexpected keyword argument 's'
+>>>
+```
+
+Способ добавить поддержку, возможно, нашёлся бы, но он потребовал бы полностью другого подхода к отображению методов. Проблема в том, что именованные аргументы не поставляются в каком-то конкретном порядке. При смешивании с позиционными аргументами вы получите перемешанную кучу, которую вы как-то должны будете отсортировать в методе *__call__()*.
+
+Этот рецепт также серьёзно ограничен в том, что касается поддержки наследования. Например, что-то такое работать не будет:
+```python
+class A:
+	pass
+
+class B(A):
+	pass
+
+class C:
+	pass
+
+class Spam(metaclass=MultipleMeta):
+	def foo(self, x:A):
+		print('Foo 1:', x)
+	def foo(self, x:C):
+		print('Foo 2:', x)
+```
+
+Причина, по которой всё ломается, такова: аннотация *x:A* не совпадает с экземплярами, которые являются подклассами (такими как экземпляры B). Например:
+```python
+>>> s = Spam()
+>>> a = A()
+>>> s.foo(a)
+Foo 1: <__main__.A object at 0x1006a5310>
+>>> c = C()
+>>> s.foo(c)
+Foo 2: <__main__.C object at 0x1007a1910>
+>>> b = B()
+>>> s.foo(b)
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "multiple.py", line 44, in __call__
+		raise TypeError('No matching method for types {}'.format(types))
+TypeError: No matching method for types (<class '__main__.B'>,)
+>>>
+```
+
+В качестве альтернативы использованию метаклассов и аннотаций можно реализовать похожий рецепт, использующий декораторы. Например:
+```python
+import types
+
+class multimethod:
+	def __init__(self, func):
+		self._methods = {}
+		self.__name__ = func.__name__
+		self._default = func
+
+	def match(self, *types):
+		def register(func):
+			ndefaults = len(func.__defaults__) if func.__defaults__ else 0
+			for n in range(ndefaults+1):
+				self._methods[types[:len(types) - n]] = func
+			return self
+		return register
+
+	def __call__(self, *args):
+		types = tuple(type(arg) for arg in args[1:])
+		meth = self._methods.get(types, None)
+		if meth:
+			return meth(*args)
+		else:
+			return self._default(*args)
+
+	def __get__(self, instance, cls):
+		if instance is not None:
+			return types.MethodType(self, instance)
+		else:
+			return self
+```
+
+Чтобы использовать версию на базе декораторов, напишите такой код:
+```python
+class Spam:
+	@multimethod
+	def bar(self, *args):
+		# Default method called if no match
+		raise TypeError('No matching method for bar')
+	
+	@bar.match(int, int)
+	def bar(self, x, y):
+		print('Bar 1:', x, y)
+	
+	@bar.match(str, int)
+	def bar(self, s, n = 0):
+		print('Bar 2:', s, n)
+```
+
+Решение на базе декораторов страдает от тех же ограничений, что и предыдущая реализация (от отсутствия поддержки именованных аргументов и поломанного наследования).
+
+При прочих равных, вероятно, лучше держаться подальше от множественной диспетчеризации в коде общего назначения. Существуют особые ситуации, где это может иметь смысл, такие как программы, где диспетчеризация методов базируется на каком-то сопоставлении с образцом (pattern matching). Например, описанный в **рецепте 8.21.** шаблон проектирования «посетитель» может быть преобразован в класс, который неким образом использует множественную диспетчеризацию. Однако никогда не будет дурной идеей остановиться на более простом подходе (просто использовать методы с разными именами).
+
+Идеи, касающиеся различных способов реализации множественной диспетчеризации, бродят в сообществе Python уже много лет. Достойной стартовой точкой для вхождения в курс этой дискуссии станет пост Гвидо ван Россума «[Мультиметоды в Python за пять минут](http://www.artima.com/weblogs/viewpost.jsp?thread=101605)».
 
 
