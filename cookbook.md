@@ -170,6 +170,7 @@
 	- 9.15. Определение метакласса, принимающего необязательные аргументы
 	- 9.16. Принудительная установка аргументной сигнатуры при использовании \*args и \*\*kwargs
 	- 9.17. Принуждение к использованию соглашений о кодировании в классах
+	- 9.18. Программное определение классов
 
 <!-- /MarkdownTOC -->
 
@@ -15164,10 +15165,157 @@ WARNING:root:Signature mismatch in B.foo. (self, x, y) != (self, a, b)
 
 Последний пример также иллюстрирует использование объекта сигнатуры функции Python. Метакласс принимает каждое определение вызываемого объекта в классе, ищет предыдущее определение в иерархии (если оно есть), а затем просто сравнивает их сигнатуры вызова, используя *inspect.signature()*.
 
-И последнее: строчка кода, которая использует *super(self, self)*, не является опечаткой. При работе с метаклассом важно понимать, что *self* — это объект класса. Так что объявление на самом деле используется для поиска определений, размещённых выше в классовой иерархии, которые соответствуют родителям *self*. (So, that statement is actually being used to find definitions located further up the class hierarchy that make up the parents of self).
+И последнее: строчка кода, которая использует *super(self, self)*, не является опечаткой. При работе с метаклассом важно понимать, что *self* — это объект класса. Так что это объявление на самом деле используется для поиска определений, размещённых выше в классовой иерархии, которые соответствуют родителям *self*. (So, that statement is actually being used to find definitions located further up the class hierarchy that make up the parents of self).
 
+## 9.18. Программное определение классов
+### Задача
+Вы пишете код, от которого требуется создать новый объект класса. Вы подумываете о том, чтобы отправить исходный код класса в строковом формате в функцию *exec()* для выполнения, но предпочли бы более элегантное решение.
 
+### Решение
+Вы можете использовать функцию *types.new_class()* для создания новых объектов классов. Вам нужно предоставить ей имя класса, кортеж с родительскими классами, именованные аргументы и функцию обратного вызова (коллбэк), который заполнит словарь класса элементами. Например:
+```python
+# stock.py
+# Example of making a class manually from parts
 
+# Methods
+def __init__(self, name, shares, price):
+	self.name = name
+	self.shares = shares
+	self.price = price
+
+def cost(self):
+	return self.shares * self.price
+
+cls_dict = {
+'__init__' : __init__,
+'cost' : cost,
+}
+
+# Make a class
+import types
+
+Stock = types.new_class('Stock', (), {}, lambda ns: ns.update(cls_dict))
+Stock.__module__ = __name__
+``` 
+
+Это создаст обычный объект класса, который работает именно так, как ожидается:
+```python
+>>> s = Stock('ACME', 50, 91.1)
+>>> s
+<stock.Stock object at 0x1006a9b10>
+>>> s.cost()
+4555.0
+>>>
+```
+
+В решении есть тонкий аспект — присваивание *Stock.__module__* после вызова *types.new_class()*. Когда класс определён, атрибут *__module__* содержит имя модуля, в котором он был определён. Это имя используется для вывода, который производят методы типа *__repr__()*. Оно также используется различными библиотеками, такими как *pickle*. Так что если вы хотите, чтобы созданный класс был «настоящим», убедитесь, что этот атрибут установлен правильно.
+
+Если класс, который вы хотите создать, использует метаклассы, это может быть определено в третьем аргументе, передаваемом в *types.new_class()*. Например:
+```python
+>>> import abc
+>>> Stock = types.new_class('Stock', (), {'metaclass': abc.ABCMeta},
+...							 lambda ns: ns.update(cls_dict))
+...
+>>> Stock.__module__ = __name__
+>>> Stock
+<class '__main__.Stock'>
+>>> type(Stock)
+<class 'abc.ABCMeta'>
+>>>
+```
+
+Третий аргумент также может содержать другие именованные аргументы. Например, такое определение класса:
+```python
+class Spam(Base, debug=True, typecheck=False):
+	...
+```
+
+...аналогично такому вызову *new_class()*:
+```python
+Spam = types.new_class('Spam', (Base,),
+					  {'debug': True, 'typecheck': False},
+			    	  lambda ns: ns.update(cls_dict))
+```
+
+Четвёртый аргумент *new_class()* — самый загадочный. Это функция, которая принимает на вход объект отображения, который используется для хранения пространства имён класса. Обычно это словарь, но на самом деле это объект, который возвращается методом *__prepare__()*, как описано в **рецепте 9.14.** Эта функция должна добавить новые записи к пространству имён, используя метод *update()* (как показано) или другие операции над объектами отображений.
+
+### Обсуждение
+Умение создавать классы таким образом может быть весьма полезно в некоторых обстоятельствах. Один из наиболее знакомых разработчикам примеров — использование функции *collections.namedtuple()*. Например:
+```python
+>>> Stock = collections.namedtuple('Stock', ['name', 'shares', 'price'])
+>>> Stock
+<class '__main__.Stock'>
+>>>
+```
+
+*namedtuple()* использует *exec()* вместо показанного в решении приёма. Однако есть простой вариант, который создает класс напрямую:
+```python
+import operator
+import types
+import sys
+
+def named_tuple(classname, fieldnames):
+	# Populate a dictionary of field property accessors
+	cls_dict = { name: property(operator.itemgetter(n))
+				 for n, name in enumerate(fieldnames) }
+
+	# Make a __new__ function and add to the class dict
+	def __new__(cls, *args):
+		if len(args) != len(fieldnames):
+			raise TypeError('Expected {} arguments'.format(len(fieldnames)))
+		return tuple.__new__(cls, args)
+	
+	cls_dict['__new__'] = __new__
+	
+	# Make the class
+	cls = types.new_class(classname, (tuple,), {},
+						  lambda ns: ns.update(cls_dict))
+	
+	# Set the module to that of the caller
+	cls.__module__ = sys._getframe(1).f_globals['__name__']
+	return cls
+```
+
+В последней части этого кода используется так называемый «фреймхак», который применяет *sys._getframe()* для получения имени модуля вызывавшего. Ещё один пример фреймхака показан в **рецепте 2.15.**
+
+Следующий пример показывает работу этого кода:
+```python
+>>> Point = named_tuple('Point', ['x', 'y'])
+>>> Point
+<class '__main__.Point'>
+>>> p = Point(4, 5)
+>>> len(p)
+2
+>>> p.x
+4
+>>> p.y
+5
+>>> p.x = 2
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+AttributeError: can't set attribute
+>>> print('%s %s' % p)
+4 5
+>>>
+```
+
+Важный аспект использованного в этом приёме рецепта — правильная поддержка метаклассов. Вы можете подумывать о создании класса напрямую путём прямого создания экземпляра метакласса. Например:
+```python
+Stock = type('Stock', (), cls_dict)
+```
+
+Проблема такого подхода заключается в том, что он пропускает некоторые критически важные шаги, такие как вызов метода метакласса *__prepare__()*. А вот *types.new_class()* позволяет удостовериться, что все необходимые шаги инициализации будут произведены. Например, функция обратного вызова, которая передается как четвёртый аргумент в *types.new_class()*, принимает объект отображения, который возвращается методом *__prepare__()*. 
+
+Если вы всего лишь хотите выполнить подготовительный шаг, используйте *types.prepare_class()*. Например:
+```python
+import types
+
+metaclass, kwargs, ns = types.prepare_class('Stock', (), {'metaclass': type})
+```
+
+Этот код обнаруживает подходящий метакласс и вызывает его метод *__prepare__()*. В результе возвращаются метакласс, оставшиеся именованные аргументы и подготовленное пространство имён.  
+
+За дополнительной информацией обратитесь к [PEP 3115](http://www.python.org/dev/peps/pep-3115), а также [документации Python](http://docs.python.org/3/reference/datamodel.html#metaclasses).
 
 
 
