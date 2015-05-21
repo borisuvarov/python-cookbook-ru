@@ -177,6 +177,7 @@
 	- 9.22. Лёгкий способ определения менеджеров контекста
 	- 9.23. Выполнение кода с локальными побочными эффектами
 	- 9.24. Парсинг и анализ исходного кода Python
+	- 9.25. Дизассемблирование байт-кода Python
 
 <!-- /MarkdownTOC -->
 
@@ -16144,6 +16145,153 @@ def countdown(n):
 Но должны ли вы применить этот декоратор ко всем своим функциям? Скорее всего, нет. Однако это хороший пример весьма продвинутых штук, которые доступны через манипуляции AST, исходным кодом и прочие подобные приёмы.
 
 Этот рецепт был вдохновлён похожим рецептом от [ActiveState](http://code.activestate.com/recipes/277940-decorator-for-bindingconstants-at-compile-time), который работает, опираясь на манипуляции исходным кодом Python. Работа с AST — это высокоуровневый подход, который мог бы быть немного прямолинейнее. См. следующий рецепт, в котором приведены сведения о байт-коде.
+
+## 9.25. Дизассемблирование байт-кода Python
+### Задача
+Вы хотите узнать в подробностях, что ваш код делает «под капотом» путём дизассемблирования его в низкоуровневый байт-код, используя интерпретатор.
+
+### Решение
+Модуль *dis* можно использовать для вывода результата дизассемблирования любой функции Python. Например:
+```python
+>>> def countdown(n):
+... while n > 0:
+... 	print('T-minus', n)
+...		n -= 1
+...	print('Blastoff!')
+...
+>>> import dis
+>>> dis.dis(countdown)
+2		0 SETUP_LOOP				39 (to 42)
+	>>	3 LOAD_FAST					0 (n)
+		6 LOAD_CONST   				1 (0)
+		9 COMPARE_OP				4 (>)
+		12 POP_JUMP_IF_FALSE	   41
+
+3		15 LOAD_GLOBAL				0 (print)
+		18 LOAD_CONST				2 ('T-minus')
+		21 LOAD_FAST				0 (n)
+		24 CALL_FUNCTION			2 (2 positional, 0 keyword pair)
+		27 POP_TOP	
+
+4 		28 LOAD_FAST				0 (n)
+		31 LOAD_CONST				3 (1)
+		34 INPLACE_SUBTRACT			
+		35 STORE_FAST				0 (n)
+		38 JUMP_ABSOLUTE			3
+	>>	41 POP_BLOCK
+
+5	>>	LOAD_GLOBAL 				0 (print)
+		LOAD_CONST					4 ('Blastoff!')
+		CALL_FUNCTION				1 (1 positional, 0 keyword pair)
+		POP_TOP
+		LOAD_CONST					0 (None)
+		RETURN_VALUE
+>>>
+``` 
+
+### Обсуждение
+Модуль *dis* может быть полезен, если вам когда-либо потребуется изучить, что происходит в ваших программах на очень низком уровне (например, если вы пытаетесь разобраться в характеристиках производительности). 
+
+Сырой байт-код, интепретируемый функцией *dis()*, доступен в функциях:
+```python
+>>> countdown.__code__.co_code
+b"x'\x00|\x00\x00d\x01\x00k\x04\x00r)\x00t\x00\x00d\x02\x00|\x00\x00\x83
+\x02\x00\x01|\x00\x00d\x03\x008}\x00\x00q\x03\x00Wt\x00\x00d\x04\x00\x83
+\x01\x00\x01d\x00\x00S"
+>>>
+```
+
+Если вы захотите интерпретировать этот код самостоятельно, вам понадобятся некоторые из констант, определённых в модуле *opcode*. Например:
+```python
+>>> c = countdown.__code__.co_code
+>>> import opcode
+>>> opcode.opname[c[0]]
+>>> opcode.opname[c[0]]
+'SETUP_LOOP'
+>>> opcode.opname[c[3]]
+'LOAD_FAST'
+>>>
+```
+
+Забавно, но в модуле *dis* нет функции, которая облегчила бы вам программную обработку байт-кода. Однако эта функция-генератор примет сырую последовательность байт-кода и превратит её в опкоды (коды операций) и аргументы:
+```python
+import opcode
+
+def generate_opcodes(codebytes):
+	extended_arg = 0
+	i = 0
+	n = len(codebytes)
+	while i < n:
+		op = codebytes[i]
+		i += 1
+		if op >= opcode.HAVE_ARGUMENT:
+			oparg = codebytes[i] + codebytes[i+1]*256 + extended_arg
+			extended_arg = 0
+			i += 2
+			if op == opcode.EXTENDED_ARG:
+				extended_arg = oparg * 65536
+				continue
+		else:
+			oparg = None
+	yield (op, oparg)
+```
+
+Чтобы использовать эту функцию, напишите такой код:
+```python
+>>> for op, oparg in generate_opcodes(countdown.__code__.co_code):
+...		print(op, opcode.opname[op], oparg)
+...
+120 SETUP_LOOP 39
+124 LOAD_FAST 0
+100 LOAD_CONST 1
+107 COMPARE_OP 4
+114 POP_JUMP_IF_FALSE 41
+116 LOAD_GLOBAL 0
+100 LOAD_CONST 2
+124 LOAD_FAST 0
+131 CALL_FUNCTION 2
+1 POP_TOP None
+124 LOAD_FAST 0
+100 LOAD_CONST 3
+56 INPLACE_SUBTRACT None
+125 STORE_FAST 0
+113 JUMP_ABSOLUTE 3
+87 POP_BLOCK None
+116 LOAD_GLOBAL 0
+100 LOAD_CONST 4
+131 CALL_FUNCTION 1
+1 POP_TOP None
+100 LOAD_CONST 0
+83 RETURN_VALUE None
+>>>
+```
+
+Это малоизвестный факт, но вы можете заменить сырой байт-код любой функции, какой пожелаете. Это требует некоторых усилий, но вот пример того, как это работает:
+```python
+>>> def add(x, y):
+...		return x + y
+...
+>>> c = add.__code__
+>>> c
+<code object add at 0x1007beed0, file "<stdin>", line 1>
+>>> c.co_code
+b'|\x00\x00|\x01\x00\x17S'
+>>>
+>>> # Make a completely new code object with bogus byte code
+>>> import types
+>>> newbytecode = b'xxxxxxx'
+>>> nc = types.CodeType(c.co_argcount, c.co_kwonlyargcount,
+...		c.co_nlocals, c.co_stacksize, c.co_flags, newbytecode, c.co_consts,
+...		c.co_names, c.co_varnames, c.co_filename, c.co_name,
+...		c.co_firstlineno, c.co_lnotab)
+>>> nc
+<code object add at 0x10069fe40, file "<stdin>", line 1>
+>>> add.__code__ = nc
+>>> add(2,3)
+Segmentation fault
+```
+
+Покрэшить интрепретатор — это как раз самый вероятный исход таких безумных трюков. Однако разработчики, выполняющие продвинутую оптимизацию и создание инструментов метапрограммирования могут заниматься этим в реальной жизни. Эта последняя часть иллюстрирует то, как это можно сделать. Вот [ещё один пример кода на ActiveState](http://code.activestate.com/recipes/277940-decorator-for-bindingconstants-at-compile-time), где показан этот приём в действии.
 
 
 
