@@ -174,6 +174,7 @@
 	- 9.19. Инициализация членов класса во время определения
 	- 9.20. Реализация множественной диспетчеризации с помощью аннотаций функций
 	- 9.21. Избежание повторяющихся методов свойств
+	- 9.22. Лёгкий способ определения менеджеров контекста
 
 <!-- /MarkdownTOC -->
 
@@ -15754,6 +15755,85 @@ class Person:
 ```   
 
 Тут код начинает походить на дескриптор системы типов, показанный в **рецепте 8.13.** 
+
+## 9.22. Лёгкий способ определения менеджеров контекста
+### Задача
+Вы хотите реализовать новые менеджеры контекста для использования с инструкцией *with*.
+
+### Решение
+Один из самых простых способов написания нового менеджера контекста — использовать декоратор *@contextmanager* из модуля *contextlib*. Вот пример менеджера контекста, подсчитывающего время выполнения блока кода:
+```python
+import time
+from contextlib import contextmanager
+
+@contextmanager
+def timethis(label):
+	start = time.time()
+	try:
+		yield
+	finally:
+		end = time.time()
+		print('{}: {}'.format(label, end - start))
+
+# Example use
+with timethis('counting'):
+	n = 10000000
+	while n > 0:
+		n -= 1
+``` 
+
+В функции *timethis()* весь код перед *yield* выполняется как метод *__enter__()* менеджера контекста. Весь код после *yield* выполняется как метод *__exit__()*. Если имеет место исключение, оно возбужадается в инструкции yield.
+
+Вот немного более продвинутый пример менеджер контекста, который реализует некую транзакцию на объекте списка:
+```python
+@contextmanager
+def list_transaction(orig_list):
+	working = list(orig_list)
+	yield working
+	orig_list[:] = working
+```
+
+Идея в том, что изменения вносятся в список только в том случае, если при выполнении всего блока кода не возбуждаются исключения. Вот пример:
+```python
+>>> items = [1, 2, 3]
+>>> with list_transaction(items) as working:
+...		working.append(4)
+...		working.append(5)
+...
+>>> items
+[1, 2, 3, 4, 5]
+>>> with list_transaction(items) as working:
+... working.append(6)
+...	working.append(7)
+...	raise RuntimeError('oops')
+...
+Traceback (most recent call last):
+	File "<stdin>", line 4, in <module>
+RuntimeError: oops
+>>> items
+[1, 2, 3, 4, 5]
+>>>
+```
+
+### Обсуждение
+Чтобы написать менеджер контекста, обычно вы определяете класс с методами *__enter__()* и *__exit__()*:
+```python
+import time
+
+class timethis:
+	def __init__(self, label):
+		self.label = label
+	def __enter__(self):
+		self.start = time.time()
+	def __exit__(self, exc_ty, exc_val, exc_tb):
+		end = time.time()
+		print('{}: {}'.format(self.label, end - self.start))
+```
+
+Хотя это несложно, но все же более утомительно, чем писать простые функции с декоратором *@contextmanager*. 
+
+*@contextmanager* на самом деле используется для написания замкнутых на себя функций с управлением контекстом. Если вам нужно реализовать поддержку инструкции *with* каким-либо объектом (например, файлом, сетевым соединением или блокировкой), вам всё равно придется отдельно имплементировать методы *__enter__()* и *__exit__()*.
+
 
 
 
