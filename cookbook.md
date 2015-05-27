@@ -188,6 +188,7 @@
 	- 10.8. Чтение файлов с данными внутри пакета
 	- 10.9. Добавление каталогов в sys.path
 	- 10.10. Импортирование модулей с использованием передаваемого в форме строки имени
+	- 10.11. Загрузка модулей с удалённого компьютера с использованием хуков импортирования
 
 <!-- /MarkdownTOC -->
 
@@ -16836,6 +16837,722 @@ b = importlib.import_module('.b', __package__)
 В старом коде вы иногда сможете встретить использование встроенной функции *import()* для выполнения импортирования. Хотя это и работает, *importlib.import_module()* обычно проще в использовании.
 
 См. **рецепт 10.11.**, где приведён продвинутый пример кастомизации процесса импортирования.
+
+## 10.11. Загрузка модулей с удалённого компьютера с использованием хуков импортирования
+### Задача
+Вы хотите кастомизировать инструкцию импортирования Python, чтобы она могла прозрачно загружать модули с удалённого компьютера.
+
+### Решение
+Во-первых, сразу отметим важность вопроса безопасности. Идея, которая обсуждается в этом рецепте, станет ужасной без некого дополнительного слоя аутентификации и безопасности. Цель этого рецепта — глубоко погрузиться во внутренний механизм работы инструкции *import*. Если вы заставите этот рецепт работать и поймете внутреннюю механику, то получите серьёзный фундамент знаний для приспособления *import* под практически любые нужды. Имея это в виду, давайте продолжим!
+
+В сердце этого рецепта лежит желание расширить функциональность инструкции *import*. Есть несколько подходов к тому, как можно это сделать, но для наглядности начнём с создания такого каталога с кодом Python:
+```
+testcode/
+	spam.py
+	fib.py
+	grok/
+		__init__.py
+		blah.py
+```  
+
+Содержимое этих файлов не имеет значения, но поместим в каждый из них несколько простых инструкций и функций, чтобы вы могли их потестировать и посмотреть на получающийся при импортировании вывод. Например:
+```python
+# spam.py
+print("I'm spam")
+
+def hello(name):
+	print('Hello %s' % name)
+
+# fib.py
+print("I'm fib")
+
+def fib(n):
+	if n < 2:
+		return 1
+	else:
+		return fib(n-1) + fib(n-2)
+
+# grok/__init__.py
+print("I'm grok.__init__")
+# grok/blah.py
+print("I'm grok.blah")
+``` 
+
+Наша цель — разрешить удалённый доступ к этим файлам как к модулям. Вероятно, наиболее простой способ сделать это — опубликовать их на веб-сервере. Просто зайдите в каталог *testcode* и запустите Python таким образом:
+```
+bash % cd testcode
+bash % python3 -m http.server 15000
+Serving HTTP on 0.0.0.0 port 15000 ...
+```
+
+Оставим этот сервер в запущенном состоянии и отдельно запустим интерпретатор Python. Убедитесь, что вы имеете доступ к удалённым файлам, используя *urllib*. Например:
+```python
+>>> from urllib.request import urlopen
+>>> u = urlopen('http://localhost:15000/fib.py')
+>>> data = u.read().decode('utf-8')
+>>> print(data)
+# fib.py
+print("I'm fib")
+
+def fib(n):
+	if n < 2:
+		return 1
+	else:
+		return fib(n-1) + fib(n-2)
+>>>
+```
+
+Загрузка исходного кода с сервера образует базу для оставшейся части этого рецепта. Если конкретно, то вместо ручного получения файла с исходным кодом с использованием *urlopen()*, мы переделаем инструкцию *import* так, что она будет делать это «за кулисами».
+
+Первый подоход к загрузке удалённого модуля — создать явную функцию загрузки, которая будет это делать. Например:
+```python
+import imp
+import urllib.request
+import sys
+
+def load_module(url):
+	u = urllib.request.urlopen(url)
+	source = u.read().decode('utf-8')
+	mod = sys.modules.setdefault(url, imp.new_module(url))
+	code = compile(source, url, 'exec')
+	mod.__file__ = url
+	mod.__package__ = ''
+	exec(code, mod.__dict__)
+	return mod
+```
+
+Эта функция просто загружает исходный код, компилирует его в объект кода, используя *compile()*, а затем выполняет словарь созданного объекта модуля. Вот как вы могли бы использовать эту функцию:
+```python
+>>> fib = load_module('http://localhost:15000/fib.py')
+I'm fib
+>>> fib.fib(10)
+89
+>>> spam = load_module('http://localhost:15000/spam.py')
+I'm spam
+>>> spam.hello('Guido')
+Hello Guido
+>>> fib
+<module 'http://localhost:15000/fib.py' from 'http://localhost:15000/fib.py'>
+>>> spam
+<module 'http://localhost:15000/spam.py' from 'http://localhost:15000/spam.py'>
+>>>
+```
+
+Как вы можете видеть, это работает для простых модулей. Однако функция не подключена к обычной инструкции *import*, а расширение кода для поддержки более продвинутых конструкций, таких как пакеты, потребует дополнительной работы.
+
+Намного более ловкий подход — создать собственный импортировщик. Первый способ это сделать — это написать так называемый «импортировщик мета-пути». Вот пример:
+```python
+# urlimport.py
+
+import sys
+import importlib.abc
+import imp
+from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
+from html.parser import HTMLParser
+
+# Debugging
+import logging
+log = logging.getLogger(__name__)
+
+# Get links from a given URL
+def _get_links(url):
+	class LinkParser(HTMLParser):
+		def handle_starttag(self, tag, attrs):	
+			if tag == 'a':
+				attrs = dict(attrs)
+				links.add(attrs.get('href').rstrip('/'))
+	links = set()
+	try:
+		log.debug('Getting links from %s' % url)
+		u = urlopen(url)
+		parser = LinkParser()
+		parser.feed(u.read().decode('utf-8'))
+	except Exception as e:
+		log.debug('Could not get links. %s', e)
+	log.debug('links: %r', links)
+	return links
+
+
+class UrlMetaFinder(importlib.abc.MetaPathFinder):
+	def __init__(self, baseurl):
+		self._baseurl = baseurl
+		self._links	= { }
+		self._loaders = { baseurl : UrlModuleLoader(baseurl) }
+
+	def find_module(self, fullname, path=None):
+		log.debug('find_module: fullname=%r, path=%r', fullname, path)
+		if path is None:
+			baseurl = self._baseurl
+		else:
+			if not path[0].startswith(self._baseurl):
+				return None
+			baseurl = path[0]
+		
+		parts = fullname.split('.')
+		basename = parts[-1]
+		log.debug('find_module: baseurl=%r, basename=%r', baseurl, basename)
+		
+		# Check link cache
+		if basename not in self._links:
+			self._links[baseurl] = _get_links(baseurl)
+		
+		# Check if it's a package
+		if basename in self._links[baseurl]:
+			log.debug('find_module: trying package %r', fullname)
+			fullurl = self._baseurl + '/' + basename
+			# Attempt to load the package (which accesses __init__.py)
+			loader = UrlPackageLoader(fullurl)
+			try:
+				loader.load_module(fullname)
+				self._links[fullurl] = _get_links(fullurl)
+				self._loaders[fullurl] = UrlModuleLoader(fullurl)
+				log.debug('find_module: package %r loaded', fullname)
+			except ImportError as e:
+				log.debug('find_module: package failed. %s', e)
+				loader = None
+			return loader
+	
+		# A normal module
+		filename = basename + '.py'
+		if filename in self._links[baseurl]:
+			log.debug('find_module: module %r found', fullname)
+			return self._loaders[baseurl]
+		else:
+			log.debug('find_module: module %r not found', fullname)
+			return None
+	
+	def invalidate_caches(self):
+		log.debug('invalidating link cache')
+		self._links.clear()
+
+
+# Module Loader for a URL
+class UrlModuleLoader(importlib.abc.SourceLoader):
+	def __init__(self, baseurl):
+		self._baseurl = baseurl
+		self._source_cache = {}
+	
+	def module_repr(self, module):
+		return '<urlmodule %r from %r>' % (module.__name__, module.__file__)
+
+	# Required method
+	def load_module(self, fullname):
+		code = self.get_code(fullname)
+		mod = sys.modules.setdefault(fullname, imp.new_module(fullname))
+		mod.__file__ = self.get_filename(fullname)
+		mod.__loader__ = self
+		mod.__package__ = fullname.rpartition('.')[0]
+		exec(code, mod.__dict__)
+		return mod
+
+	# Optional extensions
+	def get_code(self, fullname):
+		src = self.get_source(fullname)
+		return compile(src, self.get_filename(fullname), 'exec')
+	
+	def get_data(self, path):
+		pass
+	
+	def get_filename(self, fullname):
+		return self._baseurl + '/' + fullname.split('.')[-1] + '.py'
+	
+	def get_source(self, fullname):
+		filename = self.get_filename(fullname)
+		log.debug('loader: reading %r', filename)
+		if filename in self._source_cache:
+			log.debug('loader: cached %r', filename)
+			return self._source_cache[filename]
+		try:
+			u = urlopen(filename)
+			source = u.read().decode('utf-8')
+			log.debug('loader: %r loaded', filename)
+			self._source_cache[filename] = source
+			return source
+		except (HTTPError, URLError) as e:
+			log.debug('loader: %r failed. %s', filename, e)
+			raise ImportError("Can't load %s" % filename)	
+		
+	def is_package(self, fullname):
+		return False
+
+# Package loader for a URL
+class UrlPackageLoader(UrlModuleLoader):
+	def load_module(self, fullname):
+		mod = super().load_module(fullname)
+		mod.__path__ = [ self._baseurl ]
+		mod.__package__ = fullname
+	
+	def get_filename(self, fullname):
+		return self._baseurl + '/' + '__init__.py'
+	
+	def is_package(self, fullname):
+		return True
+
+# Utility functions for installing/uninstalling the loader
+_installed_meta_cache = { }
+def install_meta(address):
+	if address not in _installed_meta_cache:
+		finder = UrlMetaFinder(address)
+		_installed_meta_cache[address] = finder
+		sys.meta_path.append(finder)
+		log.debug('%r installed on sys.meta_path', finder)
+
+def remove_meta(address):
+	if address in _installed_meta_cache:
+		finder = _installed_meta_cache.pop(address)
+		sys.meta_path.remove(finder)
+		log.debug('%r removed from sys.meta_path', finder)
+```  
+
+Вот пример интерактивной сессии, показывающей, как использовать приведённый выше код:
+```python
+>>> # importing currently fails
+>>> import fib
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+ImportError: No module named 'fib'
+
+>>> # Load the importer and retry (it works)
+>>> import urlimport
+>>> urlimport.install_meta('http://localhost:15000')
+>>> import fib
+I'm fib
+>>> import spam
+I'm spam
+>>> import grok.blah
+I'm grok.__init__
+I'm grok.blah
+>>> grok.blah.__file__
+'http://localhost:15000/grok/blah.py'
+>>>
+```
+
+Это конкретное решение включает установку экземпляра специального объекта-поисковика *UrlMetaFinder* в качестве последней записи в *sys.meta_path*. Когда модули загружаются, происходит консультация с поисковиками в *sys.meta_path*, чтобы определить местоположение модуля. В этом примере экземпляр *UrlMetaFinder* становится «поисковиком последнего шанса», который запускается, когда модуль не найден ни в одном из обычных местоположений.
+
+Для обобщения подхода к реализации класс *UrlMetaFinder* обёрнут вокруг определяемого пользователем URL. Внутри поисковик строит множество валидных ссылок путём получения их из переданного URL. Когда импортирование произведено, имя модуля сравнивается с этим множеством известных ссылок. Если найдено совпадение, используется отдельный класс *UrlModuleLoader*, который загружает исходный код с удалённого компьютера и в результате создает объект модуля. Ссылки кэшируются, чтобы избежать ненужных HTTP-запросов при повторяющихся операциях импортирования.
+
+Второй подход к кастомизации импортирования — написать хук, который прикрепляется напрямую к переменной *sys.path*, распознавая некоторые шаблоны наименования каталогов. Добавьте приведённый ниже класс и поддерживающие функции в *urlimport.py*:
+```python
+# urlimport.py
+
+# ... include previous code above ...
+
+# Path finder class for a URL
+class UrlPathFinder(importlib.abc.PathEntryFinder):
+	def __init__(self, baseurl):
+		self._links = None
+		self._loader = UrlModuleLoader(baseurl)
+		self._baseurl = baseurl
+		
+	def find_loader(self, fullname):
+		log.debug('find_loader: %r', fullname)
+		parts = fullname.split('.')
+		basename = parts[-1]
+		# Check link cache
+		if self._links is None:
+			self._links = [] 		# See discussion
+			self._links = _get_links(self._baseurl)
+		
+		# Check if it's a package
+		if basename in self._links:
+			log.debug('find_loader: trying package %r', fullname)
+			fullurl = self._baseurl + '/' + basename
+			# Attempt to load the package (which accesses __init__.py)
+			loader = UrlPackageLoader(fullurl)
+			try:
+				loader.load_module(fullname)
+				log.debug('find_loader: package %r loaded', fullname)
+			except ImportError as e:
+				log.debug('find_loader: %r is a namespace package', fullname)
+				loader = None
+			return (loader, [fullurl])
+	
+		# A normal module
+		filename = basename + '.py'
+		if filename in self._links:
+			log.debug('find_loader: module %r found', fullname)
+			return (self._loader, [])
+		else:
+			log.debug('find_loader: module %r not found', fullname)
+			return (None, [])
+
+	def invalidate_caches(self):
+		log.debug('invalidating link cache')
+		self._links = None
+
+# Check path to see if it looks like a URL
+_url_path_cache = {}
+def handle_url(path):
+	if path.startswith(('http://', 'https://')):
+		log.debug('Handle path? %s. [Yes]', path)
+		if path in _url_path_cache:
+			finder = _url_path_cache[path]
+		else:
+			finder = UrlPathFinder(path)
+			_url_path_cache[path] = finder
+		return finder
+	else:
+		log.debug('Handle path? %s. [No]', path)
+
+def install_path_hook():
+	sys.path_hooks.append(handle_url)
+	sys.path_importer_cache.clear()
+	log.debug('Installing handle_url')
+
+def remove_path_hook():
+	sys.path_hooks.remove(handle_url)
+	sys.path_importer_cache.clear()
+	log.debug('Removing handle_url')
+```
+
+Чтобы использовать этот основанный на пути поисковик, просто добавьте URLы в *sys.path*. Например:
+```python
+>>> # Initial import fails
+>>> import fib
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+ImportError: No module named 'fib'
+
+>>> # Install the path hook
+>>> import urlimport
+>>> urlimport.install_path_hook()
+
+>>> # Imports still fail (not on path)
+>>> import fib
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+ImportError: No module named 'fib'
+
+>>> # Add an entry to sys.path and watch it work
+>>> import sys
+>>> sys.path.append('http://localhost:15000')
+>>> import fib
+I'm fib
+>>> import grok.blah
+I'm grok.__init__
+I'm grok.blah
+>>> grok.blah.__file__
+'http://localhost:15000/grok/blah.py'
+>>>
+```
+
+Ключ к этому последнему примеру заключается в функции *handle_url()*, которая добавлена в переменную *sys.path_hooks*. Когда обрабатываются записи *sys.path*, вызываются функции из *sys.path_hooks*. Если какая-либо из этих функций возвращает объект поисковика, этот поисковик используется для попытки загрузки модулей для этой записи в *sys.path*.
+
+Стоит отметить, что удалённо импортируемые модули работают точно так же, как и любые другие. Например: 
+```python
+>>> fib
+<urlmodule 'fib' from 'http://localhost:15000/fib.py'>
+>>> fib.__name__
+'fib'
+>>> fib.__file__
+'http://localhost:15000/fib.py'
+>>> import inspect
+>>> print(inspect.getsource(fib))
+# fib.py
+print("I'm fib")
+
+def fib(n):
+	if n < 2:
+		return 1
+	else:
+		return fib(n-1) + fib(n-2)
+>>>
+```
+
+### Обсуждение
+Перед детальным обсуждением этого рецепта, стоит отметить, что модули, пакеты и механизм импорта Python — это одна из сложнейших частей всего языка. Часто даже самые опытные программисты плохо её понимают — до тех пор, пока не вложат некоторое количество усилий, чтобы погрузиться в тему. Есть несколько важнейших документов, которые достойны прочтения, включая документацию к [importlib](http://docs.python.org/3/library/importlib.html) и [PEP 302](http://www.python.org/dev/peps/pep-0302). Эту документацию мы не будем повторять тут, но некоторые важнейшие моменты обсудим.
+
+Во-первых, если вы хотите создать новый объект модуля, вы используете функцию *imp.new_module()*. Например:
+```python
+>>> import imp
+>>> m = imp.new_module('spam')
+>>> m
+<module 'spam'>
+>>> m.__name__
+'spam'
+>>>
+```
+
+Объекты модулей обычно имеют несколько ожидаемых атрибутов, включая *__file__* (имя файла, из которого был загружен модуль) и *__package__* (имя пакета, в котором находится модуль, если он есть).
+
+Во-вторых, модули кэшируются интерпретатором. Закэшированный модуль может быть найден в словаре *sys.modules*. Из-за этого кэширования распространённой практикой является объеденение кэширования и создания модуля в один этап. Например:
+```python
+>>> import sys
+>>> import imp
+>>> m = sys.modules.setdefault('spam', imp.new_module('spam'))
+>>> m
+<module 'spam'>
+>>>
+```
+
+Главная причина делать это в том, что если модуль с заданным именем уже существует, то вы вместо пересоздания получите уже созданный модуль. Например:
+```python
+>>> import math
+>>> m = sys.modules.setdefault('math', imp.new_module('math'))
+>>> m
+<module 'math' from '/usr/local/lib/python3.3/lib-dynload/math.so'>
+>>> m.sin(2)
+0.9092974268256817
+>>> m.cos(2)
+-0.4161468365471424
+>>>
+```
+
+Поскольку создавать модули легко, то можно без труда написать простые функции, такие как *load_module()* из первой части этого рецепта. Недостаток этого подхода в том, что с его помощью сложно обрабатывать более сложные случаи, такие как импортирование пакетов. Чтобы работать с пакетами, вам придётся заново реализовать большую часть «подкапотной» логики, которая является частью обычной инструкции *import* (например, проверку каталогов, поиск файлов *__init__.py*, выполнение этих файлов, установка путей и т.д.) Эта высокая сложность — одна из причин, из-за которых часто лучше расширить инструкцию *import* напрямую, а не определять собственную функцию.
+
+Расширение инструкции *import* выполняется прямолинейно, но вовлекает достаточно много «движущихся частей». На высшем уровне операции *import* обрабатываются списком поисковиков «мета-путей», который вы можете найти в списке *sys.meta_path*. Если вы выведете его значение, то увидите следующее:
+```python
+>>> from pprint import pprint
+>>> pprint(sys.meta_path)
+[<class '_frozen_importlib.BuiltinImporter'>,
+ <class '_frozen_importlib.FrozenImporter'>,
+ <class '_frozen_importlib.PathFinder'>]
+>>>
+``` 
+
+При выполнении инструкции типа *import fib*, интерпретатор проходит по объектам-поисковикам из *sys.meta_path* и вызывает их метод *find_module()*, чтобы найти подходящий загрузчик модуля. Определите нижеприведённый класс и попробуйте поэкспериментировать с ними, чтобы разобраться в том, как это работает:
+```python
+>>> class Finder:
+... 	def find_module(self, fullname, path):
+... 		print('Looking for', fullname, path)
+...			return None
+...
+>>> import sys
+>>> sys.meta_path.insert(0, Finder()) # Insert as first entry
+>>> import math
+Looking for math None
+>>> import types
+Looking for types None
+>>> import threading
+Looking for threading None
+Looking for time None
+Looking for traceback None
+Looking for linecache None
+Looking for tokenize None
+Looking for token None
+>>>
+```
+
+Обратите внимание на то, что метод *find_module()* запускается при каждом импортировании. Роль аргумента *path* здесь заключается в обработке пакетов. Когда пакеты импортированы, это список каталогов, которые находятся в атрибуте пакета *__path__*. Это пути, которые нужно проверить, чтобы найти подкомпоненты пакета. Например, посмотрите установки пути для *xml.etree* и *xml.etree.ElementTree*:
+```python
+>>> import xml.etree.ElementTree
+Looking for xml None
+Looking for xml.etree ['/usr/local/lib/python3.3/xml']
+Looking for xml.etree.ElementTree ['/usr/local/lib/python3.3/xml/etree']
+Looking for warnings None
+Looking for contextlib None
+Looking for xml.etree.ElementPath ['/usr/local/lib/python3.3/xml/etree']
+Looking for _elementtree None
+Looking for copy None
+Looking for org None
+Looking for pyexpat None
+Looking for ElementC14N None
+```  
+
+Положение поисковика в *sys.meta_path* является критически важным. Переместите его из начала в конец списка и попробуйте выполнить несколько операций импортирования:
+```python
+>>> del sys.meta_path[0]
+>>> sys.meta_path.append(Finder())
+>>> import urllib.request
+>>> import datetime
+```
+
+Теперь вы не видите никакого вывода, потому что импортирование обрабатывается другими записями из *sys.meta_path*. В этом случае вы увидите их только в том случае, если они включатся по причине попытке импортирования несуществующих модулей:
+```pytnon
+>>> import fib
+Looking for fib None
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+ImportError: No module named 'fib'
+>>> import xml.superfast
+Looking for xml.superfast ['/usr/local/lib/python3.3/xml']
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+ImportError: No module named 'xml.superfast'
+>>>
+```
+
+Тот факт, что вы можете инсталлировать поисковик с целью «отлова» неизвестных модулей, является ключом к пониманию класса *UrlMetaFinder* в этом рецепте. Экземпляр *UrlMetaFinder* добавлен в конец *sys.meta_path*, где служит своего рода «импортировщиком последнего шанса». Если запрошенное имя модуля не может быть обнаружено никаким другим механизмом импортирования, оно обрабатывается этим поисковиком. При обработке пакетов нужно принять некоторые предосторожности. Если конкретно, то представленное в аргументе *path* должно быть проверено, чтобы посмотреть, не начинается ли оно с зарегистрированного в поисковике URL. Если нет, подмодуль принадлежит какому-то другому поисковику и должно быть проигнорировано.
+
+Дополнительная обработка пакетов производится с помощью класса *UrlPackageLoader*. Этот класс, вместо импортирования имени пакета, пытается загрузить файл *__init__.py*. Он также устанавливает атрибут модуля *__path__*. Эта последняя часть является критически важной, поискольку установленное значение будет передано в последующие вызовы *find_module()* при загрузке подмодулей пакета.
+
+Основанный на пути хук импортирования расширяет эти идеи, но базируется на другом механизме. Как вы знаете, *sys.path* — это список каталогов, где Python ищет модули. Например:
+```python
+>>> from pprint import pprint
+>>> import sys
+>>> pprint(sys.path)
+['',
+ '/usr/local/lib/python33.zip',
+ '/usr/local/lib/python3.3',
+ '/usr/local/lib/python3.3/plat-darwin',
+ '/usr/local/lib/python3.3/lib-dynload',
+ '/usr/local/lib/...3.3/site-packages']
+>>>
+```
+
+Каждая запись в *sys.path* дополнительно прикреплена к объекту поисковика. Вы можете просматривать эти поисковики путём обращения к *sys.path_importer_cache*:
+```python
+>>> pprint(sys.path_importer_cache)
+{'.': FileFinder('.'),
+ '/usr/local/lib/python3.3': FileFinder('/usr/local/lib/python3.3'),
+ '/usr/local/lib/python3.3/': FileFinder('/usr/local/lib/python3.3/'),
+ '/usr/local/lib/python3.3/collections': FileFinder('...python3.3/collections'),
+ '/usr/local/lib/python3.3/encodings': FileFinder('...python3.3/encodings'),
+ '/usr/local/lib/python3.3/lib-dynload': FileFinder('...python3.3/lib-dynload'),
+ '/usr/local/lib/python3.3/plat-darwin': FileFinder('...python3.3/plat-darwin'),
+ '/usr/local/lib/python3.3/site-packages': FileFinder('...python3.3/site-packages'),
+ '/usr/local/lib/python33.zip': None}
+>>>
+``` 
+
+*sys.path_importer_cache* обычно намного больше *sys.path*, потому что в него записываются поисковики для всех известных каталогов, из которых загружается код. Это включает подкаталоги пакетов, которые обычно не включаются в *sys.path*. 
+
+Чтобы выполнить *import fib*, каталоги в *sys.path* проверяются по порядку. Для каждого каталога имя *fib* представляется ассоциированному поисковику, найденному в *sys.path_importer_cache*. Вам стоит исследовать этот аспект путём создания собственного поисковика и помещения записи в кэш. Попробуйте провести такой эксперимент:
+```python
+>>> class Finder:
+...		def find_loader(self, name):
+...			print('Looking for', name)
+...			return (None, [])
+...
+>>> import sys
+>>> # Add a "debug" entry to the importer cache
+>>> sys.path_importer_cache['debug'] = Finder()
+>>> # Add a "debug" directory to sys.path
+>>> sys.path.insert(0, 'debug')
+>>> import threading
+Looking for threading
+Looking for time
+Looking for traceback
+Looking for linecache
+Looking for tokenize
+Looking for token
+>>>
+```
+
+Здесь вы инсталлировали новую запись кэша для имени *debug* и инсталлировали имя *debug* в качестве первой записи в *sys.path*. В последующих операциях импортирования вы видите, как запускается ваш поисковик. Однако, поскольку он возвращает *(None, [])*, процесс обработки просто переходит к следующей записи.
+
+Наполнение *sys.path_importer_cache* контролируется списком функций, который хранится в *sys.path_hooks*. Попробуйте провести эксперимент, в котором вы очистите кэш и добавите новую функцию проверки пути в *sys.path_hooks*:
+```python
+>>> sys.path_importer_cache.clear()
+>>> def check_path(path):
+... 	print('Checking', path)
+... 	raise ImportError()
+...
+>>> sys.path_hooks.insert(0, check_path)
+>>> import fib
+Checked debug
+Checking .
+Checking /usr/local/lib/python33.zip
+Checking /usr/local/lib/python3.3
+Checking /usr/local/lib/python3.3/plat-darwin
+Checking /usr/local/lib/python3.3/lib-dynload
+Checking /Users/beazley/.local/lib/python3.3/site-packages
+Checking /usr/local/lib/python3.3/site-packages
+Looking for fib
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+ImportError: No module named 'fib'
+>>>
+```
+
+Как вы можете видеть, функция *check_path()* вызывается для каждой записи из *sys.path*. Однако, поскольку возбуждается исключение *ImportError*, ничего другого не происходит (проверка просто переходит к следующей функции в *sys.path_hooks*).
+
+Используя свои знания о том, как обрабатывается *sys.path*, вы можете инсталлировать кастомную функцию проверки пути, которая ищет шаблоны имён файлов, такие как URLы. Например:
+```python
+>>> def check_url(path):
+...		if path.startswith('http://'):
+...			return Finder()
+...		else:
+...			raise ImportError()
+...
+>>> sys.path.append('http://localhost:15000')
+>>> sys.path_hooks[0] = check_url
+>>> import fib
+Looking for fib
+# Finder output!
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+ImportError: No module named 'fib'
+
+>>> # Notice installation of Finder in sys.path_importer_cache
+>>> sys.path_importer_cache['http://localhost:15000']
+<__main__.Finder object at 0x10064c850>
+>>>
+```
+
+Это ключевой механизм работы последней части данного рецепта. По сути, кастомная функция проверки пути была установлена, чтобы искать URLы в sys.path. Когда они встречаются, создается новый экземпляр *UrlPathFinder* и инсталлируется в *sys.path_importer_cache*. Начиная с этого момента, все инструкции импортирования, которые проходят через эту часть *sys.path*, будут пытаться использовать ваш кастомный поисковик.
+
+Работа с пакетами с помощью основанного на путях импортировщика достаточно сложна и опирается на возвращаемое значение метода *find_loader()*. Для простых модулей *find_loader()* возвращает кортеж *(loader, None)*, где *loader* — это экземпляр загрузчика, который будет импортировать модуль.
+
+Для обычного пакета *find_loader()* возвращает кортеж *(loader, path)*, где *loader* — это экземпляр загрузчика, который будет импортировать пакет (и выполнять *__init__.py*), а *path* — это список каталогов, которые составят начальное наполнение атрибута пакета *__path__*. Например, если базовый URL был *http://localhost:15000*, а пользователь выполнил *import grok*, возвращенный *find_loader()* путь будет таким: [ 'http://localhost:15000/grok' ].
+
+*find_loader()* должна дополнительно учитывать возможность столкнуться с пакетом пространства имён. Это пакет, где присутствуют валидные имена каталогов пакета, но отсутствуют файлы *__init__.py*. Для этого случая *find_loader()* должна возвращать кортеж *(None, path)*, гда *path* — это список каталогов, которые составили бы атрибут пакета *__file__*, определённый в файле *__init__.py* (path is a list of directories that would have made up the package’s __path__ attribute had it defined an __init__.py file). В этом случае механизм импортирования переходит дальше, чтобы проверить следующие каталоги в *sys.path*. Если будут найдены дополнительные пакеты пространств имён, все получившиеся пути соединяются вместе, чтобы образовать финальный пакет пространств имён. См. **рецепт 10.5.**, где приведена дополнительная информация о пакетах пространств имён. 
+
+В обработке пактетов есть элемент рекурсии, что не очевидно ни в решении, ни в работе. Все пакеты содержат внутреннюю настройку путей, которая может быть найдена в атрибуте *__path__*. Например:
+```python
+>>> import xml.etree.ElementTree
+>>> xml.__path__
+['/usr/local/lib/python3.3/xml']
+>>> xml.etree.__path__
+['/usr/local/lib/python3.3/xml/etree']
+>>>
+```
+
+Как было упомянуто, установка *__path__* контролируется путём возвращаемого значения метода *find_loader()*. Однако последующая обработка *__path__* также производится функциями из *sys.path_hooks*. Когда подкомпоненты пакета загружаются, записи в *__path__* проверяются функцией *handle_url()*. Это вызывает создание новых экземпляров UrlPathFinder и добавление их в *sys.path_importer_cache*.
+
+Оставшаяся сложная часть этой реализации касается поведения функции *handle_url()* и её взаимодействия с используемой внутри функцией *_get_links()*. Если ваша реализация поисковика использует другие модули (например, *urllib.request*), существует вероятность того, что эти модули предпримут попытки импортирования в середине выполнения операции поисковика. Это может вызвать рекурсивный цикл выполнения *handle_url()* и других частей поисковика. Чтобы учёсть такую возможность, реализация поддерживает кэш созданных поисковиков (по одному на URL). Это позволяет избежать проблемы с созданием дублирующихся поисковиков. Следующий фрагмент кода удостоверяет, что поисковик не отвечает ни на какие запросы импортирования, пока он находится в процессе получения начального набора ссылок:
+```python
+# Check link cache
+if self._links is None:
+	self._links = []			# See discussion
+	self._links = _get_links(self._baseurl)
+``` 
+
+Эта проверка может и не понадобиться вам в других реализациях, но для этого примера, использующего URLы, она необходима.
+
+И, наконец, метод *invalidate_caches()* обоих поисковиков — это вспомогательный метод, который должен очищать внутренние кэши при изменении исходного кода. Этот метод вызывается, когда пользователь вызывает *importlib.invalidate_caches()*. Вы можете использовать его, если хотите, чтобы импортировщики URL перечитали список ссылок — возможно, чтобы получить доступ к добавленным файлам.
+
+В сравнении двух подходов (изменении *sys.meta_path* и использовании хуков пути) помогает «высокоуровневый взгляд». Импортировщики, установленные с использованием *sys.meta_path*, свободны обрабатывать модули так, как пожелают. Например, они могут загружать модули из базы данных или импортировать их способом, который радикально отличается от стандартного процесса для модулей/пакетов. Эта свобода также означает, что импортировщики должны вести больше «бухгалтерии» и заниматься внутренним управлением. Это объясняет, например, почему реализация *UrlMetaFinder* требует собственного кэширования ссылок, загрузчиков и прочих деталей. С другой стороны, основанные на путях хуки сильнее привязаны к обработке *sys.path*. По причине связи с *sys.path*, модули, загружаемые с помощью таких расширений, будут склонны иметь те же возможности, что и обычные модули и пакеты, к которым привыкли программисты.
+
+Предполагая, что к этому моменту у вас еще не взорвалась голова, скажем, что ключом к пониманию и экспериментированию с этим рецептом может быть добавление вызовов логирования. Вы можете включить логирование и попробовать что-то такое:
+```python
+>>> import logging
+>>> logging.basicConfig(level=logging.DEBUG)
+>>> import urlimport
+>>> urlimport.install_path_hook()
+DEBUG:urlimport:Installing handle_url
+>>> import fib
+DEBUG:urlimport:Handle path? /usr/local/lib/python33.zip. [No]
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+ImportError: No module named 'fib'
+>>> import sys
+>>> sys.path.append('http://localhost:15000')
+>>> import fib
+DEBUG:urlimport:Handle path? http://localhost:15000. [Yes]
+DEBUG:urlimport:Getting links from http://localhost:15000
+DEBUG:urlimport:links: {'spam.py', 'fib.py', 'grok'}
+DEBUG:urlimport:find_loader: 'fib'
+DEBUG:urlimport:find_loader: module 'fib' found
+DEBUG:urlimport:loader: reading 'http://localhost:15000/fib.py'
+DEBUG:urlimport:loader: 'http://localhost:15000/fib.py' loaded
+I'm fib
+>>>
+```
+
+И последнее: рекомендуем провести некоторое время в медитации над [PEP 302](http://www.python.org/dev/peps/pep-0302) и документации к importlib.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
