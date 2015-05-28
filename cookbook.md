@@ -178,7 +178,7 @@
 	- 9.23. Выполнение кода с локальными побочными эффектами
 	- 9.24. Парсинг и анализ исходного кода Python
 	- 9.25. Дизассемблирование байт-кода Python
-- 10. Глава 10. Модули и пакеты
+- 10. Модули и пакеты
 	- 10.1. Создание иерархического пакета модулей
 	- 10.2. Контроль импортирования
 	- 10.3. Импортирование подмодулей пакета с использованием относительных имён
@@ -193,6 +193,8 @@
 	- 10.13. Установка пакетов «только для себя»
 	- 10.14. Создание нового окружения Python
 	- 10.15. Распространение пакетов
+- 11. Сети и веб-программирование
+	- 11.1. Взаимодействие с HTTP-сервисами в роли клиента
 
 <!-- /MarkdownTOC -->
 
@@ -16309,7 +16311,7 @@ Segmentation fault
 Покрэшить интрепретатор — это как раз самый вероятный исход таких безумных трюков. Однако разработчики, выполняющие продвинутую оптимизацию и создание инструментов метапрограммирования могут заниматься этим в реальной жизни. Эта последняя часть иллюстрирует то, как это можно сделать. Вот [ещё один пример кода на ActiveState](http://code.activestate.com/recipes/277940-decorator-for-bindingconstants-at-compile-time), где показан этот приём в действии.
 
 
-# 10. Глава 10. Модули и пакеты
+# 10. Модули и пакеты
 Модули и пакеты — ядро любого крупного проекта (и самого Python). Эта глава фокусируется на распространённых приёмах программирования, использующих модули и пакеты: упорядочивание пакетов, разделение крупных модулей на несколько файлов, создание пространств имён пакетов. Также здесь даны рецепты, которые позволят кастомизировать работу самой инструкции *import*.
 
 ## 10.1. Создание иерархического пакета модулей
@@ -17786,24 +17788,193 @@ name.utils']*.
 
 Упаковка и распространение кода, включающего написанные на C расширения, может быть заметно более сложной. В главе 15 мы коснёмся этих вопросов. В частности, обратите внимание на *рецепт 15.2.**
 
- 
+# 11. Сети и веб-программирование
+Эта глава посвящена вопросам использования Python в сетевых и распределённых приложениях. Темы подразделяются на обсуждение использования Python в качестве клиента для доступа к существующим сервисам, а также на использование Python для разработки сетевых сервисов, таких как сервер. Также будут показаны распространённые приёмы написания кода для совместной работы интерпретаторов и их коммуникации друг с другом. 
 
- 
+## 11.1. Взаимодействие с HTTP-сервисами в роли клиента
+### Задача
+Вам нужно обращаться к различным веб-сервисам через HTTP в роли клиента. Например, скачивать данные или взаимодействовать с REST API.
 
+### Решение
+Для простых задач обычно достаточно модуля *urllib.request*. Например, чтобы послать простой GET-запрос удалённому сервису, сделайте так:
+```python
+from urllib import request, parse
 
+# Base URL being accessed
+url = 'http://httpbin.org/get'
 
+# Dictionary of query parameters (if any)
+parms = {
+	'name1' : 'value1',
+	'name2' : 'value2'
+}
 
+# Encode the query string
+querystring = parse.urlencode(parms)
 
+# Make a GET request and read the response
+u = request.urlopen(url+'?' + querystring)
+resp = u.read()
+```
 
+Если вам нужно послать параметры в теле запроса, используя метод POST, закодируйте их и предоставьте в качестве необязательных аргументов в *urlopen()*:
+```python
+from urllib import request, parse
 
+# Base URL being accessed
+url = 'http://httpbin.org/post'
 
+# Dictionary of query parameters (if any)
+parms = {
+	'name1' : 'value1',
+	'name2' : 'value2'
+}
 
+# Encode the query string
+querystring = parse.urlencode(parms)
 
+# Make a POST request and read the response
+u = request.urlopen(url, querystring.encode('ascii'))
+resp = u.read()
+``` 
 
+Если вам нужно предоставить которые кастомные HTTP-заголовки в исходящем запросе (например, изменённое поле User-Agent), создать содержащий их значения словарь и экземпляр *Request* и передать его в *urlopen()*:
+```python
+from urllib import request, parse
+...
 
+# Extra headers
+headers = {
+	'User-agent' : 'none/ofyourbusiness',
+	'Spam' : 'Eggs'
+}
 
+req = request.Request(url, querystring.encode('ascii'), headers=headers)
 
+# Make a request and read the response
+u = request.urlopen(req)
+resp = u.read()
+```  
 
+Если ваше взаимодействие с сервисом сложнее, вам стоит обратить внимание на библиотеку [requests](http://pypi.python.org/pypi/requests). Например, вот эквивалентный предыдущим операциям код на *requests*:
+```python
+import requests
 
+# Base URL being accessed
+url = 'http://httpbin.org/post'
+
+# Dictionary of query parameters (if any)
+parms = {
+	'name1' : 'value1',
+	'name2' : 'value2'
+}
+
+# Extra headers
+headers = {
+	'User-agent' : 'none/ofyourbusiness',
+	'Spam' : 'Eggs'
+}
+
+resp = requests.post(url, data=parms, headers=headers)
+
+# Decoded text returned by the request
+text = resp.text
+```
+
+Стоит отметить, как *requests* возвращает получившееся содержимое ответа на запрос. Как показано выше, атрибут *resp.text* предоставляет декодированный в Unicode текст запроса. Однако если вы обратитесь к *resp.content*, то получите не текст, а сырое бинарное содержимое. С другой стороны, если вы обратитесь к *resp.json*, то вы получите содержимое ответа в формате JSON. 
+
+Вот пример использования *requests* для создания запроса HEAD и извлечения нескольких полей данных заголовка из ответа:
+```python
+import requests
+
+resp = requests.head('http://www.python.org/index.html')
+
+status = resp.status_code
+last_modified = resp.headers['last-modified']
+content_type = resp.headers['content-type']
+content_length = resp.headers['content-length']
+```
+
+Вот пример, который показывает, как можно залогиниться в Python Package Index, используя базовую аутентификацию:
+```python
+import requests
+resp = requests.get('http://pypi.python.org/pypi?:action=login',
+					 auth=('user','password'))
+```
+
+Вот пример передачи HTTP-куки из одного запроса следующему:
+```python
+import requests
+
+# First request
+resp1 = requests.get(url)
+...
+
+# Second requests with cookies received on first requests
+resp2 = requests.get(url, cookies=resp1.cookies)
+```
+
+Последний пример — загрузка данных на сервер:
+```python
+import requests
+url = 'http://httpbin.org/post'
+files = { 'file': ('data.csv', open('data.csv', 'rb')) }
+
+r = requests.post(url, files=files)
+```
+
+### Обсуждение
+Для простого клиентского HTTP-кода встроенного модуля *urllib* обычно хватает. Однако если вам нужно что-то помимо простых POST- и GET-запросов, вы не можете полагаться на его функциональность. В этом случае лучше подойдут сторонние модули, такие как *requests*.
+
+Например, если вы решите полностью опираться только на стандартную библиотеку вместо библиотеки типа *requests*, вам придётся реализовать ваш код с использованием низкоуровневого модуля *http.client*. Например, этот код выполняет HEAD-запрос:
+```python
+from http.client import HTTPConnection
+from urllib import parse
+
+c = HTTPConnection('www.python.org', 80)
+c.request('HEAD', '/index.html')
+resp = c.getresponse()
+
+print('Status', resp.status)
+for name, value in resp.getheaders():
+	print(name, value)
+``` 
+
+А если вам нужно написать код, использующий прокси, аутентификацию, куки и другие подобные моменты, использовать *urllib* неудобно, а код получится многословным. Например, вот пример кода, который производит авторизацию в Python Package Index:
+```python
+import urllib.request
+
+auth = urllib.request.HTTPBasicAuthHandler()
+auth.add_password('pypi','http://pypi.python.org','username','password')
+opener = urllib.request.build_opener(auth)
+
+r = urllib.request.Request('http://pypi.python.org/pypi?:action=login')
+u = opener.open(r)
+resp = u.read()
+
+# From here. You can access more pages using opener
+...
+```
+
+Если честно, всё это проще сделать с помощью *requests*.
+
+Тестирование клиентского HTTP-кода в процессе разработки часто может быть непростым из-за большого количества неочевидных деталей, о которых нужно думать (например, куки, авторизация, заголовки, кодировки и т.п.) Если вам нужно тестирование, посмотрите на сервис [httpbin](http://httpbin.org). Этот сайт получает запросы и «эхом» отсылает информацию обратно в форме JSON-ответа. Вот интерактивный сеанс:
+```python
+>>> import requests
+>>> r = requests.get('http://httpbin.org/get?name=Dave&n=37',
+...		headers = { 'User-agent': 'goaway/1.0' })
+>>> resp = r.json
+>>> resp['headers']
+{'User-Agent': 'goaway/1.0', 'Content-Length': '', 'Content-Type': '',
+'Accept-Encoding': 'gzip, deflate, compress', 'Connection':
+'keep-alive', 'Host': 'httpbin.org', 'Accept': '*/*'}
+>>> resp['args']
+{'name': 'Dave', 'n': '37'}
+>>>
+``` 
+
+Работать с сайтом типа [httpbin](http://httpbin.org) часто предпочтительнее, чем экспериментировать с реальным сайтом — особенно в том случае, если существует риск отключения аккаунта после трёх провалившихся попыток залогиниться (не пробуйте учиться писать клиент с HTTP-аутентификацией путём отправки запросов на сайт вашего банка).
+
+Хотя мы здесь это и не обсудили, *requests* поддерживает намного более продвинутые протоколы HTTP-клиентов, такие как OAuth. Рекомендуем вам обратиться к [замечательной документации requests](http://docs.python-requests.org), которая раскрывает тему намного лучше, чем наш короткий экскурс. 
 
 
