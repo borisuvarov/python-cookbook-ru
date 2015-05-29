@@ -195,6 +195,7 @@
 	- 10.15. Распространение пакетов
 - 11. Сети и веб-программирование
 	- 11.1. Взаимодействие с HTTP-сервисами в роли клиента
+	- 11.2. Создание TCP-сервера
 
 <!-- /MarkdownTOC -->
 
@@ -17976,5 +17977,154 @@ resp = u.read()
 Работать с сайтом типа [httpbin](http://httpbin.org) часто предпочтительнее, чем экспериментировать с реальным сайтом — особенно в том случае, если существует риск отключения аккаунта после трёх провалившихся попыток залогиниться (не пробуйте учиться писать клиент с HTTP-аутентификацией путём отправки запросов на сайт вашего банка).
 
 Хотя мы здесь это и не обсудили, *requests* поддерживает намного более продвинутые протоколы HTTP-клиентов, такие как OAuth. Рекомендуем вам обратиться к [замечательной документации requests](http://docs.python-requests.org), которая раскрывает тему намного лучше, чем наш короткий экскурс. 
+
+
+## 11.2. Создание TCP-сервера
+### Задача
+Вы хотите реализовать сервер, который общается с клиентами по протоколу TCP.
+
+### Решение
+Есть простой способ создать TCP-сервер: использовать библиотеку *socketserver*. Например, вот простой эхо-сервер:
+```python
+from socketserver import BaseRequestHandler, TCPServer
+
+class EchoHandler(BaseRequestHandler):
+	def handle(self):
+		print('Got connection from', self.client_address)
+		while True:
+			msg = self.request.recv(8192)
+			if not msg:
+				break
+			self.request.send(msg)
+
+if __name__ == '__main__':
+	serv = TCPServer(('', 20000), EchoHandler)
+	serv.serve_forever()
+```
+
+Здесь вы определяете специальный класс-обработчик, который реализует метод *handle()* для обслуживания соединений с клиентами. Атрибут *request* — это клиентский сокет, а *client_address* содержит адрес клиента.
+
+Чтобы протестировать сервер, запустите его и откройте отдельный процесс Python, который с ним соединится:
+```python
+>>> from socket import socket, AF_INET, SOCK_STREAM
+>>> s = socket(AF_INET, SOCK_STREAM)
+>>> s.connect(('localhost', 20000))
+>>> s.send(b'Hello')
+5
+>>> s.recv(8192)
+b'Hello'
+>>>
+```
+
+Во многих случаях может быть проще определить немного другой обработчик. Вот пример, который использует базовый класс *StreamRequestHandler*, чтобы «натянуть» файлоподобный интерфейс на сокет:
+```python
+from socketserver import StreamRequestHandler, TCPServer
+
+class EchoHandler(StreamRequestHandler):
+	def handle(self):
+		print('Got connection from', self.client_address)
+		# self.rfile is a file-like object for reading
+		for line in self.rfile:
+			# self.wfile is a file-like object for writing
+			self.wfile.write(line)
+
+if __name__ == '__main__':
+	serv = TCPServer(('', 20000), EchoHandler)
+	serv.serve_forever()
+```
+
+### Обсуждение
+*socketserver* делает создание простых TCP-серверов относительно простым. Однако вам стоит знать, что по умолчанию эти серверы являются однопоточными и могут обслуживать только одного клиента одновременно. Если вы хотите обрабатывать множество клиентов, создайте либо экземпляр *ForkingTCPServer*, либо *ThreadingTCPServer*. Например:
+```python
+from socketserver import ThreadingTCPServer
+...
+
+if __name__ == '__main__':
+	serv = ThreadingTCPServer(('', 20000), EchoHandler)
+	serv.serve_forever()
+```
+
+Проблема с создающими новые процессы или потоки серверами в том, что они создают новый процесс или поток на каждое соединение с клиентом. Поскольку ограничения на разрешенное количество соединений нет, злонамеренный хакер может запустить большое количество одновременных соединений и вызвать сбои в работе вашего сервера.
+
+Если это в вашем случае это может произойти, вы можете создать выделенный заранее пул рабочих потоков или процессов. Чтобы сделать это, вы создаете экземпляр обычного (не потокового) сервера, но затем запускаете метод serve_forever() в пуле множества тредов. Например:
+```python
+...
+if __name__ == '__main__':
+	from threading import Thread
+	NWORKERS = 16
+	serv = TCPServer(('', 20000), EchoHandler)
+	for n in range(NWORKERS):
+		t = Thread(target=serv.serve_forever)
+		t.daemon = True
+		t.start()
+	serv.serve_forever()
+```
+
+Обычно *TCPServer* связывается с сокетом и активирует его во время создания экземпляра. Однако иногда вы можете пожелать настроить сокет путём установки опций. Чтобы это сделать, предоставьте аргумент *bind_and_activate=False*:
+```python
+if __name__ == '__main__':
+	serv = TCPServer(('', 20000), EchoHandler, bind_and_activate=False)
+	# Set up various socket options
+	serv.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+	# Bind and activate
+	serv.server_bind()
+	serv.server_activate()
+	serv.serve_forever()
+```   
+
+Показанная выше опция настройки сокета очень распространена: она позволяет серверу перепривязаться к ранее использованному номеру порта. Это настолько стандартная штука, что стала переменной класса, которая может быть настроена в *TCPServer*. Установите её на нужное значение перед созданием экземпляра сервера, как показано в этом примере:
+```python
+...
+if __name__ == '__main__':
+	TCPServer.allow_reuse_address = True
+	serv = TCPServer(('', 20000), EchoHandler)
+	serv.serve_forever()
+``` 
+
+В этом решении показаны два разных базовых класса-обработчика (*BaseRequestHandler* и *StreamRequestHandler*). Класс *StreamRequestHandler* на самом деле является более гибким и поддерживает некоторые возможности, которые могут быть включены через указание дополнительных переменных класса. Например:
+```python
+import socket
+
+class EchoHandler(StreamRequestHandler):
+	# Optional settings (defaults shown)
+	timeout = 5							# Timeout on all socket operations
+	rbufsize = -1						# Read buffer size
+	wbufsize = 0						# Write buffer size
+	disable_nagle_algorithm = False 	# Sets TCP_NODELAY socket option
+	def handle(self):
+		print('Got connection from', self.client_address)
+		try:
+			for line in self.rfile:
+				# self.wfile is a file-like object for writing
+				self.wfile.write(line)
+		except socket.timeout:
+			print('Timed out!')
+```
+
+И, наконец, стоит отметить, что большинство высокоуровневых сетевых модулей Python (HTTP, XML-RPC и т.п.) построены на основе функциональности *socketserver*. Тем не менее, несложно реализовывать серверы напрямую, используя библиотеку *socket*. Вот простой пример прямого написания сервера с помощью сокетов:
+```python
+from socket import socket, AF_INET, SOCK_STREAM
+
+def echo_handler(address, client_sock):
+	print('Got connection from {}'.format(address))
+	while True:
+		msg = client_sock.recv(8192)
+		if not msg:
+			break
+		client_sock.sendall(msg)
+	client_sock.close()
+
+def echo_server(address, backlog=5):
+	sock = socket(AF_INET, SOCK_STREAM)
+	sock.bind(address)
+	sock.listen(backlog)
+	while True:
+		client_sock, client_addr = sock.accept()
+		echo_handler(client_addr, client_sock)
+
+if __name__ == '__main__':
+	echo_server(('', 20000))
+```
+
 
 
