@@ -198,6 +198,7 @@
 	- 11.2. Создание TCP-сервера
 	- 11.3. Создание UDP-сервера
 	- 11.4. Генерация диапазона IP-адресов из CIDR-адреса
+	- 11.5. Создание простого REST-интерфейса
 
 <!-- /MarkdownTOC -->
 
@@ -18292,5 +18293,203 @@ TypeError: Can't convert 'IPv4Address' object to str implicitly
 
 См. «[Введение в модуль ipaddress](http://docs.python.org/3/howto/ipaddress.html)», чтобы получить больше информации и продвинутых примеров использования.
 
+
+## 11.5. Создание простого REST-интерфейса
+### Задача
+Вы хотите иметь возможность контролировать вашу программу или общаться с ней удалённо, по сети, используя простой REST-интерфейс. Однако вы не хотите делать путём установки полноценного веб-фреймворка.
+
+### Решение
+Один из самых простых способов построения REST-интерфейсов — это создание небольшой библиотеки на основе стандарта WSGI, как описано в [PEP 3333](http://www.python.org/dev/peps/pep-3333). Вот пример:
+```python
+# resty.py
+
+import cgi
+
+def notfound_404(environ, start_response):
+	start_response('404 Not Found', [ ('Content-type', 'text/plain') ])
+	return [b'Not Found']
+
+class PathDispatcher:
+	def __init__(self):
+		self.pathmap = { }
+
+	def __call__(self, environ, start_response):
+		path = environ['PATH_INFO']
+		params = cgi.FieldStorage(environ['wsgi.input'],
+								  environ=environ)
+		method = environ['REQUEST_METHOD'].lower()
+		environ['params'] = { key: params.getvalue(key) for key in params }
+		handler = self.pathmap.get((method,path), notfound_404)
+		return handler(environ, start_response)
+
+	def register(self, method, path, function):
+		self.pathmap[method.lower(), path] = function
+		return function
+```
+
+Чтобы использовать этот диспетчер, вы просто пишете разные обработчики:
+```python
+import time
+_hello_resp = '''\
+<html>
+	<head>
+		<title>Hello {name}</title>
+	</head>
+	<body>
+		<h1>Hello {name}!</h1>
+	</body>
+</html>'''
+
+def hello_world(environ, start_response):
+	start_response('200 OK', [ ('Content-type','text/html')])
+	params = environ['params']
+	resp = _hello_resp.format(name=params.get('name'))
+	yield resp.encode('utf-8')
+
+_localtime_resp = '''\
+<?xml version="1.0"?>
+<time>
+	<year>{t.tm_year}</year>
+	<month>{t.tm_mon}</month>
+	<day>{t.tm_mday}</day>
+	<hour>{t.tm_hour}</hour>
+	<minute>{t.tm_min}</minute>
+	<second>{t.tm_sec}</second>
+</time>'''
+
+def localtime(environ, start_response):
+	start_response('200 OK', [ ('Content-type', 'application/xml') ])
+	resp = _localtime_resp.format(t=time.localtime())
+	yield resp.encode('utf-8')
+
+if __name__ == '__main__':
+	from resty import PathDispatcher
+	from wsgiref.simple_server import make_server
+
+	# Create the dispatcher and register functions
+	dispatcher = PathDispatcher()
+	dispatcher.register('GET', '/hello', hello_world)
+	dispatcher.register('GET', '/localtime', localtime)
+
+	# Launch a basic server
+	httpd = make_server('', 8080, dispatcher)
+	print('Serving on port 8080...')
+	httpd.serve_forever()
+```
+
+Чтобы протестировать этот сервер, вы можете обратиться к нему через браузер или *urllib*. Например:
+```python
+>>> u = urlopen('http://localhost:8080/hello?name=Guido')
+>>> print(u.read().decode('utf-8'))
+<html>
+	<head>
+		<title>Hello Guido</title>
+	</head>
+	<body>
+		<h1>Hello Guido!</h1>
+	</body>
+</html>
+>>> u = urlopen('http://localhost:8080/localtime')
+>>> print(u.read().decode('utf-8'))
+<?xml version="1.0"?>
+<time>
+	<year>2012</year>
+	<month>11</month>
+	<day>24</day>
+	<hour>14</hour>
+	<minute>49</minute>
+	<second>17</second>
+</time>
+>>>
+```
+
+### Обсуждение
+REST-интерфейсы обычно применяются в программах, которые должны отвечать на обычные HTTP-запросы. Однако, в отличие от полноценного сайта, вы часто просто передаёте данные. Эти данные могут быть закодированы в различных форматах, таких как XML, JSON или CSV. Хотя это выглядит минималистично, предоставление такого API может быть крайне полезной штукой для самых разных приложений. 
+
+Например, программы, которые долго работают, могут использовать REST API для реализации мониторинга или диагностики. Приложения для работы с big data могут использовать REST для построения систем извлечения данных по запросу. REST может быть даже использован для управления устройствами, такими как роботы, сенсоры, кофемолки или лампочки. Более того, REST API отлично поддерживается различными программными окружениями для клиентской части, такими как JavaScript, Android, iOS и т.п. Предоставление такого интерфейса может быть отличным способом вдохновить разработку более сложных приложений, взаимодействующих с вашим кодом через REST.
+
+Чтобы реализовать простой REST-интерфейс, часто достаточно просто написать код на основе стандарта Python WSGI. Он поддерживается стандартной библиотекой, но также большинством сторонних фреймворков. Так что если вы используете его, то ваш код становится гибче и расширяет свои возможности по дальнейшему использованию.
+
+Согласно WSGI, вы просто реализуете приложения в форме вызываемых объектов с такими условиями вызова:
+```python
+import cgi
+
+def wsgi_app(environ, start_response):
+	...
+```
+
+Аргумент *environ* — это словарь, который содержит значения, которые были вдохновлены интерфейсом CGI, который предоставляется различными веб-серверами, такими как Apache (см. [Internet RFC 3875](http://tools.ietf.org/html/rfc3875)). Чтобы извлекать различные поля, вы должны написать такой код:
+```python
+def wsgi_app(environ, start_response):
+	method = environ['REQUEST_METHOD']
+	path = environ['PATH_INFO']
+	# Parse the query parameters
+	params = cgi.FieldStorage(environ['wsgi.input'], environ=environ)
+	...
+```
+
+Здесь показано несколько распространённых значений. *environ['REQUEST_METHOD']* — это тип запроса (т.е., GET, POST, HEAD и т.п.) *environ['PATH_INFO']* — это запрашиваемый путь или ресурс. Вызов *cgi.FieldStorage()* извлекает предоставленны параметры запроса из запроса и помещает их в словареподобный объект для дальнейшего использования.
+
+Аргумент *start_response* — это функция, которая должны быть вызвана, чтобы инициировать ответ. Первый аргумент — это получившийся HTTP-статус. Второй аргумент — это список кортежей *(name, value)*, которые составляют HTTP-заголовки ответа. Например:
+```python
+def wsgi_app(environ, start_response):
+	...
+	start_response('200 OK', [('Content-type', 'text/plain')])
+```
+
+Чтобы вернуть данные, WSGI-приложение должно вернуть последовательность байтовых строк. Это может быть сделано с использованием списка:
+```python
+def wsgi_app(environ, start_response):
+	...
+	start_response('200 OK', [('Content-type', 'text/plain')])
+	resp = []
+	resp.append(b'Hello World\n')
+	resp.append(b'Goodbye!\n')
+	return resp
+```
+
+Или же вы можете использовать *yield*:
+```python
+def wsgi_app(environ, start_response):
+	...
+	start_response('200 OK', [('Content-type', 'text/plain')])
+	yield b'Hello World\n'
+	yield b'Goodbye!\n'
+```
+
+Важно подчеркнуть, что эти байтовые строки должны быть использованы в результате. Если ответ состоит из текста, его нужно будет сначала закодировать в байты. Конечно, нет такого требования, чтобы возвращаемое значение было текстом — вы можете легко написать приложение, которое создает картинки. 
+
+Хотя WSGI-приложения часто определяются как функция, но может быть использован и экземпляр, если в нём реализован подходящий метод *__call__()*. Например:
+```python
+class WSGIApplication:
+	def __init__(self):
+	...
+	def __call__(self, environ, start_response)
+	...
+``` 
+
+Этот приём был использован для создания класса *PathDispatcher* в этом рецепте. Диспетчер ничего не делает, кроме как управляет отображением пар словаря *(method, path)* в функции-обработчики. Когда приходит запрос, метод и путь извлекаются и используются для диспетчеризации на обработчик. Также любые переменные запроса парсятся и помещаются в словарь, который сохраняется как *environ['params']* (этот последний шаг настолько распространён, что имеет смысл просто делать это в диспетчере, чтобы избежать дублирования кода).
+
+Чтобы использовать диспетчер, вы просто создаете экземпляр и регистрируете различные WSGI-функции приложения с его помощью, как показано в рецепте. Написание этих функций обычно абсолютно прямолинейно, если вы следуете правилам, касающимся функции *start_response()* и производите вывод в форме байтовых строк.
+
+Момент, о котором стоит помнить при написании этих функций, касается осторожного подхода к использованию строковых шаблонов. Никто не любит работать с кодом, который представляет собой перепутанную массу функций *print()*, XML и различных операций форматирования. В решении определены и используются строковые шаблоны в тройных кавычках. Этот подход облегчает изменение формата вывода позже (просто измените шаблон, а использующий его код менять не придётся). 
+
+Наконец, важный момент использования WSGI заключается в том, что ничто в этой реализации не специфично для конкретного веб-сервера. Это и есть главная идея — поскольку стандарт нейтрален по отношению к серверам и фреймворкам, вы сможете прикрутить ваше приложение к практически любому серверу. В рецепте для проверки используется такой код:
+```python
+if __name__ == '__main__':
+	from wsgiref.simple_server import make_server
+	# Create the dispatcher and register functions
+	dispatcher = PathDispatcher()
+	...
+
+	# Launch a basic server
+	httpd = make_server('', 8080, dispatcher)
+	print('Serving on port 8080...')
+	httpd.serve_forever()
+``` 
+
+Это создаёт простой сервер, который вы можете использовать, чтобы проверить, работает ли ваша реализация. Позже, когда вы будете готовы к масштабированию, вы измените этот код, чтобы он работал с конкретным сервером. 
+
+WSGI — это спецификация, которая намеренно сделана минимальной. Поэтому она не предоставляет поддержку более продвинутым концепциям, таким как аутентификация, куки, редиректы и так далее. Все они легко реализуются самостоятельно. Однако если вам нужно чуть-чуть больше функций, вы можете посмотреть на сторонние библиотеки типа [WebOb](http://webob.org) или [Paste](http://pythonpaste.org).
 
 
