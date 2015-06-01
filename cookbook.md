@@ -201,6 +201,10 @@
 	- 11.5. Создание простого REST-интерфейса
 	- 11.6. Реализация простого удалённого вызова процедуры через XML-RPC
 	- 11.7. Простое взаимодействие между интерпретаторами
+	- 11.8. Реализация вызовов удалённых процедур
+- jsonrpcserver.py
+- jsonrpcclient.py
+	- 11.9. Простая аутентификация клиентов
 
 <!-- /MarkdownTOC -->
 
@@ -18659,4 +18663,160 @@ s = Listener(r'\\.\pipe\myconn', authkey=b'peekaboo')
 Общее правило: вы не должны использовать *multiprocessing* для реализации публичных сервисов. Параметр *authkey*, передаваемый *Client()* и *Listener()*, помогает аутентифицировать конечные точки соединения. Попытки соединения с неправильным ключом будут возбуждать исключение. Вероятно, этот модуль лучше подходит для длительных соединений (но не для большого количества коротких соединений). Например, два интерпретатора могут установить соединение при запуске и поддерживать соединение активным на всём протяжении выполнения задачи.
 
 Не используете *multiprocessing*, если вам нужен более низкоуровневый контроль над аспектами соединения. Например, если вы хотите поддерживать таймауты, неблокирующий ввод-вывод или что-то похожее, вам стоит использовать другую библиотеку или реализовать эти возможности поверх сокетов.  
+
+## 11.8. Реализация вызовов удалённых процедур
+### Задача
+Вы хотите реализовать простую систему удаленного вызова процедур (RPC) поверх слоя передачи сообщений, такого как сокеты, соединения модуля *multiprocessing* или ZeroMQ.
+
+### Решение
+RPC легко реализовать путём упаковки с помощью *pickle* запросов, аргументов и возвращаемых значений функций, и передачи упакованной байтовой строки между интерпретаторами. Вот пример простого RPC-обработчика, который можно встроить в сервер:
+```python
+# rpcserver.py
+
+import pickle
+
+class RPCHandler:
+	def __init__(self):
+		self._functions = { }
+	
+	def register_function(self, func):
+		self._functions[func.__name__] = func
+	
+	def handle_connection(self, connection):
+		try:
+			while True:
+				# Receive a message
+				func_name, args, kwargs = pickle.loads(connection.recv())
+				# Run the RPC and send a response
+				try:
+					r = self._functions[func_name](*args,**kwargs)
+					connection.send(pickle.dumps(r))
+				except Exception as e:
+					connection.send(pickle.dumps(e))
+		except EOFError:
+			pass
+``` 
+
+Чтобы использовать этот обработчик, вам нужно добавить его в сервер сообщений. Есть много возможных выборов, но библиотека *multiprocessing* — один из самых простых вариантов. Вот пример RPC-сервера:
+```python
+from multiprocessing.connection import Listener
+from threading import Thread
+
+def rpc_server(handler, address, authkey):
+	sock = Listener(address, authkey=authkey)
+	while True:
+		client = sock.accept()
+		t = Thread(target=handler.handle_connection, args=(client,))
+		t.daemon = True
+		t.start()
+
+# Some remote functions
+def add(x, y):
+	return x + y
+
+def sub(x, y):
+	return x - y
+
+# Register with a handler
+handler = RPCHandler()
+handler.register_function(add)
+handler.register_function(sub)
+
+# Run the server
+rpc_server(handler, ('localhost', 17000), authkey=b'peekaboo')
+```
+
+Чтобы обратиться к серверу с удалённого клиента, вам нужно создать соответствующий RPC-прокси-класс, который будет перенаправлять запросы. Например:
+```python
+import pickle
+
+class RPCProxy:
+	def __init__(self, connection):
+		self._connection = connection
+	
+	def __getattr__(self, name):
+		def do_rpc(*args, **kwargs):
+			self._connection.send(pickle.dumps((name, args, kwargs)))
+			result = pickle.loads(self._connection.recv())
+			if isinstance(result, Exception):
+				raise result
+			return result
+		return do_rpc
+```
+
+Чтобы использовать прокси, оберните его вокруг соединения с сервером. Например:
+```python
+>>> from multiprocessing.connection import Client
+>>> c = Client(('localhost', 17000), authkey=b'peekaboo')
+>>> proxy = RPCProxy(c)
+>>> proxy.add(2, 3)
+5
+>>> proxy.sub(2, 3)
+-1
+>>> proxy.sub([1, 2], 4)
+Traceback (most recent call last):
+	File "<stdin>", line 1, in <module>
+	File "rpcserver.py", line 37, in do_rpc
+		raise result
+TypeError: unsupported operand type(s) for -: 'list' and 'int'
+>>>
+```
+
+Стоит отметить, что многие слои передачи сообщений (такие как *multiprocessing*) уже сериализуют данные с помощью *pickle*. В этом случае вызовы *pickle.dumps()* и pickle.loads() могут быть удалены.
+
+### Обсуждение
+Главная идея классов *RPCHandler* и *RPCProxy* относительно проста. Если клиент хочет вызывать удалённую функцию, такую как *foo(1, 2, z=3)*, прокси-класс создает кортеж *('foo', (1, 2), {'z': 3})*, который содержит имя функции и аргументы. Этот кортеж упаковывается и отсылается через соединение. Это выполняется в замыкании *do_rpc()*, которое возвращается методом *__getattr__()* класса *RPCProxy*. Сервер получает и распаковывает сообщение, проверяет, зарегистрировано ли имя функции, а затем выполняет её с переданными аргументами. Результат (или исключение) упаковывается и отсылается обратно.
+
+Как показано выше, данный пример использует для коммуникации *multiprocessing*. Однако этот подход может быть применён для практически любой системы передачи сообщений. Например, если вы захотите реализовать RPC через ZeroMQ, просто заменить объекты соединений подходящими объектами сокетов ZeroMQ.
+
+Поскольку здесь применяется *pickle*, безопасность под угрозой (умный хакер может создать сообщения, которые выполнят произвольные функции во время распаковки). В частности, вы никогда не должны разрешать RPC от недоверенных или неаутентифицированных клиентов. И вы ни в коем случае не должны давать доступ с любого компьютера, подключенного к интернету: RPC нужно использовать внутри сети, за файрволлом.
+
+ В качестве альтернативы *pickle* вы можете попробовать JSON, XML или какой-то другой способ кодирования данных для сериализации. Например, этот рецепт легко адаптировать к JSON — просто заменить *pickle.loads()* и *pickle.dumps()* на *json.loads()* и *json.dumps()*. Например:
+ ```python
+# jsonrpcserver.py
+import json
+
+class RPCHandler:
+	def __init__(self):
+		self._functions = { }
+	
+	def register_function(self, func):
+		self._functions[func.__name__] = func
+	
+	def handle_connection(self, connection):
+		try:
+			while True:
+				# Receive a message
+				func_name, args, kwargs = json.loads(connection.recv())
+				# Run the RPC and send a response
+				try:
+					r = self._functions[func_name](*args,**kwargs)
+					connection.send(json.dumps(r))
+				except Exception as e:
+					connection.send(json.dumps(str(e)))
+		except EOFError:
+			pass
+
+# jsonrpcclient.py
+import json
+
+class RPCProxy:
+	def __init__(self, connection):
+		self._connection = connection
+	def __getattr__(self, name):
+		def do_rpc(*args, **kwargs):
+			self._connection.send(json.dumps((name, args, kwargs)))
+			result = json.loads(self._connection.recv())
+			return result
+		return do_rpc
+ ```
+
+Сложный момент в реализации RPC — обработка исключений. По крайней мере, сервер не должен падать, если метод возбуждает исключение. Однако средства отправки сообщений об исключениях обратно клиенту требуют изучения. Если вы используете *pickle*, экземпляры исключений часто сериализуются и заново возбуждаются уже на клиенте. Если вы используете какой-либо другой протокол, вам, вероятно, придётся подумать об альтернативном подходе. Как минимум, вы, вероятно, захотите возвращать строку с исключением в ответе. Это подход, которому мы следователи в примере с JSON. 
+
+Ещё один пример реализации RPC вы найдете в **рецепте 11.6.**, где обсуждаются классы *SimpleXMLRPCServer* и *ServerProxy*.
+
+## 11.9. Простая аутентификация клиентов
+###     
+
+
 
