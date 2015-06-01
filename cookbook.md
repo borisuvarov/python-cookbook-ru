@@ -18816,7 +18816,89 @@ class RPCProxy:
 Ещё один пример реализации RPC вы найдете в **рецепте 11.6.**, где обсуждаются классы *SimpleXMLRPCServer* и *ServerProxy*.
 
 ## 11.9. Простая аутентификация клиентов
-###     
+### Задача
+Вы хотите реализовать простой способ аутентификации клиентов, соединяющихся с серверами в распределённой системе, но вам не нужны сложные решения типа SSL.
+
+### Решение
+Простой, но при этом эффективный способ аутентификации может быть реализован путём хендшейка при соединении с использованием модуля *hmac*. Вот пример:
+```python
+import hmac
+import os
+
+def client_authenticate(connection, secret_key):
+	'''
+	Authenticate client to a remote service.
+	connection represents a network connection.
+	secret_key is a key known only to both client/server.
+	'''
+	message = connection.recv(32)
+	hash = hmac.new(secret_key, message)
+	digest = hash.digest()
+	connection.send(digest)
+
+def server_authenticate(connection, secret_key):
+	'''
+	Request client authentication.
+	'''
+	message = os.urandom(32)
+	connection.send(message)
+	hash = hmac.new(secret_key, message)
+	digest = hash.digest()
+	response = connection.recv(len(digest))
+	return hmac.compare_digest(digest,response)
+```    
+
+Основная идея в том, что до установки соединения сервер предоставляет клиенту сообщение, состоящее из случайных байтов (в данном случае они генерируются *os.random()*). И клиент, и сервер вычисляют криптографический хэш этих случайных данных, используя *hmac* и секретный ключ, известный только обеим сторонам. Клиент посылает вычисленный дайджест обратно на сервер, где они сравниваются, после чего принимается решение — принимать соединение или нет. 
+
+Сравнение получившихся дайджестов должно выполняться с помощью функции *hmac.compare_digest()*. Она написана таким образом, чтобы предотвратить атаки на основе анализа тайминга и должна быть использована вместо стандартного оператора сравнения (*==*).
+
+Чтобы использовать эти функции, вы должны включить их в существующий сетевой код или код системы обмена сообщениями. Например, с сокетами серверный код может выглядеть как-то так:
+```python
+from socket import socket, AF_INET, SOCK_STREAM
+
+secret_key = b'peekaboo'
+def echo_handler(client_sock):
+	if not server_authenticate(client_sock, secret_key):
+		client_sock.close()
+		return
+	while True:
+		msg = client_sock.recv(8192)
+		if not msg:
+			break
+		client_sock.sendall(msg)
+
+def echo_server(address):
+	s = socket(AF_INET, SOCK_STREAM)
+	s.bind(address)
+	s.listen(5)
+	while True:
+		c,a = s.accept()
+		echo_handler(c)
+
+echo_server(('', 18000))
+```
+
+В клиенте нужен примерно такой код:
+```python
+from socket import socket, AF_INET, SOCK_STREAM
+
+secret_key = b'peekaboo'
+
+s = socket(AF_INET, SOCK_STREAM)
+s.connect(('localhost', 18000))
+client_authenticate(s, secret_key)
+s.send(b'Hello World')
+resp = s.recv(1024)
+...
+``` 
+
+### Обсуждение
+Обычно аутентификация на базе *hmac* используется для внутренних систем обмена сообщениями и взаимодействия между процессами. Например, если вы пишете систему, в которой общаются между собой процессы, запущенные на кластере компьютеров, вы можете использовать этот подход, чтобы быть уверенными, что только процессы, у которых есть соответствующие права, могут соединятся друг с другом. Например, HMAC-аутентификация используется библиотекой *multiprocessing*, когда она устанавливает сообщение между подпроцессами. 
+
+Важно подчеркнуть, что аутентификация соединения — это не то же самое, что шифрование. Последующая коммуникация по аутентифицированному соединению посылается без шифрования, и поэтому может быть видима всем, кто вклинится посредине и будет сниффить трафик (хотя приватный ключ, известный обеим сторонам, никогда не передаётся).
+
+Алгоритм аутентификации, используемый *hmac*, базируется на криптографических функциях хэширования, таких как MD5 и SHA-1, и в деталях описан в [IETF RFC 2104](http://tools.ietf.org/html/rfc2104.html).
+
 
 
 
