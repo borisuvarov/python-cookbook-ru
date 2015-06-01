@@ -206,6 +206,7 @@
 - jsonrpcclient.py
 	- 11.9. Простая аутентификация клиентов
 	- 11.10. Добавление SSL в сетевые сервисы
+	- 11.11. Передача файловых дескрипторов сокетов между процессами
 
 <!-- /MarkdownTOC -->
 
@@ -19185,3 +19186,223 @@ D3vvcW5lAnCCC80P6rXy7d7hTeFu5EYKtRGXNvVNd/06NALGDflrrOwxF3Y=
 Серверы также могут верифицировать клиентов. Чтобы сделать это, клиентам нужно иметь собственный приватный ключ и сертификатный ключ. Сервер также поддерживает файл с доверенными центрами сертификации, чтобы проверять клиентские сертификаты.
 
 Если вы намереваетесь добавить поддержку SSL в реальный сетевой сервис, этот рецепт может лишь кивнуть в направлении, куда вам надлежит копать. Вам обязательно придётся свериться с [документацией](http://docs.python.org/3/library/ssl.html), чтобы разобраться в вопросе. Приготовьтесь провести немало времени в попытках заставить всё заработать.    
+
+## 11.11. Передача файловых дескрипторов сокетов между процессами
+### Задача
+У вас запущено несколько процессов с интерпретаторами Python, и вы хотите передать открытый файловый дескриптор из одного интерпретатора в другой. Например, у вас может быть серверный процесс, который отвечает за приём соединений, но реальное обслуживание клиентов выполняет другой интерпретатор.
+
+### Решение
+Чтобы передать файловый дескриптор между процессами, вам для начала потребуется соединить процессы. На компьютерах с Unix вы можете использовать доменные сокеты Unix, а на Windows — именованные каналы. Однако вместо работы с такими низкоуровневыми механизмами, часто для установки таких соединений проще использовать модуль *multiprocessing*.
+
+Когда соединение установлено, вы можете использовать функции *send_handle()* и *recv_handle()* из *multiprocessing.reduction*, чтобы пересылать файловые дескрипторы между процессами. Следующий пример показывает основные моменты:
+```python
+import multiprocessing
+from multiprocessing.reduction import recv_handle, send_handle
+import socket
+
+def worker(in_p, out_p):
+	out_p.close()
+	while True:
+		fd = recv_handle(in_p)
+		print('CHILD: GOT FD', fd)
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM, fileno=fd) as s:
+			while True:
+				msg = s.recv(1024)
+				if not msg:
+					break
+				print('CHILD: RECV {!r}'.format(msg))
+				s.send(msg)
+
+def server(address, in_p, out_p, worker_pid):
+	in_p.close()
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+	s.bind(address)
+	s.listen(1)
+	while True:
+		client, addr = s.accept()
+		print('SERVER: Got connection from', addr)
+		send_handle(out_p, client.fileno(), worker_pid)
+		client.close()
+
+if __name__ == '__main__':
+	c1, c2 = multiprocessing.Pipe()
+	worker_p = multiprocessing.Process(target=worker, args=(c1,c2))
+	worker_p.start()
+
+	server_p = multiprocessing.Process(target=server,
+									   args=(('', 15000), c1, c2, worker_p.pid))
+	server_p.start()
+
+	c1.close()
+	c2.close()
+```
+
+В этом примере создаются два процесса и соединяются через объект *Pipe* из *multiprocessing*. Серверный процесс открывает сокет и ждёт соединений с клиентами. Процесс-воркер ждёт получения файлового дескриптора по каналу, используя *recv_handle()*. Когда сервер получает соединение, он посылает получившийся файловый дескриптор сокета воркеру, используя *send_handle()*. Воркер принимает сокет и эхом отправляет данные обратно клиенту, пока соединение не закроется.  
+
+Если вы соединитесь с запущенным сервером с помощью Telnet или похожего инструмента, то вы увидите что-то подобное:
+```
+bash % python3 passfd.py
+SERVER: Got connection from ('127.0.0.1', 55543)
+CHILD: GOT FD 7
+CHILD: RECV b'Hello\r\n'
+CHILD: RECV b'World\r\n'
+```
+
+Самая важная часть этого примера — тот факт, что сокет клиента, принятый сервером, на самом деле обслуживается совершенно другим процессом. Сервер всего лишь передает его, закрывает и ждёт следующего соединения.
+
+### Обсуждение
+Многие программисты даже не представляют себе, что можно реализовать передачу файловых дескрипторов между процессами. Однако это иногда может стать полезным инструментом для построения масштабируемых систем. Например, на многоядерном компьютере вы можете запустить несколько экземпляров интепретатора Python и использовать передачу файловых дескрипторов для более равномерной балансировки количества клиентов, обслуживаемого каждым из интепретаторов.
+
+Функции *send_handle()* и *recv_handle()*, показанные в решении, на самом деле работают только с многопроцессными соединениями. Вместо использования канала, вы можете соединить интерпретаторы так, как показано в **рецепте 11.7.**, и это будет работать до тех пор, пока вы используете доменные сокеты UNIX или каналы Windows. Например, вы можете реализовать сервер и воркер как абсолютно разные программы, которые запускаются по отдельности. Вот реализация сервера:
+```python
+# servermp.py
+from multiprocessing.connection import Listener
+from multiprocessing.reduction import send_handle
+import socket
+
+def server(work_address, port):
+	# Wait for the worker to connect
+	work_serv = Listener(work_address, authkey=b'peekaboo')
+	worker = work_serv.accept()
+	worker_pid = worker.recv()
+
+	# Now run a TCP/IP server and send clients to worker
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+	s.bind(('', port))
+	s.listen(1)
+	while True:
+		client, addr = s.accept()
+		print('SERVER: Got connection from', addr)
+		send_handle(worker, client.fileno(), worker_pid)
+		client.close()
+
+if __name__ == '__main__':
+	import sys
+	if len(sys.argv) != 3:
+		print('Usage: server.py server_address port', file=sys.stderr)
+		raise SystemExit(1)
+	
+	server(sys.argv[1], int(sys.argv[2]))
+```
+
+Чтобы запустить этот сервер, вы можете напечатать команду *python3 servermp.py /tmp/ servconn 15000*. Вот соответствующий код клиента:
+```python
+# workermp.py
+
+from multiprocessing.connection import Client
+from multiprocessing.reduction import recv_handle
+import os
+from socket import socket, AF_INET, SOCK_STREAM
+
+def worker(server_address):
+	serv = Client(server_address, authkey=b'peekaboo')
+	serv.send(os.getpid())
+	while True:
+		fd = recv_handle(serv)
+		print('WORKER: GOT FD', fd)
+		with socket(AF_INET, SOCK_STREAM, fileno=fd) as client:
+			while True:
+				msg = client.recv(1024)
+				if not msg:
+					break
+				print('WORKER: RECV {!r}'.format(msg))
+				client.send(msg)
+
+if __name__ == '__main__':
+	import sys
+	if len(sys.argv) != 2:
+		print('Usage: worker.py server_address', file=sys.stderr)
+		raise SystemExit(1)
+	
+	worker(sys.argv[1])
+```
+
+Чтобы запустить воркер, напечатайте *python3 workermp.py /tmp/servconn*. Получившаяся операция будет точно такой же, как и в примере, который использует *Pipe()*. 
+
+«Под капотом» передача файлового дескриптора использует создание доменного сокета UNIX и метода сокетов sendmsg(). Поскольку этот приём не общеизвестен, вот другая реализация сервера, которая показывает, как передать дескрипторы, используя сокеты:
+```python
+# server.py
+import socket
+import struct
+
+def send_fd(sock, fd):
+	'''
+	Send a single file descriptor.
+	'''
+	sock.sendmsg([b'x'],
+			   	 [(socket.SOL_SOCKET, socket.SCM_RIGHTS, struct.pack('i', fd))])
+	ack = sock.recv(2)
+	assert ack == b'OK'
+
+def server(work_address, port):
+	# Wait for the worker to connect
+	work_serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+	work_serv.bind(work_address)
+	work_serv.listen(1)
+	worker, addr = work_serv.accept()
+
+	# Now run a TCP/IP server and send clients to worker
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+	s.bind(('',port))
+	s.listen(1)
+	while True:
+		client, addr = s.accept()
+		print('SERVER: Got connection from', addr)
+		send_fd(worker, client.fileno())
+		client.close()
+
+if __name__ == '__main__':
+	import sys
+	if len(sys.argv) != 3:
+		print('Usage: server.py server_address port', file=sys.stderr)
+		raise SystemExit(1)
+
+	server(sys.argv[1], int(sys.argv[2]))
+``` 
+
+Вот реализация воркера с использованием сокетов:
+```python
+# worker.py
+import socket
+import struct
+
+def recv_fd(sock):
+	'''
+	Receive a single file descriptor
+	'''
+	msg, ancdata, flags, addr = sock.recvmsg(1,
+									socket.CMSG_LEN(struct.calcsize('i')))
+	
+	cmsg_level, cmsg_type, cmsg_data = ancdata[0]
+	assert cmsg_level == socket.SOL_SOCKET and cmsg_type == socket.SCM_RIGHTS
+	sock.sendall(b'OK')
+	return struct.unpack('i', cmsg_data)[0]
+
+
+def worker(server_address):
+	serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+	serv.connect(server_address)
+	while True:
+		fd = recv_fd(serv)
+		print('WORKER: GOT FD', fd)
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM, fileno=fd) as client:
+			while True:
+				msg = client.recv(1024)
+				if not msg:
+					break
+				print('WORKER: RECV {!r}'.format(msg))
+				client.send(msg)
+
+if __name__ == '__main__':
+	import sys
+	if len(sys.argv) != 2:
+		print('Usage: worker.py server_address', file=sys.stderr)
+		raise SystemExit(1)
+
+	worker(sys.argv[1])
+```
+
+Если собираетесь использовать передачу файловых дескрипторов в своей программе, рекомендуем почитать более продвинутый материал, такой как *Unix Network Programming* У. Ричарда Стивенса. Передача файловых дескрипторов в Windows использует другие приёмы (не показанные здесь). Для работы с этой ОС рекомендуем внимательно изучить исходный код *multiprocessing.reduction* и понять, как он работает. 
