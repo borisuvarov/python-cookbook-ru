@@ -205,6 +205,7 @@
 - jsonrpcserver.py
 - jsonrpcclient.py
 	- 11.9. Простая аутентификация клиентов
+	- 11.10. Добавление SSL в сетевые сервисы
 
 <!-- /MarkdownTOC -->
 
@@ -18895,10 +18896,292 @@ resp = s.recv(1024)
 ### Обсуждение
 Обычно аутентификация на базе *hmac* используется для внутренних систем обмена сообщениями и взаимодействия между процессами. Например, если вы пишете систему, в которой общаются между собой процессы, запущенные на кластере компьютеров, вы можете использовать этот подход, чтобы быть уверенными, что только процессы, у которых есть соответствующие права, могут соединятся друг с другом. Например, HMAC-аутентификация используется библиотекой *multiprocessing*, когда она устанавливает сообщение между подпроцессами. 
 
-Важно подчеркнуть, что аутентификация соединения — это не то же самое, что шифрование. Последующая коммуникация по аутентифицированному соединению посылается без шифрования, и поэтому может быть видима всем, кто вклинится посредине и будет сниффить трафик (хотя приватный ключ, известный обеим сторонам, никогда не передаётся).
+Важно подчеркнуть, что аутентификация соединения — это не то же самое, что шифрование. Последующая коммуникация по аутентифицированному соединению посылается без шифрования, и поэтому может быть видима всем, кто вклинится посредине и будет сниффить трафик (хотя секретный ключ, известный обеим сторонам, никогда не передаётся).
 
 Алгоритм аутентификации, используемый *hmac*, базируется на криптографических функциях хэширования, таких как MD5 и SHA-1, и в деталях описан в [IETF RFC 2104](http://tools.ietf.org/html/rfc2104.html).
 
+## 11.10. Добавление SSL в сетевые сервисы
+### Задача
+Вы хотите реализовать сетевой сервис, использующий сокеты, где серверы и клиенты аутентифицируют друг друга и шифруют передаваемые данные с помощью SSL.
 
+### Решение
+Модуль *ssl* предоставляет поддержку для добавления SSL к низкоуровневым соединениям на базе сокетов. В частности, функция *ssl.wrap_socket()* принимает существующий сокет и оборачивает его слоем SSL. Вот, например, простой эхо-сервер, который предоставляет серверный сертификат подсоединяющимся клиентам:
+```python
+from socket import socket, AF_INET, SOCK_STREAM
+import ssl
 
+KEYFILE = 'server_key.pem' 		# Private key of the server
+CERTFILE = 'server_cert.pem' 	# Server certificate (given to client)
 
+def echo_client(s):
+	while True:
+		data = s.recv(8192)
+		if data == b'':
+			break
+		s.send(data)
+	s.close()
+	print('Connection closed')
+
+def echo_server(address):
+	s = socket(AF_INET, SOCK_STREAM)
+	s.bind(address)
+	s.listen(1)
+
+	# Wrap with an SSL layer requiring client certs
+	s_ssl = ssl.wrap_socket(s,
+							keyfile=KEYFILE,
+							certfile=CERTFILE,
+							server_side=True
+							)
+	# Wait for connections
+	while True:
+		try:
+			c,a = s_ssl.accept()
+			print('Got connection', c, a)
+			echo_client(c)
+		except Exception as e:
+			print('{}: {}'.format(e.__class__.__name__, e))
+
+echo_server(('', 20000))
+```  
+
+Вот интерактивный сеанс, который показывает, как клиент соединяется с сервером. Клиент запрашивает у сервера его сертификат и проверяет его:
+```python
+>>> from socket import socket, AF_INET, SOCK_STREAM
+>>> import ssl
+>>> s = socket(AF_INET, SOCK_STREAM)
+>>> s_ssl = ssl.wrap_socket(s,
+...							cert_reqs=ssl.CERT_REQUIRED,
+...							ca_certs = 'server_cert.pem')
+>>> s_ssl.connect(('localhost', 20000))
+>>> s_ssl.send(b'Hello World?')
+12
+>>> s_ssl.recv(8192)
+b'Hello World?'
+>>>
+```
+
+Проблема со всем этим низкоуровневым сокетным хакерством в том, что это не очень хорошо работает с существующими сетевыми сервисами, уже реализованными в стандартной библиотеке. Например, большая часть серверного кода (HTTP, XML-RPC и т.д.) базируется на библиотеке *socketserver*. Код клиентов тоже реализуется на более высоком уровне. В существующие сервисы можно добавить SSL, но для этого требуется немного другой подход.
+
+Во-первых, в серверы SSL может быть добавлен через использование класса-примеси (миксина):
+```python
+import ssl
+
+class SSLMixin:
+	'''
+	Mixin class that adds support for SSL to existing servers based
+	on the socketserver module.
+	'''
+	def __init__(self, *args,
+				 keyfile=None, certfile=None, ca_certs=None,
+				 cert_reqs=ssl.NONE,
+				 **kwargs):
+		self._keyfile = keyfile
+		self._certfile = certfile
+		self._ca_certs = ca_certs
+		self._cert_reqs = cert_reqs
+		super().__init__(*args, **kwargs)
+	
+	def get_request(self):
+		client, addr = super().get_request()
+		client_ssl = ssl.wrap_socket(client,
+								     keyfile = self._keyfile,
+									 certfile = self._certfile,
+									 ca_certs = self._ca_certs,
+									 cert_reqs = self._cert_reqs,
+									 server_side = True)
+		return client_ssl, addr
+```
+
+Чтобы использовать этот миксин, вы должн примешать его другим классам сервера. Например, вот как определить XML-RPC-сервер, который работает через SSL:
+```python
+# XML-RPC server with SSL
+
+from xmlrpc.server import SimpleXMLRPCServer
+
+class SSLSimpleXMLRPCServer(SSLMixin, SimpleXMLRPCServer):
+	pass
+```
+
+Вот XML-RPC-сервер из **рецепта 11.6.**, немного модифицированного для работы через SSL:
+```python
+import ssl
+from xmlrpc.server import SimpleXMLRPCServer
+from sslmixin import SSLMixin
+
+class SSLSimpleXMLRPCServer(SSLMixin, SimpleXMLRPCServer):
+	pass
+
+class KeyValueServer:
+	_rpc_methods_ = ['get', 'set', 'delete', 'exists', 'keys']
+	def __init__(self, *args, **kwargs):
+		self._data = {}
+		self._serv = SSLSimpleXMLRPCServer(*args, allow_none=True, **kwargs)
+		for name in self._rpc_methods_:
+			self._serv.register_function(getattr(self, name))
+		
+	def get(self, name):
+		return self._data[name]
+	
+	def set(self, name, value):
+		self._data[name] = value
+	
+	def delete(self, name):
+		del self._data[name]
+	
+	def exists(self, name):
+		return name in self._data
+	
+	def keys(self):
+		return list(self._data)
+	
+	def serve_forever(self):
+		self._serv.serve_forever()
+
+if __name__ == '__main__':
+	KEYFILE='server_key.pem'	# Private key of the server
+	CERTFILE='server_cert.pem'  # Server certificate
+	kvserv = KeyValueServer(('', 15000),
+							 keyfile=KEYFILE,
+							 certfile=CERTFILE),
+	kvserv.serve_forever()
+```
+
+Чтобы использовать этот сервер, вы можете соединиться с ним с помощью обычного модуля *xmlrpc.client*. Просто напишите *https:* в URL. Например:
+```python
+>>> from xmlrpc.client import ServerProxy
+>>> s = ServerProxy('https://localhost:15000', allow_none=True)
+>>> s.set('foo','bar')
+>>> s.set('spam', [1, 2, 3])
+>>> s.keys()
+['spam', 'foo']
+>>> s.get('foo')
+'bar'
+>>> s.get('spam')
+[1, 2, 3]
+>>> s.delete('spam')
+>>> s.exists('spam')
+False
+>>>
+```
+
+Сложная проблема с SSL-клиентами в том, что требуется выполнение дополнительных шагов, чтобы верифицировать сертификат сервера или предоставить серверу опознавательную информацию о клиенте (такую как клиентский сертификат). К сожалению, для реализации этого нет стандартного пути, так что потребуется некоторое изучение вопроса. Вот, однако, пример того, как установить безопасное XML-RPC-соединение, которое проверяет сертификат сервера:
+```python
+from xmlrpc.client import SafeTransport, ServerProxy
+import ssl
+
+class VerifyCertSafeTransport(SafeTransport):
+	def __init__(self, cafile, certfile=None, keyfile=None):
+		SafeTransport.__init__(self)
+		self._ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+		self._ssl_context.load_verify_locations(cafile)
+		if cert:
+			self._ssl_context.load_cert_chain(certfile, keyfile)
+		self._ssl_context.verify_mode = ssl.CERT_REQUIRED
+
+	def make_connection(self, host):
+		# Items in the passed dictionary are passed as keyword
+		# arguments to the http.client.HTTPSConnection() constructor.
+		# The context argument allows an ssl.SSLContext instance to
+		# be passed with information about the SSL configuration
+		s = super().make_connection((host, {'context': self._ssl_context}))
+		
+		return s
+
+# Create the client proxy
+s = ServerProxy('https://localhost:15000',
+				 transport=VerifyCertSafeTransport('server_cert.pem'),
+				 allow_none=True)
+```
+
+Как показано выше, сервер предоставляет сертификат клиенту, и клиент его проверяет. Эта верификация может быть двунаправленной. Если сервер хочет верифицировать клиента, измените процесс его запуска на следующий:
+```python
+# Create the client proxy
+s = ServerProxy('https://localhost:15000',
+				 transport=VerifyCertSafeTransport('server_cert.pem',
+												   'client_cert.pem',
+												   'client_key.pem'),
+			     allow_none=True)
+```
+
+### Обсуждение
+Этот рецепт испытает на прочность ваши знания в области системного конфигурирования и SSL. Самое сложное — просто произвести первоначальную конфигурацию ключей, сертификатов и всех прочих необходимых компонентов по порядку. 
+
+Поясним: каждая конечная точка SSL-соединения обычно имеет приватный ключ и подписанный файл сертификата. Файл сертификата содержит публичный ключ. Он предоставляется удалённому пиру (peer) при каждом соединении. Для публичных серверов сертификаты обычно подписываются центром выдачи сертификатов типа Verisign, Equifax или похожими организациями (это стоит денег). Чтобы верифицировать серверные сертификаты, клиенты поддерживают файл, в котором хранятся сертификаты доверенных центров сертификации. Например, веб-браузеры поддерживают сертификаты, соответствующие главным центрам выдачи сертификатов, и используют их для проверки целостности сертификатов, предоставляемых веб-серверами при HTTPS-соединениях.
+
+Для целей этого рецепта вы можете создать самоподписанный сертификат. Вот как это делается:
+```
+bash % openssl req -new -x509 -days 365 -nodes -out server_cert.pem \
+-keyout server_key.pem
+Generating a 1024 bit RSA private key
+..........................................++++++
+...++++++
+writing new private key to 'server_key.pem'
+ -----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+ -----
+Country Name (2 letter code) [AU]:US
+State or Province Name (full name) [Some-State]:Illinois
+Locality Name (eg, city) []:Chicago
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Dabeaz, LLC
+Organizational Unit Name (eg, section) []:
+Common Name (eg, YOUR name) []:localhost
+Email Address []:
+bash %
+``` 
+
+При создании сертификата значения для различных полей часто могут быть произвольными. Однако поле “Common Name” часто содержит имя хоста DNS серверов. Если вы просто экспериментируете на своём компьютере, используйте “localhost”. В противном случае используйте доменное имя компьютера, на котором будет запущен сервер.
+
+В качестве результата этой конфигурации вы получите файл *server_key.pem*, содержащий приватный ключ. Он выглядит примерно так:
+```
+-----BEGIN RSA PRIVATE KEY-----
+MIICXQIBAAKBgQCZrCNLoEyAKF+f9UNcFaz5Osa6jf7qkbUl8si5xQrY3ZYC7juu
+nL1dZLn/VbEFIITaUOgvBtPv1qUWTJGwga62VSG1oFE0ODIx3g2Nh4sRf+rySsx2
+L4442nx0z4O5vJQ7k6eRNHAZUUnCL50+YvjyLyt7ryLSjSuKhCcJsbZgPwIDAQAB
+AoGAB5evrr7eyL4160tM5rHTeATlaLY3UBOe5Z8XN8Z6gLiB/ucSX9AysviVD/6F
+3oD6z2aL8jbeJc1vHqjt0dC2dwwm32vVl8mRdyoAsQpWmiqXrkvP4Bsl04VpBeHw
+Qt8xNSW9SFhceL3LEvw9M8i9MV39viih1ILyH8OuHdvJyFECQQDLEjl2d2ppxND9
+PoLqVFAirDfX2JnLTdWbc+M11a9Jdn3hKF8TcxfEnFVs5Gav1MusicY5KB0ylYPb
+YbTvqKc7AkEAwbnRBO2VYEZsJZp2X0IZqP9ovWokkpYx+PE4+c6MySDgaMcigL7v
+WDIHJG1CHudD09GbqENasDzyb2HAIW4CzQJBAKDdkv+xoW6gJx42Auc2WzTcUHCA
+eXR/+BLpPrhKykzbvOQ8YvS5W764SUO1u1LWs3G+wnRMvrRvlMCZKgggBjkCQQCG
+Jewto2+a+WkOKQXrNNScCDE5aPTmZQc5waCYq4UmCZQcOjkUOiN3ST1U5iuxRqfb
+V/yX6fw0qh+fLWtkOs/JAkA+okMSxZwqRtfgOFGBfwQ8/iKrnizeanTQ3L6scFXI
+CHZXdJ3XQ6qUmNxNn7iJ7S/LDawo1QfWkCfD9FYoxBlg
+-----END RSA PRIVATE KEY----
+``` 
+
+Серверный сертификат в файле *server_cert.pem* выглядит похожим образом:
+```
+-----BEGIN CERTIFICATE-----
+MIIC+DCCAmGgAwIBAgIJAPMd+vi45js3MA0GCSqGSIb3DQEBBQUAMFwxCzAJBgNV
+BAYTAlVTMREwDwYDVQQIEwhJbGxpbm9pczEQMA4GA1UEBxMHQ2hpY2FnbzEUMBIG
+A1UEChMLRGFiZWF6LCBMTEMxEjAQBgNVBAMTCWxvY2FsaG9zdDAeFw0xMzAxMTEx
+ODQyMjdaFw0xNDAxMTExODQyMjdaMFwxCzAJBgNVBAYTAlVTMREwDwYDVQQIEwhJ
+bGxpbm9pczEQMA4GA1UEBxMHQ2hpY2FnbzEUMBIGA1UEChMLRGFiZWF6LCBMTEMx
+EjAQBgNVBAMTCWxvY2FsaG9zdDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA
+mawjS6BMgChfn/VDXBWs+TrGuo3+6pG1JfLIucUK2N2WAu47rpy9XWS5/1WxBSCE
+2lDoLwbT79alFkyRsIGutlUhtaBRNDgyMd4NjYeLEX/q8krMdi+OONp8dM+DubyU
+O5OnkTRwGVFJwi+dPmL48i8re68i0o0rioQnCbG2YD8CAwEAAaOBwTCBvjAdBgNV
+HQ4EFgQUrtoLHHgXiDZTr26NMmgKJLJLFtIwgY4GA1UdIwSBhjCBg4AUrtoLHHgX
+iDZTr26NMmgKJLJLFtKhYKReMFwxCzAJBgNVBAYTAlVTMREwDwYDVQQIEwhJbGxp
+bm9pczEQMA4GA1UEBxMHQ2hpY2FnbzEUMBIGA1UEChMLRGFiZWF6LCBMTEMxEjAQ
+BgNVBAMTCWxvY2FsaG9zdIIJAPMd+vi45js3MAwGA1UdEwQFMAMBAf8wDQYJKoZI
+hvcNAQEFBQADgYEAFci+dqvMG4xF8UTnbGVvZJPIzJDRee6Nbt6AHQo9pOdAIMAu
+WsGCplSOaDNdKKzl+b2UT2Zp3AIW4Qd51bouSNnR4M/gnr9ZD1ZctFd3jS+C5XRp
+D3vvcW5lAnCCC80P6rXy7d7hTeFu5EYKtRGXNvVNd/06NALGDflrrOwxF3Y=
+-----END CERTIFICATE-----
+```
+
+В серверном коде и приватный ключ, и файл сертификата будут передаваться различным связанным с SSL функциям-обёрткам. Сертификат — это то, что будет представлено клиентам. Приватный ключ должен быть защищён и оставаться на сервере.
+
+В коде клиента нужно поддерживать специальный файл с валидными сертифицирующими организациями — он нужен, чтобы верифицировать сертификат сервера. Если такого файла у вас нет, то, по крайней мере, вы должны поместить копию серверного сертификата на клиентском компьютере и использовать его как способ верификации. Во время соединения сервер представит свой сертификат, и затем вы используете сохранённый сертификат, который у вас есть, чтобы проверить корректность серверного.
+
+Серверы также могут верифицировать клиентов. Чтобы сделать это, клиентам нужно иметь собственный приватный ключ и сертификатный ключ. Сервер также поддерживает файл с доверенными центрами сертификации, чтобы проверять клиентские сертификаты.
+
+Если вы намереваетесь добавить поддержку SSL в реальный сетевой сервис, этот рецепт может лишь кивнуть в направлении, куда вам надлежит копать. Вам обязательно придётся свериться с [документацией](http://docs.python.org/3/library/ssl.html), чтобы разобраться в вопросе. Приготовьтесь провести немало времени в попытках заставить всё заработать.    
