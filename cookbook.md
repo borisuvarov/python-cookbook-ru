@@ -90,8 +90,8 @@ ValueError: need more than 2 values to unpack
 Для решения этой задачи могут быть использованы «выражения со звёздочкой». Предположим, например, что вы ведете учебный курс и решаете в конце семестра, что вы не будете принимать во внимание оценки за первое и последнее домашние задания, а по остальным оценкам посчитаете среднее значение. Если у вас было четыре задания, то можно просто распаковать все четыре. Но что делать, если их 24? Выражения со звёздочкой позволяют легко решить проблему:
 ``` python
 def drop_first_last(grades):
-	first, *middle, last = grades
-	return avg(middle)
+    first, *middle, last = grades
+    return avg(middle)
 ```
 
 Рассмотрим еще один пример: предположим, что у вас есть записи о юзерах, которые состоят из имени и email, за которыми следует произвольное количество телефонных номеров. Вы можете распаковать записи так:
@@ -131,22 +131,22 @@ return avg_comparison(trailing_avg, current_qtr)
 Стоит отметить, что синтаксис звёздочки может быть особенно полезен при итерировании по последовательности кортежей переменной длины. Например, возможна такая последовательность кортежей с тегами:
 ```python
 records = [
-	('foo', 1, 2),
-	('bar', 'hello'),
-	('foo', 3, 4),
+    ('foo', 1, 2),
+    ('bar', 'hello'),
+    ('foo', 3, 4),
 ]
 
 def do_foo(x, y):
-	print('foo', x, y)
+    print('foo', x, y)
 
 def do_bar(s):
-	print('bar', s)
+    print('bar', s)
 
 for tag, *args in records:
-	if tag == 'foo':
-		do_foo(*args)
-	elif tag == 'bar':
-		do_bar(*args)
+    if tag == 'foo':
+        do_foo(*args)
+    elif tag == 'bar':
+        do_bar(*args)
 ```
 
 Распаковка со звёздочкой также может быть полезна в комбинации с операциями обработки строк, такими как разрезание. Например:
@@ -207,20 +207,20 @@ for tag, *args in records:
 ```python
 from collections import deque
 def search(lines, pattern, history=5):
-	previous_lines = deque(maxlen=history)
-	for line in lines:
-		if pattern in line:
-			yield line, previous_lines
-		previous_lines.append(line)
+    previous_lines = deque(maxlen=history)
+    for line in lines:
+        if pattern in line:
+            yield line, previous_lines
+        previous_lines.append(line)
 
 # Example use on a file
 if __name__ == '__main__':
-	with open('somefile.txt') as f:
-		for line, prevlines in search(f, 'python', 5):
-			for pline in prevlines:
-				print(pline, end='')
-		print(line, end='')
-		print('-'*20)
+    with open('somefile.txt') as f:
+        for line, prevlines in search(f, 'python', 5):
+            for pline in prevlines:
+                print(pline, end='')
+        print(line, end='')
+        print('-'*20)
 ```
 
 ### Обсуждение
@@ -283,12 +283,12 @@ print(heapq.nsmallest(3, nums)) # Prints [-4, 1, 2]
 Обе функции таке принимают параметр key, который позволяет использовать их с более сложными структурами данных. Например:
 ```python
 portfolio = [
-	{'name': 'IBM', 'shares': 100, 'price': 91.1},
-	{'name': 'AAPL', 'shares': 50, 'price': 543.22},
-	{'name': 'FB', 'shares': 200, 'price': 21.09},
-	{'name': 'HPQ', 'shares': 35, 'price': 31.75},
-	{'name': 'YHOO', 'shares': 45, 'price': 16.35},
-	{'name': 'ACME', 'shares': 75, 'price': 115.65}
+    {'name': 'IBM', 'shares': 100, 'price': 91.1},
+    {'name': 'AAPL', 'shares': 50, 'price': 543.22},
+    {'name': 'FB', 'shares': 200, 'price': 21.09},
+    {'name': 'HPQ', 'shares': 35, 'price': 31.75},
+    {'name': 'YHOO', 'shares': 45, 'price': 16.35},
+    {'name': 'ACME', 'shares': 75, 'price': 115.65}
 ]
 cheap = heapq.nsmallest(3, portfolio, key=lambda s: s['price'])
 expensive = heapq.nlargest(3, portfolio, key=lambda s: s['price'])
@@ -331,16 +331,16 @@ expensive = heapq.nlargest(3, portfolio, key=lambda s: s['price'])
 import heapq
 
 class PriorityQueue:
-	def __init__(self):
-		self._queue = []
-		self._index = 0
-	
-	def push(self, item, priority):
-		heapq.heappush(self._queue, (-priority, self._index, item))
-		self._index += 1
+    def __init__(self):
+        self._queue = []
+        self._index = 0
+    
+    def push(self, item, priority):
+        heapq.heappush(self._queue, (-priority, self._index, item))
+        self._index += 1
 
 def pop(self):
-		return heapq.heappop(self._queue)[-1]
+        return heapq.heappop(self._queue)[-1]
 ```
 
 А вот пример использования:
@@ -382,7 +382,7 @@ Item('grok')
 >>> b = Item('bar')
 >>> a < b
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: unorderable types: Item() < Item()
 >>>
 ```
@@ -396,7 +396,7 @@ True
 >>> c = (1, Item('grok'))
 >>> a < c
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: unorderable types: Item() < Item()
 >>>
 ```
@@ -426,13 +426,13 @@ True
 Словарь — это отображение, где каждый ключ отображен на единственное значение. Если вы хотите отобразить ключи на множественные значения, вам нужно хранить множественные значения в другом контейнере, таком как список или множество. Например, вы можете создавать такие словари:
 ```python
 d = {
-	'a' : [1, 2, 3],
-	'b' : [4, 5]
+    'a' : [1, 2, 3],
+    'b' : [4, 5]
 }
 
 e = {
-	'a' : {1, 2, 3},
-	'b' : {4, 5}
+    'a' : {1, 2, 3},
+    'b' : {4, 5}
 }
 ```
 
@@ -471,16 +471,16 @@ d.setdefault('b', []).append(4)
 ```python
 d = {}
 for key, value in pairs:
-	if key not in d:
-		d[key] = []
-	d[key].append(value)
+    if key not in d:
+        d[key] = []
+    d[key].append(value)
 ``` 
 
 Использование *defaultdict* приводит к намного более чистому коду:
 ```python
 d = defaultdict(list)
 for key, value in pairs:
-	d[key].append(value)
+    d[key].append(value)
 ```
 
 Этот рецепт сильно связан с проблемой группировки записей в задачах обработки данных. Посмотрите, например, рецепт **1.15.**
@@ -502,7 +502,7 @@ d['grok'] = 4
 
 # Outputs "foo 1", "bar 2", "spam 3", "grok 4"
 for key in d:
-	print(key, d[key])
+    print(key, d[key])
 ```
 
 *OrderedDict* особенно полезен, когда вы хотите создать отображение, которое вы в дальнейшем собираетесь сериализовать или закодировать в другой формат. Например, если вы хотите строго контролировать порядок полей, выводимых в JSON, вам нужно просто создать *OrderedDict* с нужными данными:
@@ -527,11 +527,11 @@ for key in d:
 Рассмотрим словарь, который отображает тикеры (названия) акций на цены:
 ```python
 prices = {
-	'ACME': 45.23,
-	'AAPL': 612.78,
-	'IBM': 205.55,
-	'HPQ': 37.20,
-	'FB': 10.75
+    'ACME': 45.23,
+    'AAPL': 612.78,
+    'IBM': 205.55,
+    'HPQ': 37.20,
+    'FB': 10.75
 }
 ```
 
@@ -548,8 +548,8 @@ max_price = max(zip(prices.values(), prices.keys()))
 ```python
 prices_sorted = sorted(zip(prices.values(), prices.keys()))
 # prices_sorted is [(10.75, 'FB'), (37.2, 'HPQ'),
-# 					(45.23, 'ACME'), (205.55, 'IBM'),
-# 					(612.78, 'AAPL')]
+#                   (45.23, 'ACME'), (205.55, 'IBM'),
+#                   (612.78, 'AAPL')]
 ``` 
 
 Когда вы производите эти вычисления, обратите внимание, что *zip()* создает итератор, по которому можно пройти только один раз. Например, следующий фрагмент кода — неправильный:
@@ -605,15 +605,15 @@ min_value = prices[min(prices, key=lambda k: prices[k])]
 Рассмотрим два словаря:
 ```python
 a = {
-	'x' : 1,
-	'y' : 2,
-	'z' : 3
+    'x' : 1,
+    'y' : 2,
+    'z' : 3
 }
 
 b = {
-	'w' : 10,
-	'x' : 11,
-	'y' : 2
+    'w' : 10,
+    'x' : 11,
+    'y' : 2
 }
 ```
 
@@ -649,11 +649,11 @@ c = {key:a[key] for key in a.keys() - {'z', 'w'}}
 Если значения в последовательности являются хэшируемыми, задача может быть легко решена с использованием множества и генератора. Например:
 ```python
 def dedupe(items):
-	seen = set()
-	for item in items:
-		if item not in seen:
-			yield item
-			seen.add(item)
+    seen = set()
+    for item in items:
+        if item not in seen:
+            yield item
+            seen.add(item)
 ```
 
 Вот пример использования этой функции:
@@ -667,12 +667,12 @@ def dedupe(items):
 Это будет работать только в том случае, если элементы последовательности хэшируются. Если вы пытаетесь удалить дубликаты в последовательности из нехэшируемых типов (таких как словари), вы можете внести небольшое изменение в этот рецепт. Например, такое:
 ```python
 def dedupe(items, key=None):
-	seen = set()
-	for item in items:
-		val = item if key is None else key(item)
-		if val not in seen:
-			yield item
-			seen.add(val)
+    seen = set()
+    for item in items:
+        val = item if key is None else key(item)
+        if val not in seen:
+            yield item
+            seen.add(val)
 ```
 
 Аргумент *key* здесь нужен для определения функции, которая конвертирует элементы последовательности в хэшируемый тип, подходящий для поиска дубликатов. Вот как это работает:
@@ -702,8 +702,8 @@ def dedupe(items, key=None):
 Использование функции-генератора в этом рецепте отражает тот факт, что вы наверняка хотите написать функцию максимально широкого назначения, а не напрямую привязанную к обработке списков. Например, если вы хотите читать файл, удаляя дублирующиеся строки, вы можете сделать так:
 ```python
 with open(somefile,'r') as f:
-	for line in dedupe(f):
-		...
+    for line in dedupe(f):
+        ...
 ```
 
 Передача функции в аргументе *key* имитирует похожую возможность во встроенных функциях, таких как *sorted()*, *min()* и *max()*. См., например, рецепты **1.8** и **1.13.**
@@ -785,10 +785,10 @@ d
 Чтобы проиллюстрировать это, предположим, что у вас есть список слов, и вы хотите найти наиболее часто встречающееся. Вот как можно это сделать:
 ```python
 words = [
-	'look', 'into', 'my', 'eyes', 'look', 'into', 'my', 'eyes',
-	'the', 'eyes', 'the', 'eyes', 'the', 'eyes', 'not', 'around', 'the',
-	'eyes', "don't", 'look', 'around', 'the', 'eyes', 'look', 'into',
-	'my', 'eyes', "you're", 'under'
+    'look', 'into', 'my', 'eyes', 'look', 'into', 'my', 'eyes',
+    'the', 'eyes', 'the', 'eyes', 'the', 'eyes', 'not', 'around', 'the',
+    'eyes', "don't", 'look', 'around', 'the', 'eyes', 'look', 'into',
+    'my', 'eyes', "you're", 'under'
 ]
 
 from collections import Counter
@@ -832,23 +832,23 @@ print(top_three)
 >>> b = Counter(morewords)
 >>> a
 Counter({'eyes': 8, 'the': 5, 'look': 4, 'into': 3, 'my': 3, 'around': 2,
-		"you're": 1, "don't": 1, 'under': 1, 'not': 1})
+        "you're": 1, "don't": 1, 'under': 1, 'not': 1})
 >>> b
 Counter({'eyes': 1, 'looking': 1, 'are': 1, 'in': 1, 'not': 1, 'you': 1,
-		'my': 1, 'why': 1})
+        'my': 1, 'why': 1})
 
 >>> # Combine counts
 >>> c = a + b
 >>> c
 Counter({'eyes': 9, 'the': 5, 'look': 4, 'my': 4, 'into': 3, 'not': 2,
-		'around': 2, "you're": 1, "don't": 1, 'in': 1, 'why': 1,
-		'looking': 1, 'are': 1, 'under': 1, 'you': 1})
+        'around': 2, "you're": 1, "don't": 1, 'in': 1, 'why': 1,
+        'looking': 1, 'are': 1, 'under': 1, 'you': 1})
 
 >>> # Subtract counts
 >>> d = a - b
 >>> d
 Counter({'eyes': 7, 'the': 5, 'look': 4, 'into': 3, 'my': 2, 'around': 2,
-		"you're": 1, "don't": 1, 'under': 1})
+        "you're": 1, "don't": 1, 'under': 1})
 >>>
 ```
 
@@ -862,10 +862,10 @@ Counter({'eyes': 7, 'the': 5, 'look': 4, 'into': 3, 'my': 2, 'around': 2,
 Сортировка структур этого типа легко выполняется с помощью функции *itemgetter* из модуля *operator*. Предположим, вы выполнили запрос к таблице базы данных, чтобы получить список зарегистрированных пользователей вашего сайта, и получили в ответ вот такую структуру данных:
 ```python
 rows = [
-	{'fname': 'Brian', 'lname': 'Jones', 'uid': 1003},
-	{'fname': 'David', 'lname': 'Beazley', 'uid': 1002},
-	{'fname': 'John', 'lname': 'Cleese', 'uid': 1001},
-	{'fname': 'Big', 'lname': 'Jones', 'uid': 1004}
+    {'fname': 'Brian', 'lname': 'Jones', 'uid': 1003},
+    {'fname': 'David', 'lname': 'Beazley', 'uid': 1002},
+    {'fname': 'John', 'lname': 'Cleese', 'uid': 1001},
+    {'fname': 'Big', 'lname': 'Jones', 'uid': 1004}
 ]
 ```  
 
@@ -936,9 +936,9 @@ rows_by_lfname = sorted(rows, key=lambda r: (r['lname'],r['fname']))
 ```python
 >>> class User:
 ...  def __init__(self, user_id):
-...  	self.user_id = user_id
+...     self.user_id = user_id
 ...  def __repr__(self):
-...  	return 'User({})'.format(self.user_id)
+...     return 'User({})'.format(self.user_id)
 ...
 >>> users = [User(23), User(3), User(99)]
 >>> users
@@ -979,14 +979,14 @@ User(99)
 Функция *itertools.groupby()* особенно полезна для такого типа группировки данных. Предположим, что у вас есть список словарей:
 ```python
 rows = [
-	{'address': '5412 N CLARK', 'date': '07/01/2012'},
-	{'address': '5148 N CLARK', 'date': '07/04/2012'},
-	{'address': '5800 E 58TH', 'date': '07/02/2012'},
-	{'address': '2122 N CLARK', 'date': '07/03/2012'},
-	{'address': '5645 N RAVENSWOOD', 'date': '07/02/2012'},
-	{'address': '1060 W ADDISON', 'date': '07/02/2012'},
-	{'address': '4801 N BROADWAY', 'date': '07/01/2012'},
-	{'address': '1039 W GRANVILLE', 'date': '07/04/2012'},
+    {'address': '5412 N CLARK', 'date': '07/01/2012'},
+    {'address': '5148 N CLARK', 'date': '07/04/2012'},
+    {'address': '5800 E 58TH', 'date': '07/02/2012'},
+    {'address': '2122 N CLARK', 'date': '07/03/2012'},
+    {'address': '5645 N RAVENSWOOD', 'date': '07/02/2012'},
+    {'address': '1060 W ADDISON', 'date': '07/02/2012'},
+    {'address': '4801 N BROADWAY', 'date': '07/01/2012'},
+    {'address': '1039 W GRANVILLE', 'date': '07/04/2012'},
 ]
 ```
 
@@ -1000,25 +1000,25 @@ rows.sort(key=itemgetter('date'))
 
 # Iterate in groups
 for date, items in groupby(rows, key=itemgetter('date')):
-	print(date)
-	for i in items:
-		print(' ', i)
+    print(date)
+    for i in items:
+        print(' ', i)
 ```    
 
 Вывод будет таким:
 ```python
 07/01/2012
-	{'date': '07/01/2012', 'address': '5412 N CLARK'}
-	{'date': '07/01/2012', 'address': '4801 N BROADWAY'}
+    {'date': '07/01/2012', 'address': '5412 N CLARK'}
+    {'date': '07/01/2012', 'address': '4801 N BROADWAY'}
 07/02/2012
-	{'date': '07/02/2012', 'address': '5800 E 58TH'}
-	{'date': '07/02/2012', 'address': '5645 N RAVENSWOOD'}
-	{'date': '07/02/2012', 'address': '1060 W ADDISON'}
+    {'date': '07/02/2012', 'address': '5800 E 58TH'}
+    {'date': '07/02/2012', 'address': '5645 N RAVENSWOOD'}
+    {'date': '07/02/2012', 'address': '1060 W ADDISON'}
 07/03/2012
-	{'date': '07/03/2012', 'address': '2122 N CLARK'}
+    {'date': '07/03/2012', 'address': '2122 N CLARK'}
 07/04/2012
-	{'date': '07/04/2012', 'address': '5148 N CLARK'}
-	{'date': '07/04/2012', 'address': '1039 W GRANVILLE'}
+    {'date': '07/04/2012', 'address': '5148 N CLARK'}
+    {'date': '07/04/2012', 'address': '1039 W GRANVILLE'}
 ```
 
 ### Обсуждение
@@ -1031,7 +1031,7 @@ for date, items in groupby(rows, key=itemgetter('date')):
 from collections import defaultdict
 rows_by_date = defaultdict(list)
 for row in rows:
-	rows_by_date[row['date']].append(row)
+    rows_by_date[row['date']].append(row)
 ```
 
 Это позволяет легко получить доступ к записям для каждой даты:
@@ -1081,11 +1081,11 @@ for row in rows:
 values = ['1', '2', '-3', '-', '4', 'N/A', '5']
 
 def is_int(val):
-	try:
-		x = int(val)
-		return True
-	except ValueError:
-		return False
+    try:
+        x = int(val)
+        return True
+    except ValueError:
+        return False
 
 ivals = list(filter(is_int, values))
 print(ivals)
@@ -1118,14 +1118,14 @@ print(ivals)
 Другой важный инструмент для фильтрации — *itertools.compress()*, который принимает итерируемый объект вместе с последовательностью-селектором из булевых значений. На выходе функция выдает все элементы итерируемого объекта, для которых совпадающий элемент в селекторе — True. Это может быть полезно, если вы пытаетесь применить результаты фильтрования одной последовательности к другой связанной последовательности. Например, у вас есть две колонки данных:
 ```python
 addresses = [
-	'5412 N CLARK',
-	'5148 N CLARK',
-	'5800 E 58TH',
-	'2122 N CLARK'
-	'5645 N RAVENSWOOD',
-	'1060 W ADDISON',
-	'4801 N BROADWAY',
-	'1039 W GRANVILLE',
+    '5412 N CLARK',
+    '5148 N CLARK',
+    '5800 E 58TH',
+    '2122 N CLARK'
+    '5645 N RAVENSWOOD',
+    '1060 W ADDISON',
+    '4801 N BROADWAY',
+    '1039 W GRANVILLE',
 ]
 
 counts = [ 0, 3, 10, 4, 1, 7, 6, 1]
@@ -1154,11 +1154,11 @@ counts = [ 0, 3, 10, 4, 1, 7, 6, 1]
 Эту задачу можно легко решить с помощью генератора словаря (dictionary comprehension). Например:
 ```python
 prices = {
-	'ACME': 45.23,
-	'AAPL': 612.78,
-	'IBM': 205.55,
-	'HPQ': 37.20,
-	'FB': 10.75
+    'ACME': 45.23,
+    'AAPL': 612.78,
+    'IBM': 205.55,
+    'HPQ': 37.20,
+    'FB': 10.75
 }
 
 # Make a dictionary of all prices over 200
@@ -1222,10 +1222,10 @@ Subscriber(addr='jonesy@example.com', joined='2012-10-19')
 Чтобы проиллюстрировать это, приведём пример кода, использующего обычные кортежи:
 ```python
 def compute_cost(records):
-	total = 0.0
-	for rec in records:
-		total += rec[1] * rec[2]
-	return total
+    total = 0.0
+    for rec in records:
+        total += rec[1] * rec[2]
+    return total
 ```
 
 Использование позиционного обращения к элементам часто делает код немного менее выразительным и более зависимым от структуры записей. А вот версия с использованием именованного кортежа:
@@ -1234,11 +1234,11 @@ from collections import namedtuple
 
 Stock = namedtuple('Stock', ['name', 'shares', 'price'])
 def compute_cost(records):
-	total = 0.0
-	for rec in records:
-		s = Stock(*rec)
-		total += s.shares * s.price
-	return total
+    total = 0.0
+    for rec in records:
+        s = Stock(*rec)
+        total += s.shares * s.price
+    return total
 ```
 
 Естественно, вы можете избежать явной конвертации в именованный кортеж *Stock*, если последовательность *records* из примера уже содержит такие экземпляры. 
@@ -1275,7 +1275,7 @@ stock_prototype = Stock('', 0, 0.0, None, None)
 
 # Function to convert a dictionary to a Stock
 def dict_to_stock(s):
-	return stock_prototype._replace(**s)
+    return stock_prototype._replace(**s)
 ```   
 
 Вот пример работы этого кода:
@@ -1309,9 +1309,9 @@ s = sum(x * x for x in nums)
 import os
 files = os.listdir('dirname')
 if any(name.endswith('.py') for name in files):
-	print('There be python!')
+    print('There be python!')
 else:
-	print('Sorry, no python.')
+    print('Sorry, no python.')
 
 # Output a tuple as CSV
 s = ('ACME', 50, 123.45)
@@ -1319,10 +1319,10 @@ print(','.join(str(x) for x in s))
 
 # Data reduction across fields of a data structure
 portfolio = [
-	{'name':'GOOG', 'shares': 50},
-	{'name':'YHOO', 'shares': 75},
-	{'name':'AOL', 'shares': 20},
-	{'name':'SCOX', 'shares': 65}
+    {'name':'GOOG', 'shares': 50},
+    {'name':'YHOO', 'shares': 75},
+    {'name':'AOL', 'shares': 20},
+    {'name':'SCOX', 'shares': 65}
 ]
 min_shares = min(s['shares'] for s in portfolio)
 ```
@@ -1537,11 +1537,11 @@ True
 from urllib.request import urlopen
 
 def read_data(name):
-	if name.startswith(('http:', 'https:', 'ftp:')):
-		return urlopen(name).read()
-	else:
-		with open(name) as f:
-		return f.read()
+    if name.startswith(('http:', 'https:', 'ftp:')):
+        return urlopen(name).read()
+    else:
+        with open(name) as f:
+        return f.read()
 ```
 
 Любопытно, что в этом случае на вход нужно подавать именно кортеж. Если так случилось, что варианты выбора собраны у вас в списке или множестве, сначала сконвертируйте их с помощью *tuple()*. Например:
@@ -1550,7 +1550,7 @@ def read_data(name):
 >>> url = 'http://www.python.org'
 >>> url.startswith(choices)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: startswith first arg must be str or a tuple of str, not list
 >>> url.startswith(tuple(choices))
 True
@@ -1628,11 +1628,11 @@ False
 Часто упускается из вида возможность использования этих функций на строках, получаемых при обработке данных, или на строках, не являющихся именами файлов. Например, у вас есть список адресов:
 ```python
 addresses = [
-	'5412 N CLARK ST',
-	'1060 W ADDISON ST',
-	'1039 W GRANVILLE AVE',
-	'2122 N CLARK ST',
-	'4802 N BROADWAY',
+    '5412 N CLARK ST',
+    '1060 W ADDISON ST',
+    '1039 W GRANVILLE AVE',
+    '2122 N CLARK ST',
+    '4802 N BROADWAY',
 ]
 ``` 
 
@@ -1886,17 +1886,17 @@ no
 Последний пример раскрывает ограничение: текст замены не будет совпадать по регистру с заменяемым текстом. Если вам нужно исправить такое поведение, используйте поддерживающую функцию:
 ```python
 def matchcase(word):
-	def replace(m):
-		text = m.group()
-		if text.isupper():
-			return word.upper()
-		elif text.islower():
-			return word.lower()
-		elif text[0].isupper():
-			return word.capitalize()
-		else:
-			return word
-	return replace
+    def replace(m):
+        text = m.group()
+        if text.isupper():
+            return word.upper()
+        elif text.islower():
+            return word.lower()
+        elif text[0].isupper():
+            return word.capitalize()
+        else:
+            return word
+    return replace
 ```
 
 А вот пример использования этой функции:
@@ -2147,9 +2147,9 @@ Unicode — весьма обширная тема. Для более подро
 Часто вам нужно сочетать срезание символов с другими видами итерационной обработки, таким как чтением строк данных из файла. Если это так, то стоит применить выражение-генератор:
 ```python
 with open(filename) as f:
-	lines = (line.strip() for line in f)
-	for line in lines:
-		...
+    lines = (line.strip() for line in f)
+    for line in lines:
+        ...
 ```
 
 Здесь выражение *lines = (line.strip() for line in f)* работает как преобразователь данных. Это эффективно, потому что оно не читает данные из какого-либо временного списка. Оно просто создает итератор, где ко всем производимым строкам применена операция срезания символов.
@@ -2380,7 +2380,7 @@ Is Chicago Not Chicago?
 ```python
 s = ''
 for p in parts:
-	s += p
+    s += p
 ```
 
 Это работает заметно медленнее метода *join()*, главным образом потому, что каждая \+= операция создает новый строковый объект. Намного лучше собрать все части и только затем объединить.
@@ -2430,25 +2430,25 @@ text = ''.join(sample())
 Или же вы можете перенаправить фрагменты на вывод:
 ```python
 for part in sample():
-	f.write(part)
+    f.write(part)
 ```
 
 Или же вы можете создать некую гибридную схему, что умно с точки зрения операций ввода-вывода:
 ```python
 def combine(source, maxsize):
-	parts = []
-	size = 0
-	for part in source:
-		parts.append(part)
-		size += len(part)
-		if size > maxsize:
-			yield ''.join(parts)
-			parts = []
-			size = 0
-	yield ''.join(parts)
+    parts = []
+    size = 0
+    for part in source:
+        parts.append(part)
+        size += len(part)
+        if size > maxsize:
+            yield ''.join(parts)
+            parts = []
+            size = 0
+    yield ''.join(parts)
 
 for part in combine(sample(), 32768):
-	f.write(part)
+    f.write(part)
 ```
 
 Ключевой момент в том, что первоначальный генератор не обязан знать деталей: он просто выдает части.
@@ -2494,7 +2494,7 @@ for part in combine(sample(), 32768):
 ```python
 >>> s.format(name='Guido')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 KeyError: 'n'
 >>>
 ```
@@ -2502,8 +2502,8 @@ KeyError: 'n'
 Этого можно избежать путём определения альтернативный класс словаря с методом *__missing__()*, как показано ниже:
 ```python
 class safesub(dict):
-	def __missing__(self, key):
-		return '{' + key + '}'
+    def __missing__(self, key):
+        return '{' + key + '}'
 ```
 
 Теперь этот класс можно использовать, чтобы обернуть значения, которые подаются на вход в *format_map()*:
@@ -2518,7 +2518,7 @@ class safesub(dict):
 ```python
 import sys
 def sub(text):
-	return text.format_map(safesub(sys._getframe(1).f_locals))
+    return text.format_map(safesub(sys._getframe(1).f_locals))
 ```
 
 Теперь вы можете делать вот так:
@@ -2727,13 +2727,13 @@ from collections import namedtuple
 Token = namedtuple('Token', ['type','value'])
 
 def generate_tokens(pat, text):
-	scanner = pat.scanner(text)
-		for m in iter(scanner.match, None):
-			yield Token(m.lastgroup, m.group())
+    scanner = pat.scanner(text)
+        for m in iter(scanner.match, None):
+            yield Token(m.lastgroup, m.group())
 
 # Example use
 for tok in generate_tokens(master_pat, 'foo = 42'):
-	print(tok)
+    print(tok)
 
 # Produces output
 # Token(type='NAME', value='foo')
@@ -2746,9 +2746,9 @@ for tok in generate_tokens(master_pat, 'foo = 42'):
 Если вы хотите как-то отфильтровать поток токенов, вы можете либо определить больше генераторов, либо использовать выражение-генератор. Например, вот так можно отфильтровать все токены-пробелы:
 ```python
 tokens = (tok for tok in generate_tokens(master_pat, text)
-	if tok.type != 'WS')
+    if tok.type != 'WS')
 for tok in tokens:
-	print(tok)
+    print(tok)
 ```
 
 ### Обсуждение
@@ -2774,7 +2774,7 @@ NAME  = r'(P<NAME>[a-zA-Z_][a-zA-Z_0-9]*)'
 master_pat = re.compile('|'.join([PRINT, NAME]))
 
 for tok in generate_tokens(master_pat, 'printer'):
-	print(tok)
+    print(tok)
 
 # Outputs :
 # Token(type='PRINT', value='print')
@@ -2790,46 +2790,46 @@ for tok in generate_tokens(master_pat, 'printer'):
 ### Решение
 В этой задаче мы сосредоточены на парсинге текста в соответствии с некоторой определенной грамматикой. Чтобы это сделать, вы должны начать с формальной спецификации грамматики в форме BNF (БНФ, форма Бэкуса — Наура) или EBNF (РБНФ, расширенная форма Бэкуса — Наура). Например, грамматика для простых арифметических выражений может выглядеть так:
 
-	expr ::= expr + term
-		| expr - term
-		| term
-	
-	term ::= term * factor
-		| term / factor
-		| factor
-	
-	factor ::= ( expr )
-		| NUM
+    expr ::= expr + term
+        | expr - term
+        | term
+    
+    term ::= term * factor
+        | term / factor
+        | factor
+    
+    factor ::= ( expr )
+        | NUM
 
 А вот альтернативная форма РБНФ:
 
-	expr ::= term { (+|-) term }*
+    expr ::= term { (+|-) term }*
 
-	term ::= factor { (*|/) factor }*
+    term ::= factor { (*|/) factor }*
 
-	factor ::= ( expr )
-		| NUM
+    factor ::= ( expr )
+        | NUM
 
 В РБНФ части правил, заключенные в { ... }\* являются необязательными. \* означает ноль и более повторений (то есть имеет такое значение, как и в регулярных выражениях).
 
 Теперь, если вы незнакомы с механизмом работы БНФ, думайте о ней как об определении правил замены или подстановки, где символы слева могут быть заменены символами справа (или наоборот). В общем, во время парсинга вы пытаетесь сопоставить входящий текст с грамматикой, делая различные подстановки и расширения с использованием БНФ. Чтобы проиллюстрировать это, предположим, что вы парсите выражение 3 \+ 4 \* 5. Это выражение должно быть сначала разбито на поток токенов с использованием описанных в **рецепте 2.18.** приёмов. Результатом будет последовательность токенов:
 
-	NUM + NUM * NUM
+    NUM + NUM * NUM
 
 С этого момента парсинг начинает пытаться сопоставить грамматику с входящими токенами, делая подстановки:
 
-	expr
-	expr ::= term { (+|-) term }*
-	expr ::= factor { (*|/) factor }* { (+|-) term }*
-	expr ::= NUM { (*|/) factor }* { (+|-) term }*
-	expr ::= NUM { (+|-) term }*
-	expr ::= NUM + term { (+|-) term }*
-	expr ::= NUM + factor { (*|/) factor }* { (+|-) term }*
-	expr ::= NUM + NUM { (*|/) factor}* { (+|-) term }*
-	expr ::= NUM + NUM * factor { (*|/) factor }* { (+|-) term }*
-	expr ::= NUM + NUM * NUM { (*|/) factor }* { (+|-) term }*
-	expr ::= NUM + NUM * NUM { (+|-) term }*
-	expr ::= NUM + NUM * NUM
+    expr
+    expr ::= term { (+|-) term }*
+    expr ::= factor { (*|/) factor }* { (+|-) term }*
+    expr ::= NUM { (*|/) factor }* { (+|-) term }*
+    expr ::= NUM { (+|-) term }*
+    expr ::= NUM + term { (+|-) term }*
+    expr ::= NUM + factor { (*|/) factor }* { (+|-) term }*
+    expr ::= NUM + NUM { (*|/) factor}* { (+|-) term }*
+    expr ::= NUM + NUM * factor { (*|/) factor }* { (+|-) term }*
+    expr ::= NUM + NUM * NUM { (*|/) factor }* { (+|-) term }*
+    expr ::= NUM + NUM * NUM { (+|-) term }*
+    expr ::= NUM + NUM * NUM
 
 Чтобы пройти по всем шагам подстановки и разобраться, придётся потратить время, но в целом они работают так: смотрят на входящие данные и пытаются сопоставить их с правилами грамматики. Первый входящий токен — это NUM, поэтому подстановки сначала сосредотачиваются на поиске совпадений с этой частью. Когда совпадение найдено, внимание переходит к следующему токену \+ и т.д. Некоторые части правой стороны (например, { (\*/) factor }\*) иcчезают, когда определено, что они не совпадают со следующим токеном. Парсинг проходит успешно, если правая сторона достаточно полна, чтобы охватить все входящие токены. 
 
@@ -2855,85 +2855,85 @@ master_pat = re.compile('|'.join([NUM, PLUS, MINUS, TIMES,
 Token = collections.namedtuple('Token', ['type','value'])
 
 def generate_tokens(text):
-	scanner = master_pat.scanner(text)
-	for m in iter(scanner.match, None):
-		tok = Token(m.lastgroup, m.group())
-		if tok.type != 'WS':
-			yield tok
+    scanner = master_pat.scanner(text)
+    for m in iter(scanner.match, None):
+        tok = Token(m.lastgroup, m.group())
+        if tok.type != 'WS':
+            yield tok
 
 # Parser
 class ExpressionEvaluator:
-	'''
-	Implementation of a recursive descent parser. Each method
-	implements a single grammar rule. Use the ._accept() method
-	to test and accept the current lookahead token. Use the ._expect()
-	method to exactly match and discard the next token on on the input
-	(or raise a SyntaxError if it doesn't match).
-	'''
+    '''
+    Implementation of a recursive descent parser. Each method
+    implements a single grammar rule. Use the ._accept() method
+    to test and accept the current lookahead token. Use the ._expect()
+    method to exactly match and discard the next token on on the input
+    (or raise a SyntaxError if it doesn't match).
+    '''
 
-	def parse(self,text):
-		self.tokens = generate_tokens(text)
-		self.tok = None  # Last symbol consumed
-		self.nexttok = None  # Next symbol tokenized
-		self._advance()  # Load first lookahead token
-		return self.expr()
+    def parse(self,text):
+        self.tokens = generate_tokens(text)
+        self.tok = None  # Last symbol consumed
+        self.nexttok = None  # Next symbol tokenized
+        self._advance()  # Load first lookahead token
+        return self.expr()
 
-	def _advance(self):
-		'Advance one token ahead'
-		self.tok, self.nexttok = self.nexttok, next(self.tokens, None)
+    def _advance(self):
+        'Advance one token ahead'
+        self.tok, self.nexttok = self.nexttok, next(self.tokens, None)
 
-	def _accept(self,toktype):
-		'Test and consume the next token if it matches toktype'
-		if self.nexttok and self.nexttok.type == toktype:
-			self._advance()
-			return True
-		else:
-			return False
+    def _accept(self,toktype):
+        'Test and consume the next token if it matches toktype'
+        if self.nexttok and self.nexttok.type == toktype:
+            self._advance()
+            return True
+        else:
+            return False
 
-	def _expect(self,toktype):
-		'Consume next token if it matches toktype or raise SyntaxError'
-		if not self._accept(toktype):
-			raise SyntaxError('Expected ' + toktype)
+    def _expect(self,toktype):
+        'Consume next token if it matches toktype or raise SyntaxError'
+        if not self._accept(toktype):
+            raise SyntaxError('Expected ' + toktype)
 
-	# Grammar rules follow
+    # Grammar rules follow
 
-	def expr(self):
-		"expression ::= term { ('+'|'-') term }*"
+    def expr(self):
+        "expression ::= term { ('+'|'-') term }*"
 
-		exprval = self.term()
-		while self._accept('PLUS') or self._accept('MINUS'):
-			op = self.tok.type
-			right = self.term()
-			if op == 'PLUS':
-				exprval += right
-			elif op == 'MINUS':
-				exprval -= right
-			return exprval
+        exprval = self.term()
+        while self._accept('PLUS') or self._accept('MINUS'):
+            op = self.tok.type
+            right = self.term()
+            if op == 'PLUS':
+                exprval += right
+            elif op == 'MINUS':
+                exprval -= right
+            return exprval
 
-	def term(self):
-		"term ::= factor { ('*'|'/') factor }*"
-		
-		termval = self.factor()
-		while self._accept('TIMES') or self._accept('DIVIDE'):
-			op = self.tok.type
-			right = self.factor()
-			if op == 'TIMES':
-				termval *= right
-			elif op == 'DIVIDE':
-				termval /= right
-		return termval
+    def term(self):
+        "term ::= factor { ('*'|'/') factor }*"
+        
+        termval = self.factor()
+        while self._accept('TIMES') or self._accept('DIVIDE'):
+            op = self.tok.type
+            right = self.factor()
+            if op == 'TIMES':
+                termval *= right
+            elif op == 'DIVIDE':
+                termval /= right
+        return termval
 
-	def factor(self):
-		"factor ::= NUM | ( expr )"
+    def factor(self):
+        "factor ::= NUM | ( expr )"
 
-		if self._accept('NUM'):
-			return int(self.tok.value)
-		elif self._accept('LPAREN'):
-			exprval = self.expr()
-			self._expect('RPAREN')
-			return exprval
-		else:
-			raise SyntaxError('Expected NUMBER or LPAREN')
+        if self._accept('NUM'):
+            return int(self.tok.value)
+        elif self._accept('LPAREN'):
+            exprval = self.expr()
+            self._expect('RPAREN')
+            return exprval
+        else:
+            raise SyntaxError('Expected NUMBER or LPAREN')
 ```   
 
 Вот пример интерактивного использования класса ExpressionEvaluator:
@@ -2949,21 +2949,21 @@ class ExpressionEvaluator:
 37
 >>> e.parse('2 + (3 + * 4)')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "exprparse.py", line 40, in parse
-		return self.expr()
-	File "exprparse.py", line 67, in expr
-		right = self.term()
-	File "exprparse.py", line 77, in term
-		termval = self.factor()
-	File "exprparse.py", line 93, in factor
-		exprval = self.expr()
-	File "exprparse.py", line 67, in expr
-		right = self.term()
-	File "exprparse.py", line 77, in term
-		termval = self.factor()
-	File "exprparse.py", line 97, in factor
-		raise SyntaxError("Expected NUMBER or LPAREN")
+    File "<stdin>", line 1, in <module>
+    File "exprparse.py", line 40, in parse
+        return self.expr()
+    File "exprparse.py", line 67, in expr
+        right = self.term()
+    File "exprparse.py", line 77, in term
+        termval = self.factor()
+    File "exprparse.py", line 93, in factor
+        exprval = self.expr()
+    File "exprparse.py", line 67, in expr
+        right = self.term()
+    File "exprparse.py", line 77, in term
+        termval = self.factor()
+    File "exprparse.py", line 97, in factor
+        raise SyntaxError("Expected NUMBER or LPAREN")
 SyntaxError: Expected NUMBER or LPAREN
 >>>
 ```
@@ -2971,43 +2971,43 @@ SyntaxError: Expected NUMBER or LPAREN
 Если вы хотите сделать что-то другое, а не только простое вычисление, вам нужно изменить класс ExpressionEvaluator. Например, вот альтернативная реализация, которая конструирует простое дерево разбора (парсинга):
 ```python
 class ExpressionTreeBuilder(ExpressionEvaluator):
-	def expr(self):
-		"expression ::= term { ('+'|'-') term }"
+    def expr(self):
+        "expression ::= term { ('+'|'-') term }"
 
-		exprval = self.term()
-		while self._accept('PLUS') or self._accept('MINUS'):
-			op = self.tok.type
-			right = self.term()
-			if op == 'PLUS':
-				exprval = ('+', exprval, right)
-			elif op == 'MINUS':
-				exprval = ('-', exprval, right)
-		return exprval
+        exprval = self.term()
+        while self._accept('PLUS') or self._accept('MINUS'):
+            op = self.tok.type
+            right = self.term()
+            if op == 'PLUS':
+                exprval = ('+', exprval, right)
+            elif op == 'MINUS':
+                exprval = ('-', exprval, right)
+        return exprval
 
-	def term(self):
-		"term ::= factor { ('*'|'/') factor }"
-		
-		termval = self.factor()
-		while self._accept('TIMES') or self._accept('DIVIDE'):
-			op = self.tok.type
-			right = self.factor()
-			if op == 'TIMES':
-				termval = ('*', termval, right)
-			elif op == 'DIVIDE':
-				termval = ('/', termval, right)
-		return termval
+    def term(self):
+        "term ::= factor { ('*'|'/') factor }"
+        
+        termval = self.factor()
+        while self._accept('TIMES') or self._accept('DIVIDE'):
+            op = self.tok.type
+            right = self.factor()
+            if op == 'TIMES':
+                termval = ('*', termval, right)
+            elif op == 'DIVIDE':
+                termval = ('/', termval, right)
+        return termval
 
-	def factor(self):
-		'factor ::= NUM | ( expr )'
+    def factor(self):
+        'factor ::= NUM | ( expr )'
 
-		if self._accept('NUM'):
-			return int(self.tok.value)
-		elif self._accept('LPAREN'):
-			exprval = self.expr()
-			self._expect('RPAREN')
-			return exprval
-		else:
-			raise SyntaxError('Expected NUMBER or LPAREN')
+        if self._accept('NUM'):
+            return int(self.tok.value)
+        elif self._accept('LPAREN'):
+            exprval = self.expr()
+            self._expect('RPAREN')
+            return exprval
+        else:
+            raise SyntaxError('Expected NUMBER or LPAREN')
 ```
 
 Вот как это работает:
@@ -3029,21 +3029,21 @@ class ExpressionTreeBuilder(ExpressionEvaluator):
 
 Тем не менее, общая идея парсера на основе рекурсивного спуска проста. Для начала вы берете каждое правило грамматики и превращаете его в функцию или метод. Если ваша грамматика выглядит так:
 
-	expr ::= term { ('+'|'-') term }*
-	term ::= factor { ('*'|'/') factor }*
-	factor ::= '(' expr ')'
-	| NUM
+    expr ::= term { ('+'|'-') term }*
+    term ::= factor { ('*'|'/') factor }*
+    factor ::= '(' expr ')'
+    | NUM
 
 То вы начинаете с превращения её в такой набор методов:
 ```python
 class ExpressionEvaluator:
-	...
-	def expr(self):
-		...
-	def term(self):
-		...
-	def factor(self):
-		...
+    ...
+    def expr(self):
+        ...
+    def term(self):
+        ...
+    def factor(self):
+        ...
 ```
 
 Задача каждого метода проста: он должен пройти слева направо по каждой части грамматического правила, потребляя токены в процессе. Цель метода — либо потребить правило, либо сгенерировать синтаксическую ошибку в случае застревания. Чтобы реализовать это, применяются следующие приёмы:
@@ -3058,27 +3058,27 @@ class ExpressionEvaluator:
 
 Одно из таких ограничений парсеров на основе рекурсивного спуска заключается в том, что они не могут быть написаны для грамматических правил, использующих левую рекурсию. Предположим, например, что вам нужно перевести такое правило:
 
-	items ::= items ',' item
-	| item
+    items ::= items ',' item
+    | item
 
 Чтобы сделать это, вы могли бы использовать метод items():
 ```python
 def items(self):
-	itemsval = self.items()
-	if itemsval and self._accept(','):
-		itemsval.append(self.item())
-	else:
-		itemsval = [ self.item() ]
+    itemsval = self.items()
+    if itemsval and self._accept(','):
+        itemsval.append(self.item())
+    else:
+        itemsval = [ self.item() ]
 ```
 
 Единственная проблема в том, что это не работает. Такой код вылетит с ошибкой бесконечной рекурсии. 
 
 Вы можете также столкнуться с хитрыми проблемами, касающимися самих грамматических правил. Например, вы можете поразмышлять над тем, могут ли выражения быть описаны вот такой более простой грамматикой:
 
-	expr ::= factor { ('+'|'-'|'*'|'/') factor }*
+    expr ::= factor { ('+'|'-'|'*'|'/') factor }*
 
-	factor ::= '(' expression ')'
-	| NUM
+    factor ::= '(' expression ')'
+    | NUM
 
 Эта грамматика технически «работает», но она не соблюдает стандартные правила порядка вычисления арифметических выражений. Например, для выражения “3 + 4 * 5” оно выдаст результат 35 вместо правильного 23. Чтобы решить эту проблему, нужно использовать отдельные правила expr и term.
 
@@ -3103,67 +3103,67 @@ t_RPAREN = r'\)'
 
 # Token processing functions
 def t_NUM(t):
-	r'\d+'
-	t.value = int(t.value)
-	return t
+    r'\d+'
+    t.value = int(t.value)
+    return t
 
 # Error handler
 def t_error(t):
-	print('Bad character: {!r}'.format(t.value[0]))
-	t.skip(1)
+    print('Bad character: {!r}'.format(t.value[0]))
+    t.skip(1)
 
 # Build the lexer
 lexer = lex()
 
 # Grammar rules and handler functions
 def p_expr(p):
-	'''
-	expr : expr PLUS term
-	| expr MINUS term
-	'''
-	if p[2] == '+':
-		p[0] = p[1] + p[3]
-	elif p[2] == '-':
-		p[0] = p[1] - p[3]
+    '''
+    expr : expr PLUS term
+    | expr MINUS term
+    '''
+    if p[2] == '+':
+        p[0] = p[1] + p[3]
+    elif p[2] == '-':
+        p[0] = p[1] - p[3]
 
 def p_expr_term(p):
-	'''
-	expr : term
-	'''
-	p[0] = p[1]
+    '''
+    expr : term
+    '''
+    p[0] = p[1]
 
 
 def p_term(p):
-	'''
-	term : term TIMES factor
-	| term DIVIDE factor
-	'''
-	if p[2] == '*':
-		p[0] = p[1] * p[3]
-	elif p[2] == '/':
-		p[0] = p[1] / p[3]
+    '''
+    term : term TIMES factor
+    | term DIVIDE factor
+    '''
+    if p[2] == '*':
+        p[0] = p[1] * p[3]
+    elif p[2] == '/':
+        p[0] = p[1] / p[3]
 
 def p_term_factor(p):
-	'''
-	term : factor
-	'''
-	p[0] = p[1]
+    '''
+    term : factor
+    '''
+    p[0] = p[1]
 
 def p_factor(p):
-	'''
-	factor : NUM
-	'''
-	p[0] = p[1]
+    '''
+    factor : NUM
+    '''
+    p[0] = p[1]
 
 
 def p_factor_group(p):
-	'''
-	factor : LPAREN expr RPAREN
-	'''
-	p[0] = p[2]
+    '''
+    factor : LPAREN expr RPAREN
+    '''
+    p[0] = p[2]
 
 def p_error(p):
-	print('Syntax error')
+    print('Syntax error')
 
 parser = yacc()
 ```
@@ -4379,8 +4379,8 @@ from datetime import datetime, date, timedelta
 import calendar
 
 def get_month_range(start_date=None):
-	if start_date is None:
-	start_date = date.today().replace(day=1)
+    if start_date is None:
+    start_date = date.today().replace(day=1)
 _, days_in_month = calendar.monthrange(start_date.year, start_date.month)
 end_date = start_date + timedelta(days=days_in_month)
 return (start_date, end_date)
@@ -4418,9 +4418,9 @@ return (start_date, end_date)
 В идеальном случае стоит создать функцию, которая будет работать как встроенная *range()*, но с датами. К счастью, есть чрезвычайно простой способ сделать это с помощью генератора:
 ```python
 def date_range(start, stop, step):
-	while start < stop:
-		yield start
-		start += step
+    while start < stop:
+        yield start
+        start += step
 ```
 
 Вот пример её использования:
@@ -4475,8 +4475,8 @@ datetime.datetime(2012, 9, 23, 21, 37, 4, 177393)
 ```python
 from datetime import datetime
 def parse_ymd(s):
-	year_s, mon_s, day_s = s.split('-')
-	return datetime(int(year_s), int(mon_s), int(day_s))
+    year_s, mon_s, day_s = s.split('-')
+    return datetime(int(year_s), int(mon_s), int(day_s))
 ``` 
 
 При тестировании эта функции оказалась более чем в семь раз быстрее метода *datetime.strptime()*. Это стоит держать в голове, если вы обрабатываете большие объемы данных с датами.
@@ -4575,22 +4575,22 @@ def parse_ymd(s):
 Чтобы вручную пройти по итерируемому объекту, используйте функцию *next()* и напишите код так, чтобы он ловил исключение *StopIteration*. Например, в этом случае мы вручную читаем строки из файла:
 ```python
 with open('/etc/passwd') as f:
-	try:
-		while True:
-		line = next(f)
-		print(line, end='')
-	except StopIteration:
-		pass
+    try:
+        while True:
+        line = next(f)
+        print(line, end='')
+    except StopIteration:
+        pass
 ``` 
 
 Обычно *StopIteration* используется для передачи сигнала о конце итерирования. Однако если вы используете *next()* вручную, вы вместо этого можете запрограммировать возвращение конечного значения, такого как *None*. Например:
 ```python
 with open('/etc/passwd') as f:
-	while True:
-	line = next(f, None)
-		if line is None:
-			break
-	print(line, end='')
+    while True:
+    line = next(f, None)
+        if line is None:
+            break
+    print(line, end='')
 ``` 
 
 ### Обсуждение
@@ -4612,7 +4612,7 @@ with open('/etc/passwd') as f:
 3
 >>> next(it)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 StopIteration
 >>>
 ```
@@ -4627,29 +4627,29 @@ StopIteration
 В типичном случае вам нужно определить метод __iter()__, который делегирует итерацию внутреннему содержимому контейнера. Например:
 ```python
 class Node:
-	def __init__(self, value):
-		self._value = value
-		self._children = []
+    def __init__(self, value):
+        self._value = value
+        self._children = []
 
-	def __repr__(self):
-		return 'Node({!r})'.format(self._value)
+    def __repr__(self):
+        return 'Node({!r})'.format(self._value)
 
-	def add_child(self, node):
-		self._children.append(node)
+    def add_child(self, node):
+        self._children.append(node)
 
 def __iter__(self):
-		return iter(self._children)
+        return iter(self._children)
 
 # Example
 if __name__ == '__main__':
-	root = Node(0)
-	child1 = Node(1)
-	child2 = Node(2)
-	root.add_child(child1)
-	root.add_child(child2)
-	for ch in root:
-	print(ch)
-	# Outputs Node(1), Node(2)
+    root = Node(0)
+    child1 = Node(1)
+    child2 = Node(2)
+    root.add_child(child1)
+    root.add_child(child2)
+    for ch in root:
+    print(ch)
+    # Outputs Node(1), Node(2)
 ```
 
 В этой программе метод *__iter()__* просто перенаправляет запрос на итерацию содержащемус внутри атрибуту *_children*. 
@@ -4668,16 +4668,16 @@ if __name__ == '__main__':
 Если вы хотите реализовать новый тип итерационного паттерна, определите его с помощью генератора. Вот, например, генератор, который создает диапазон чисел с плавающей точкой:
 ```python
 def frange(start, stop, increment):
-	x = start
-	while x < stop:
-		yield x
-		x += increment
+    x = start
+    while x < stop:
+        yield x
+        x += increment
 ```
 
 Чтобы использовать такую функцию, вы должны проитерировать по ней в цикле или применить ее с какой-то другой функцией, которая потребляет итерируемый объект (например, *sum()*, *list()* и т.п.) Например:
 ```python
 >>> for n in frange(0, 4, 0.5):
-... 	print(n)
+...     print(n)
 ...
 0
 0.5
@@ -4698,8 +4698,8 @@ def frange(start, stop, increment):
 >>> def countdown(n):
 ...print('Starting to count from', n)
 ...while n > 0:
-...	yield n
-...	n -= 1
+... yield n
+... n -= 1
 ...print('Done!')
 ...
 
@@ -4725,7 +4725,7 @@ Starting to count from 3
 >>> next(c)
 Done!
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 StopIteration
 >>>
 ``` 
@@ -4740,38 +4740,38 @@ StopIteration
 На текущий момент простейший способ реализации итерируемости в объекте — это использование генератора. В **рецепте 4.2.** был представлен класс *Node*, представляющий древовидные структуры. Возможно, вы захотите реализовать итератор, который будет обходить узлы поиском в глубину. Вот как можно это сделать:
 ```python
 class Node:
-	def __init__(self, value):
-		self._value = value
-		self._children = []
+    def __init__(self, value):
+        self._value = value
+        self._children = []
 
-	def __repr__(self):
-		return 'Node({!r})'.format(self._value)
+    def __repr__(self):
+        return 'Node({!r})'.format(self._value)
 
-	def add_child(self, node):
-		self._children.append(node)
+    def add_child(self, node):
+        self._children.append(node)
 
-	def __iter__(self):
-		return iter(self._children)
+    def __iter__(self):
+        return iter(self._children)
 
-	def depth_first(self):
-		yield self
-		for c in self:
-			yield from c.depth_first()
+    def depth_first(self):
+        yield self
+        for c in self:
+            yield from c.depth_first()
 
 # Example
 if __name__ == '__main__':
-	root = Node(0)
-	child1 = Node(1)
-	child2 = Node(2)
-	root.add_child(child1)
-	root.add_child(child2)
-	child1.add_child(Node(3))
-	child1.add_child(Node(4))
-	child2.add_child(Node(5))
+    root = Node(0)
+    child1 = Node(1)
+    child2 = Node(2)
+    root.add_child(child1)
+    root.add_child(child2)
+    child1.add_child(Node(3))
+    child1.add_child(Node(4))
+    child2.add_child(Node(5))
 
-	for ch in root.depth_first():
-		print(ch)
-	# Outputs Node(0), Node(1), Node(3), Node(4), Node(2), Node(5)
+    for ch in root.depth_first():
+        print(ch)
+    # Outputs Node(0), Node(1), Node(3), Node(4), Node(2), Node(5)
 ``` 
 
 В этой программе метод *depth_first()* просто прочесть и описать. Сначала он выдает себя, а затем итерируется по каждому потомку, выдавая элементы, производимые методом *depth_first()* потомка (используя *yield from*). 
@@ -4780,54 +4780,54 @@ if __name__ == '__main__':
 Протокол итератора Python требует *__iter()__*, чтобы вернуть специальный объект итератора, в котором реализована операция *__next()__*, а исключение *StopIteration* используется для подачи сигнала о завершении. Однако создание таких объектов частов может быть запутанным делом. Например, следующая программа демонстрирует альтернативную реализацию метода *depth_first()*, использующую связанный класс итератора:
 ```python
 class Node:
-	def __init__(self, value):
-		self._value = value
-		self._children = []
-	
-	def __repr__(self):
-		return 'Node({!r})'.format(self._value)
-	
-	def add_child(self, other_node):
-		self._children.append(other_node)
-	
-	def __iter__(self):
-		return iter(self._children)
-	
-	def depth_first(self):
-		return DepthFirstIterator(self)
+    def __init__(self, value):
+        self._value = value
+        self._children = []
+    
+    def __repr__(self):
+        return 'Node({!r})'.format(self._value)
+    
+    def add_child(self, other_node):
+        self._children.append(other_node)
+    
+    def __iter__(self):
+        return iter(self._children)
+    
+    def depth_first(self):
+        return DepthFirstIterator(self)
 
 class DepthFirstIterator(object):
-	'''
-	Depth-first traversal
-	'''
-	
-	def __init__(self, start_node):
-		self._node = start_node
-		self._children_iter = None
-		self._child_iter = None
-	
-	def __iter__(self):
-		return self
-	
-	def __next__(self):
-		# Return myself if just started; create an iterator for children
-		if self._children_iter is None:
-			self._children_iter = iter(self._node)
-			return self._node
-	
-		# If processing a child, return its next item
-		elif self._child_iter:
-		try:
-			nextchild = next(self._child_iter)
-			return nextchild
-		except StopIteration:
-			self._child_iter = None
-			return next(self)
-		
-		# Advance to the next child and start its iteration
-		else:
-			self._child_iter = next(self._children_iter).depth_first()
-			return next(self)
+    '''
+    Depth-first traversal
+    '''
+    
+    def __init__(self, start_node):
+        self._node = start_node
+        self._children_iter = None
+        self._child_iter = None
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        # Return myself if just started; create an iterator for children
+        if self._children_iter is None:
+            self._children_iter = iter(self._node)
+            return self._node
+    
+        # If processing a child, return its next item
+        elif self._child_iter:
+        try:
+            nextchild = next(self._child_iter)
+            return nextchild
+        except StopIteration:
+            self._child_iter = None
+            return next(self)
+        
+        # Advance to the next child and start its iteration
+        else:
+            self._child_iter = next(self._children_iter).depth_first()
+            return next(self)
 ``` 
 
 Класс DepthFirstIterator работает так же, как и версия на основе генератора, но он беспорядочен и некрасив, поскольку итератор вынужден хранить много сложных состояний о состоянии итерационного процесса. Откровенно говоря, никому не нравится писать такой мозговыносящий код. Реализуйте итератор на базе генератора и успокойтесь на этом.
@@ -4841,7 +4841,7 @@ class DepthFirstIterator(object):
 ```python
 >>> a = [1, 2, 3, 4]
 >>> for x in reversed(a):
-... 	print(x)
+...     print(x)
 ...
 4
 3
@@ -4854,7 +4854,7 @@ class DepthFirstIterator(object):
 # Print a file backwards
 f = open('somefile')
 for line in reversed(list(f)):
-	print(line, end='')
+    print(line, end='')
 ```
 
 Обратите внимание, что конвертирование итерируемого объекта в список может съесть много памяти, если список получится большим. 
@@ -4863,22 +4863,22 @@ for line in reversed(list(f)):
 Многие программисты не знают, что итерирование в обратном порядке может быть переопределено в собственном классе, если он реализует метод *__reversed__()*. Например
 ```python
 class Countdown:
-	def __init__(self, start):
-		self.start = start
-	
-	# Forward iterator
-	def __iter__(self):
-		n = self.start
-		while n > 0:
-			yield n
-			n -= 1
-	
-	# Reverse iterator
-	def __reversed__(self):
-		n = 1
-		while n <= self.start:
-			yield n
-			n += 1
+    def __init__(self, start):
+        self.start = start
+    
+    # Forward iterator
+    def __iter__(self):
+        n = self.start
+        while n > 0:
+            yield n
+            n -= 1
+    
+    # Reverse iterator
+    def __reversed__(self):
+        n = 1
+        while n <= self.start:
+            yield n
+            n += 1
 ``` 
 
 Определение обратного итератора делает код намного более эффективным, а также отпадает необходимость предварительного помещения данных в список для выполнения итераций в обратном порядке.
@@ -4893,27 +4893,27 @@ class Countdown:
 from collections import deque
 
 class linehistory:
-	def __init__(self, lines, histlen=3):
-		self.lines = lines
-		self.history = deque(maxlen=histlen)
-	
-	def __iter__(self):
-		for lineno, line in enumerate(self.lines,1):
-			self.history.append((lineno, line))
-			yield line
-	
-	def clear(self):
-		self.history.clear()
+    def __init__(self, lines, histlen=3):
+        self.lines = lines
+        self.history = deque(maxlen=histlen)
+    
+    def __iter__(self):
+        for lineno, line in enumerate(self.lines,1):
+            self.history.append((lineno, line))
+            yield line
+    
+    def clear(self):
+        self.history.clear()
 ```
 
 Вы можете обращаться с этим классом так же, как с обычным генератором. Однако, поскольку он создает экземпляр, вы можете обращаться к внутренним атрибутам, таким как *history* или метод *clear()*. Например:
 ```python
 with open('somefile.txt') as f:
-	lines = linehistory(f)
-	for line in lines:
-		if 'python' in line:
-			for lineno, hline in lines.history:
-				print('{}:{}'.format(lineno, hline), end='')
+    lines = linehistory(f)
+    for line in lines:
+        if 'python' in line:
+            for lineno, hline in lines.history:
+                print('{}:{}'.format(lineno, hline), end='')
 ```
 
 ### Обсуждение
@@ -4925,7 +4925,7 @@ with open('somefile.txt') as f:
 >>> lines = linehistory(f)
 >>> next(lines)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: 'linehistory' object is not an iterator
 
 >>> # Call iter() first, then start iterating
@@ -4945,20 +4945,20 @@ TypeError: 'linehistory' object is not an iterator
 Функция *itertools.islice()* отлично подходит для получения срезов генераторов и итераторов. Например:
 ```python
 >>> def count(n):
-... 	while True:
-...			yield n
-...			n += 1
+...     while True:
+...         yield n
+...         n += 1
 ...
 >>> c = count(0)
 >>> c[10:20]
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: 'generator' object is not subscriptable
 
 >>> # Now using islice()
 >>> import itertools
 >>> for x in itertools.islice(c, 10, 20):
-... 	print(x)
+...     print(x)
 ...
 10
 11
@@ -4989,7 +4989,7 @@ TypeError: 'generator' object is not subscriptable
 ```python
 >>> with open('/etc/passwd') as f:
 ... for line in f:
-... 	print(line, end='')
+...     print(line, end='')
 ...
 ##
 # User Database
@@ -5009,8 +5009,8 @@ root:*:0:0:System Administrator:/var/root:/bin/sh
 ```python
 >>> from itertools import dropwhile
 >>> with open('/etc/passwd') as f:
-...		for line in dropwhile(lambda line: line.startswith('#'), f):
-...			print(line, end='')
+...     for line in dropwhile(lambda line: line.startswith('#'), f):
+...         print(line, end='')
 ...
 nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false
 root:*:0:0:System Administrator:/var/root:/bin/sh
@@ -5023,7 +5023,7 @@ root:*:0:0:System Administrator:/var/root:/bin/sh
 >>> from itertools import islice
 >>> items = ['a', 'b', 'c', 1, 4, 10, 15]
 >>> for x in islice(items, 3, None):
-...		print(x)
+...     print(x)
 ...
 1
 4
@@ -5038,25 +5038,25 @@ root:*:0:0:System Administrator:/var/root:/bin/sh
 Главное преимущество функций *dropwhile()* и *islice()* в том, что они позволяют избажеть написания грязного кода наподобие вот такого:
 ```python
 with open('/etc/passwd') as f:
-	# Skip over initial comments
-	while True:
-		line = next(f, '')
-		if not line.startswith('#'):
-			break
+    # Skip over initial comments
+    while True:
+        line = next(f, '')
+        if not line.startswith('#'):
+            break
 
 # Process remaining lines
 while line:
-	# Replace with useful processing	
-	print(line, end='')
-	line = next(f, None)
+    # Replace with useful processing    
+    print(line, end='')
+    line = next(f, None)
 ```
 
 Отбрасывание первой части итерируемого объекта также немного отличается от простого фильтрования. Например, первая часть этого рецепта может быть переписана вот так:
 ```python
 with open('/etc/passwd') as f:
-	lines = (line for line in f if not line.startswith('#'))
-	for line in lines:
-		print(line, end='')
+    lines = (line for line in f if not line.startswith('#'))
+    for line in lines:
+        print(line, end='')
 ```
 
 Очевидно, что это отбросит все закомментированные строчки в начале файла, но такое решение отбросит и все остальные такие строчки во всём файле. С другой стороны, решение, которое отбрасывает все элементы до тех пор, пока не будет встречен элемент, не соответствующий условиям отбрасывания, удовлетворяет нашим требованиям: все последующие элементы будут возвращены без фильтрования.
@@ -5073,7 +5073,7 @@ with open('/etc/passwd') as f:
 >>> items = ['a', 'b', 'c']
 >>> from itertools import permutations
 >>> for p in permutations(items):
-... 	print(p)
+...     print(p)
 ...
 ('a', 'b', 'c')
 ('a', 'c', 'b')
@@ -5087,7 +5087,7 @@ with open('/etc/passwd') as f:
 Если вы хотите получить все возможные перестановки меньшей длины, вы можете передать функции необязательный аргумент со значением длины. Например:
 ```python
 >>> for p in permutations(items, 2):
-...		print(p)
+...     print(p)
 ...
 ('a', 'b')
 ('a', 'c')
@@ -5102,17 +5102,17 @@ with open('/etc/passwd') as f:
 ```python
 >>> from itertools import combinations
 >>> for c in combinations(items, 3):
-...		print(c)
+...     print(c)
 ...
 ('a', 'b', 'c')
 >>> for c in combinations(items, 2):
-... 	print(c)
+...     print(c)
 ...
 ('a', 'b')
 ('a', 'c')
 ('b', 'c')
 >>> for c in combinations(items, 1):
-...		print(c)
+...     print(c)
 ...
 ('a',)
 ('b',)
@@ -5125,7 +5125,7 @@ with open('/etc/passwd') as f:
 При создании комбинаций выбранные элементы удаляются из коллекции возможных кандидатов (то есть если 'a' уже выбран, он больше не будет рассматриваться). А функция itertools.combinations_with_replacement() выбирает один и тот же элемент более одного раза. Например:
 ```python
 >>> for c in combinations_with_replacement(items, 3):
-...		print(c)
+...     print(c)
 ...
 ('a', 'a', 'a')
 ('a', 'a', 'b')
@@ -5153,7 +5153,7 @@ with open('/etc/passwd') as f:
 ```python
 >>> my_list = ['a', 'b', 'c']
 >>> for idx, val in enumerate(my_list):
-...		print(idx, val)
+...     print(idx, val)
 ...
 0 a
 1 b
@@ -5164,7 +5164,7 @@ with open('/etc/passwd') as f:
 ```python
 >>> my_list = ['a', 'b', 'c']
 >>> for idx, val in enumerate(my_list, 1):
-...		print(idx, val)
+...     print(idx, val)
 ...
 1 a
 2 b
@@ -5174,14 +5174,14 @@ with open('/etc/passwd') as f:
 Этот приём особенно полезен для учёта номеров строк в файлах, если нужно будет вывести номер строки в сообщении об ошибке:
 ```python
 def parse_data(filename):
-	with open(filename, 'rt') as f:
-		for lineno, line in enumerate(f, 1):
-			fields = line.split()
-			try:
-				count = int(fields[1])
-				...
-				except ValueError as e:
-					print('Line {}: Parse error: {}'.format(lineno, e))
+    with open(filename, 'rt') as f:
+        for lineno, line in enumerate(f, 1):
+            fields = line.split()
+            try:
+                count = int(fields[1])
+                ...
+                except ValueError as e:
+                    print('Line {}: Parse error: {}'.format(lineno, e))
 ```
 
 *enumerate()* удобна, например, для отслеживания смещения (offset) в списке для вхождений определенных значений. Так что если вы хотите отобразить слова в файле к строчкам, в которых они встречаются, это легко сделать с помощью enumerate() — функция отображает каждое слово на смещение строки в файле, где оно найдено:
@@ -5189,13 +5189,13 @@ def parse_data(filename):
 word_summary = defaultdict(list)
 
 with open('myfile.txt', 'r') as f:
-	lines = f.readlines()
+    lines = f.readlines()
 
 for idx, line in enumerate(lines):
-	# Create a list of words in current line
-	words = [w.strip().lower() for w in line.split()]
-	for word in words:
-		word_summary[word].append(idx)
+    # Create a list of words in current line
+    words = [w.strip().lower() for w in line.split()]
+    for word in words:
+        word_summary[word].append(idx)
 ```
 
 Если вы выведете *word_summary* после обработки файла, это будет словарь (*default dict*, если быть точными), и каждое слово будет ключом. Значение для каждого ключа — список номеров строк, где встретилось это слово. Если слово встретилось дважды в одной строке, этот номер строки будет записан в список дважды, что делает возможным получение разнообразных простых метрик текста.
@@ -5204,17 +5204,17 @@ for idx, line in enumerate(lines):
 *enumerate()* — симпатичное решение для ситуаций, где вы могли бы склоняться использованию собственной переменной-счетчика. Вы могли бы написать такой код:
 ```python
 lineno = 1
-	for line in f:
-	# Process line
-	...
-	lineno += 1
+    for line in f:
+    # Process line
+    ...
+    lineno += 1
 ```
 
 Но часто более элегантным (и менее подверженным ошибкам) способом становится использование *enumerate()*:
 ```python
 for lineno, line in enumerate(f):
-	# Process line
-	...
+    # Process line
+    ...
 ```
 
 Значение, возвращаемое функцией *enumerate()*, является объектом *enumerate*. Это итератор, который последовательно возвращает кортежи, состоящие из счётчика и значения, возвращаемого вызовом функции *next()* для последовательности, которую вы обходите.
@@ -5225,11 +5225,11 @@ data = [ (1, 2), (3, 4), (5, 6), (7, 8) ]
 
 # Correct!
 for n, (x, y) in enumerate(data):
-	...
+    ...
 
 # Error!
-	for n, x, y in enumerate(data):
-	...
+    for n, x, y in enumerate(data):
+    ...
 ```
 
 ## 4.11. Одновременное итерирование по нескольким последовательностям
@@ -5242,7 +5242,7 @@ for n, (x, y) in enumerate(data):
 >>> xpts = [1, 5, 4, 2, 10, 7]
 >>> ypts = [101, 78, 37, 15, 62, 99]
 >>> for x, y in zip(xpts, ypts):
-... 	print(x,y)
+...     print(x,y)
 ...
 1 101
 5 78
@@ -5258,7 +5258,7 @@ for n, (x, y) in enumerate(data):
 >>> a = [1, 2, 3]
 >>> b = ['w', 'x', 'y', 'z']
 >>> for i in zip(a,b):
-...		print(i)
+...     print(i)
 ...
 (1, 'w')
 (2, 'x')
@@ -5269,14 +5269,14 @@ for n, (x, y) in enumerate(data):
 ```python
 >>> from itertools import zip_longest
 >>> for i in zip_longest(a,b):
-...		print(i)
+...     print(i)
 ...
 (1, 'w')
 (2, 'x')
 (3, 'y')
 (None, 'z')
 >>> for i in zip_longest(a, b, fillvalue=0):
-... 	print(i)
+...     print(i)
 ...
 (1, 'w')
 (2, 'x')
@@ -5300,7 +5300,7 @@ s = dict(zip(headers,values))
 Если вы хотите вывести результат, можно поступить так:
 ```python
 for name, val in zip(headers, values):
-	print(name, '=', val)
+    print(name, '=', val)
 ```
 
 Менее распространённое применение *zip()* заключается в том, что функции может быть передано не две последовательности, а больше. В этом случае кортежи результата будут иметь такое количество элементов, каким было количество последовательностей. Например:
@@ -5309,7 +5309,7 @@ for name, val in zip(headers, values):
 >>> b = [10, 11, 12]
 >>> c = ['x', 'y', 'z']
 >>> for i in zip(a, b, c):
-...		print(i)
+...     print(i)
 ...
 (1, 10, 'x')
 (2, 11, 'y')
@@ -5337,7 +5337,7 @@ for name, val in zip(headers, values):
 >>> a = [1, 2, 3, 4]
 >>> b = ['x', 'y', 'z']
 >>> for x in chain(a, b):
-... 	print(x)
+...     print(x)
 ...
 1
 2
@@ -5357,31 +5357,31 @@ inactive_items = set()
 
 # Iterate over all items
 for item in chain(active_items, inactive_items):
-	# Process item
-	...
+    # Process item
+    ...
 ``` 
 
 Это решение намного более элегантно, нежели использование двух отдельных циклов, как показано в этом примере:
 ```python
 for item in active_items:
-	# Process item
-	...
+    # Process item
+    ...
 
 for item in inactive_items:
-	# Process item
-	...
+    # Process item
+    ...
 ```
 
 ### Обсуждение
 *itertools.chain()* принимает один или более итерируемых объектов в качестве аргументов. Далее она создает итератор, который последовательно потребляет и возвращает элементы, производимые каждым из предоставленных итерируемых объектов. Это тонкое различие, но *chain()* эффективнее, чем итерирование по предварительно объединенным последовательностям. Например:
 ```python
 # Inefficent
-	for x in a + b:
-	...
+    for x in a + b:
+    ...
 
 # Better
-	for x in chain(a, b):
-	...
+    for x in chain(a, b):
+    ...
 ```
 
 В первом случае операция a + b создает новую последовательность и дополнительно требует, чтобы a и b относились к одному типу. *chain()* не выполняет такую операцию, намного эффективнее обращается с памятью, если входные последовательности большие, а также легко применяется к итерируемым объектов различных типов.
@@ -5394,15 +5394,15 @@ for item in inactive_items:
 Генераторы хорошо подходят для реализации обрабатывающих каналов. Предположим, например, что у вас есть огромный каталог с файлами логов, который вы хотите обработать:
 ```
 foo/
-	access-log-012007.gz
-	access-log-022007.gz
-	access-log-032007.gz
-	...
-	access-log-012008
+    access-log-012007.gz
+    access-log-022007.gz
+    access-log-032007.gz
+    ...
+    access-log-012008
 bar/
-	access-log-092007.bz2
-	...
-	access-log-022008
+    access-log-092007.bz2
+    ...
+    access-log-022008
 ``` 
 
 Предположим, каждый файл содержит такие строки данных:
@@ -5423,44 +5423,44 @@ import bz2
 import re
 
 def gen_find(filepat, top):
-	'''
-	Find all filenames in a directory tree that match a shell wildcard pattern
-	'''
-	for path, dirlist, filelist in os.walk(top):
-		for name in fnmatch.filter(filelist, filepat):
-			yield os.path.join(path,name)
+    '''
+    Find all filenames in a directory tree that match a shell wildcard pattern
+    '''
+    for path, dirlist, filelist in os.walk(top):
+        for name in fnmatch.filter(filelist, filepat):
+            yield os.path.join(path,name)
 
 def gen_opener(filenames):
-	'''
-	Open a sequence of filenames one at a time producing a file object.
-	The file is closed immediately when proceeding to the next iteration.
-	'''
-	for filename in filenames:
-		if filename.endswith('.gz'):
-			f = gzip.open(filename, 'rt')
-		elif filename.endswith('.bz2'):
-			f = bz2.open(filename, 'rt')
-		else:
-			f = open(filename, 'rt')
-		yield f
-		f.close()
+    '''
+    Open a sequence of filenames one at a time producing a file object.
+    The file is closed immediately when proceeding to the next iteration.
+    '''
+    for filename in filenames:
+        if filename.endswith('.gz'):
+            f = gzip.open(filename, 'rt')
+        elif filename.endswith('.bz2'):
+            f = bz2.open(filename, 'rt')
+        else:
+            f = open(filename, 'rt')
+        yield f
+        f.close()
 
 
 def gen_concatenate(iterators):
-	'''
-	Chain a sequence of iterators together into a single sequence.
-	'''
-	for it in iterators:
-		yield from it
-	
+    '''
+    Chain a sequence of iterators together into a single sequence.
+    '''
+    for it in iterators:
+        yield from it
+    
 def gen_grep(pattern, lines):
-	'''
-	Look for a regex pattern in a sequence of lines
-	'''
-	pat = re.compile(pattern)
-	for line in lines:
-		if pat.search(line):
-			yield line
+    '''
+    Look for a regex pattern in a sequence of lines
+    '''
+    pat = re.compile(pattern)
+    for line in lines:
+        if pat.search(line):
+            yield line
 ```
 
 Теперь вы можете легко совместить эти функции для создания обрабатывающего канала. Например, чтобы найти все файлы логов, которые содержат слово *python*, вы можете поступить так:
@@ -5470,7 +5470,7 @@ files = gen_opener(lognames)
 lines = gen_concatenate(files)
 pylines = gen_grep('(?i)python', lines)
 for line in pylines:
-	print(line)
+    print(line)
 ```
 
 Если вы хотите еще расширить канал, вы можете скармливать данные выражениям-генераторам. Например, эта версия находит количество переданных байтов и подсчитывает общую сумму:
@@ -5509,17 +5509,17 @@ print('Total', sum(bytes))
 from collections import Iterable
 
 def flatten(items, ignore_types=(str, bytes)):
-	for x in items:
-		if isinstance(x, Iterable) and not isinstance(x, ignore_types):
-			yield from flatten(x)
-		else:
-			yield x
+    for x in items:
+        if isinstance(x, Iterable) and not isinstance(x, ignore_types):
+            yield from flatten(x)
+        else:
+            yield x
 
 items = [1, 2, [3, 4, [5, 6], 7], 8]
 
 # Produces 1 2 3 4 5 6 7 8
 for x in flatten(items):
-	print(x)
+    print(x)
 ```
 
 В этой программе *isinstance(x, Iterable)* просто проверяет, является ли элемент итерируемым объектом. Если это так, то *yield from* используется в качестве некой подпрограммы, чтобы выдать все его значения. Конечный результат — одна последовательность без вложенности.
@@ -5528,7 +5528,7 @@ for x in flatten(items):
 ```python
 >>> items = ['Dave', 'Paula', ['Thomas', 'Lewis']]
 >>> for x in flatten(items):
-... 	print(x)
+...     print(x)
 ...
 Dave
 Paula
@@ -5541,12 +5541,12 @@ Lewis
 Инструкция *yield from* — отличный способ написания генераторов, которые вызывают другие генераторы в качестве подпроцедуры. Без использования этой инструкции вам придется вставить в код дополнительный цикл. Например:
 ```python
 def flatten(items, ignore_types=(str, bytes)):
-	for x in items:
-		if isinstance(x, Iterable) and not isinstance(x, ignore_types):
-			for i in flatten(x):
-				yield i
-		else:
-			yield x
+    for x in items:
+        if isinstance(x, Iterable) and not isinstance(x, ignore_types):
+            for i in flatten(x):
+                yield i
+        else:
+            yield x
 ```
 
 Хотя это незначительное изменение, инструкция *yield from* просто приятнее и делает код чище.
@@ -5566,7 +5566,7 @@ def flatten(items, ignore_types=(str, bytes)):
 >>> a = [1, 4, 7, 10]
 >>> b = [2, 5, 6, 11]
 >>> for c in heapq.merge(a, b):
-...		print(c)
+...     print(c)
 ...
 1
 2
@@ -5583,11 +5583,11 @@ def flatten(items, ignore_types=(str, bytes)):
 ```python
 import heapq
 with open('sorted_file_1', 'rt') as file1, \
-	open('sorted_file_2') 'rt' as file2, \
-	open('merged_file', 'wt') as outf:
+    open('sorted_file_2') 'rt' as file2, \
+    open('merged_file', 'wt') as outf:
 
 for line in heapq.merge(file1, file2):
-	outf.write(line)
+    outf.write(line)
 ```
 
 Важно отметить, что *heapq.merge()* требует, чтобы все передаваемые ей последовательности уже были отсортированы. Она не читает предварительно данные в кучу, не выполняет предварительную сортировку. Также она не выполняет никакой валидации входных данных на соответствие требованиям упорядоченности. Она просто проверяет набор элементов из «голов» каждой переданной последовательности и выдает минимальный из найденных. Далее читается новый элемент из выбранной последовательности, и процесс повторяется до тех пор, пока все входные последовательности не будут полностью потреблены.
@@ -5602,18 +5602,18 @@ for line in heapq.merge(file1, file2):
 CHUNKSIZE = 8192
 
 def reader(s):
-	while True:
-		data = s.recv(CHUNKSIZE)
-		if data == b'':
-			break
-		process_data(data)
+    while True:
+        data = s.recv(CHUNKSIZE)
+        if data == b'':
+            break
+        process_data(data)
 ``` 
 
 Такой код часто можно заменить использованием *iter()*, как показано ниже:
 ```python
 def reader(s):
-	for chunk in iter(lambda: s.recv(CHUNKSIZE), b''):
-		process_data(data)
+    for chunk in iter(lambda: s.recv(CHUNKSIZE), b''):
+        process_data(data)
 ```
 
 Если вы сомневаетесь, будет ли это работать, вы можете попробовать похожий пример для обработки файлов:
@@ -5621,7 +5621,7 @@ def reader(s):
 >>> import sys
 >>> f = open('/etc/passwd')
 >>> for chunk in iter(lambda: f.read(10), ''):
-... 	n = sys.stdout.write(chunk)
+...     n = sys.stdout.write(chunk)
 ...
 nobody:*:-2:-2:Unprivileged User:/var/empty:/usr/bin/false
 root:*:0:0:System Administrator:/var/root:/bin/sh
@@ -5648,28 +5648,28 @@ _uucp:*:4:4:Unix to Unix Copy Protocol:/var/spool/uucp:/usr/sbin/uucico
 ```python
 # Read the entire file as a single string
 with open('somefile.txt', 'rt') as f:
-	data = f.read()
+    data = f.read()
 
 # Iterate over the lines of the file
 with open('somefile.txt', 'rt') as f:
-	for line in f:
-	# process line
-	...
+    for line in f:
+    # process line
+    ...
 ``` 
 
 Похожим образом для записи в текстовый файл используйте *open()* в режиме *wt* (стирает и перезаписывает любое предыдущее содержание файла, если оно было):
 ```python
 # Write chunks of text data
 with open('somefile.txt', 'wt') as f:
-	f.write(text1)
-	f.write(text2)
-	...
+    f.write(text1)
+    f.write(text2)
+    ...
 
 # Redirected print statement
 with open('somefile.txt', 'wt') as f:
-	print(line1, file=f)
-	print(line2, file=f)
-	...
+    print(line1, file=f)
+    print(line2, file=f)
+    ...
 ```
 
 Чтобы добавить записываемый текст к концу существующего файла, используйте *open()* в режиме *at*.
@@ -5677,7 +5677,7 @@ with open('somefile.txt', 'wt') as f:
 По умолчанию файлы читаются и записываются в дефолтной системной кодировке, информацию о которой можно получить из *sys.getdefaultencoding()*. На большинстве компьютеров это будет *utf-8*. Если вы знаете, что текст, который вы читаете или пишите, представлен в другой кодировке, передайте необязательный параметр *encoding* функции *open()*. Например:
 ```python
 with open('somefile.txt', 'rt', encoding='latin-1') as f:
-	...
+    ...
 ``` 
 
 Python понимает несколько сотен текстовых кодировок. Однако самые распространенные — ascii, latin-1, utf-8 и utf-16. utf-8 обычно является безопасным выбором для работы с веб-приложениями. ascii соответствует 7-битным символам в диапазоне от U+0000 до U+007F. latin-1 — это прямое отображение байтов 0-255 на символы Unicode от U-0000 до U-00FF. latin-1 известна тем, что она никогда не вызовет ошибку декодирования при чтении текста в возможно неизвестной кодировке. Чтение файла как latin-1 может не привести к получению полностью правильно декодированного текста, но этого бывает достаточно для извлечения полезных данных. Также, если вы позже запишете данные обратно, первоначальные данные будут сохранены.
@@ -5694,7 +5694,7 @@ f.close()
 ```pytnon
 # Read with disabled newline translation
 with open('somefile.txt', 'rt', newline='') as f:
-	...
+    ...
 ```  
 
 Чтобы продемонстрировать разницу, покажем, что вы увидите на компьютере с Unix, если вы читаете содержание файла в Windows-кодировке, в котором присутствуют сырые данные *hello world!\\r\\n*:
@@ -5717,9 +5717,9 @@ Contents of a Windows-encoded text file containing the raw data hello world!\r\n
 >>> f = open('sample.txt', 'rt', encoding='ascii')
 >>> f.read()
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "/usr/local/lib/python3.3/encodings/ascii.py", line 26, in decode
-		return codecs.ascii_decode(input, self.errors)[0]
+    File "<stdin>", line 1, in <module>
+    File "/usr/local/lib/python3.3/encodings/ascii.py", line 26, in decode
+        return codecs.ascii_decode(input, self.errors)[0]
 UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3 in position
 12: ordinal not in range(128)
 >>>
@@ -5749,7 +5749,7 @@ UnicodeDecodeError: 'ascii' codec can't decode byte 0xc3 in position
 Используйте *print()* c именованным аргументом *file*:
 ```python
 with open('somefile.txt', 'rt') as f:
-	print('Hello World!', file=f)
+    print('Hello World!', file=f)
 ```
 
 ### Обсуждение
@@ -5774,7 +5774,7 @@ ACME,50,91.5!!
 Использование аргумента *end* также позволяет подавить добавление символа новой строки при выводе. Например:
 ```python
 >>> for i in range(5):
-...		print(i)
+...     print(i)
 ...
 0
 1
@@ -5782,7 +5782,7 @@ ACME,50,91.5!!
 3
 4
 >>> for i in range(5):
-...		print(i, end=' ')
+...     print(i, end=' ')
 ...
 0 1 2 3 4 >>>
 ```
@@ -5800,7 +5800,7 @@ ACME,50,91.5
 >>> row = ('ACME', 50, 91.5)
 >>> print(','.join(row))
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: sequence item 1: expected str instance, int found
 >>> print(','.join(str(x) for x in row))
 ACME,50,91.5
@@ -5823,11 +5823,11 @@ ACME,50,91.5
 ```python
 # Read the entire file as a single byte string
 with open('somefile.bin', 'rb') as f:
-	data = f.read()
+    data = f.read()
 
 # Write binary data to a file
 with open('somefile.bin', 'wb') as f:
-	f.write(b'Hello World')
+    f.write(b'Hello World')
 ```
 
 При чтении бинарных данных важно подчеркнуть, что все получаемые данные будут в форме байтовых, а не текстовых строк. Похожим образом, при записи вы должны предоставить данные в форме объектов, которые представляют данные в форме байтов (байтовые строки, объекты *bytearray* и т.д.)
@@ -5840,7 +5840,7 @@ with open('somefile.bin', 'wb') as f:
 >>> t[0]
 'H'
 >>> for c in t:
-...		print(c)
+...     print(c)
 ...
 H
 e
@@ -5853,7 +5853,7 @@ o
 >>> b[0]
 72
 >>> for c in b:
-... 	print(c)
+...     print(c)
 ...
 72
 101
@@ -5867,12 +5867,12 @@ o
 Если вам когда-либо потребуется прочесть или записать текст из или в открытый в бинарном режиме файл, убедитесь, что не забыли декодировать или закодировать его. Например:
 ```python
 with open('somefile.bin', 'rb') as f:
-	data = f.read(16)
-	text = data.decode('utf-8')
+    data = f.read(16)
+    text = data.decode('utf-8')
 
 with open('somefile.bin', 'wb') as f:
-	text = 'Hello World'
-	f.write(text.encode('utf-8'))
+    text = 'Hello World'
+    f.write(text.encode('utf-8'))
 ```
 
 Менее известный аспект бинарного ввода-вывода заключается в том, что такие объекты как массивы и структуры языка C могут быть использованы для записи без какого-либо промежуточного преобразования в объект *bytes*. Например:
@@ -5880,7 +5880,7 @@ with open('somefile.bin', 'wb') as f:
 import array
 nums = array.array('i', [1, 2, 3, 4])
 with open('data.bin','wb') as f:
-	f.write(nums)
+    f.write(nums)
 ```
 
 Это применимо к любому объекту, в котором реализован так называемый «буферный интерфейс», который напрямую дает доступ к собственному буферу памяти операциям, которые могут с ним работать. Запись бинарных данных — одна из таких операций.
@@ -5890,7 +5890,7 @@ with open('data.bin','wb') as f:
 >>> import array
 >>> a = array.array('i', [0, 0, 0, 0, 0, 0, 0, 0])
 >>> with open('data.bin', 'rb') as f:
-... 	f.readinto(a)
+...     f.readinto(a)
 ...
 16
 >>> a
@@ -5908,13 +5908,13 @@ array('i', [1, 2, 3, 4, 0, 0, 0, 0])
 Эта задача легко решается с помощью использования малоизвестного режима *x* работы *open()* (вместо обычного режима *w*):
 ```python
 >>> with open('somefile', 'wt') as f:
-...		f.write('Hello\n')
+...     f.write('Hello\n')
 ...
 >>> with open('somefile', 'xt') as f:
-...		f.write('Hello\n')
+...     f.write('Hello\n')
 ...
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 FileExistsError: [Errno 17] File exists: 'somefile'
 >>>
 ```
@@ -5926,10 +5926,10 @@ FileExistsError: [Errno 17] File exists: 'somefile'
 ```python
 >>> import os
 >>> if not os.path.exists('somefile'):
-... 	with open('somefile', 'wt') as f:
-...			f.write('Hello\n')
+...     with open('somefile', 'wt') as f:
+...         f.write('Hello\n')
 ... else:
-...		print('File already exists!')
+...     print('File already exists!')
 ...
 ... File already exists!
 >>>
@@ -5987,12 +5987,12 @@ b'binary data'
 # gzip compression
 import gzip
 with gzip.open('somefile.gz', 'rt') as f:
-	text = f.read()
+    text = f.read()
 
 # bz2 compression
 import bz2
 with bz2.open('somefile.bz2', 'rt') as f:
-	text = f.read()
+    text = f.read()
 ```
 
 Как показано выше, весь ввод и вывод будет использовать текст и проводить кодирование/декодирование в Unicode. Если же вы хотите работать с бинарными данными, используйте файловые режимы *rb* или *wb*. 
@@ -6003,7 +6003,7 @@ with bz2.open('somefile.bz2', 'rt') as f:
 При записи сжатных данных с помощью необязательного именованного аргумента *compresslevel* может быть установлен уровень компрессии. Например:
 ```python
 with gzip.open('somefile.gz', 'wt', compresslevel=5) as f:
-	f.write(text)
+    f.write(text)
 ```
 
 Уровень по умолчанию — это 9, то есть наивысший. Более низкие уровни увеличивают скорость, но снижают степень сжатия данных.
@@ -6014,7 +6014,7 @@ import
 
 f = open('somefile.gz', 'rb')
 with gzip.open(f, 'rt') as g:
-	text = g.read()
+    text = g.read()
 ```
 
 Это позволяет модулям *gzip* и *bz2* работать с различными файлоподобными объектами, такими как сокеты, каналы и файлы в оперативной памяти.
@@ -6031,9 +6031,9 @@ from functools import partial
 RECORD_SIZE = 32
 
 with open('somefile.data', 'rb') as f:
-	records = iter(partial(f.read, RECORD_SIZE), b'')
-	for r in records:
-		...
+    records = iter(partial(f.read, RECORD_SIZE), b'')
+    for r in records:
+        ...
 ```
 
 Объект *records* в этом примере является итерируемым; он будет производить кусочки (чанки) фиксированного размера, пока не будет достигнут конец файла. Однако стоит отметить, что в последнем элементе может быть на несколько байтов меньше, чем ожидается, если размер файла не делится на точную длину размера записи.
@@ -6055,17 +6055,17 @@ with open('somefile.data', 'rb') as f:
 import os.path
 
 def read_into_buffer(filename):
-	buf = bytearray(os.path.getsize(filename))
-	with open(filename, 'rb') as f:
-		f.readinto(buf)
-	return buf
+    buf = bytearray(os.path.getsize(filename))
+    with open(filename, 'rb') as f:
+        f.readinto(buf)
+    return buf
 ```
 
 Вот пример использования:
 ```python
 >>> # Write a sample file
 >>> with open('sample.bin', 'wb') as f:
-...		f.write(b'Hello World')
+...     f.write(b'Hello World')
 ...
 >>> buf = read_into_buffer('sample.bin')
 >>> buf
@@ -6074,7 +6074,7 @@ bytearray(b'Hello World')
 >>> buf
 bytearray(b'Hallo World')
 >>> with open('newsample.bin', 'wb') as f:
-...		f.write(buf)
+...     f.write(buf)
 ...
 11
 >>>
@@ -6083,16 +6083,16 @@ bytearray(b'Hallo World')
 ### Обсуждение
 Метод *readinto()* может быть использован для заполнения данными любого предварительно выделенного (preallocated) массива. Это даже включает массивы, созданные с помощью модуля *array* или библиотек типа *numpy*. В отличие от обычного метода *read()*, метод *readinto()* заполняет содержание текущего буфера вместо выделения и возвращения новых объектов. Так что вы можете использовать его, чтобы избежать излишних выделений памяти. Например, если вы читаете бинарный файл, состоящий из записей одинакового размера, вы можете написать такую программу:
 ```python
-record_size = 32 	# Size of each record (adjust value)
+record_size = 32    # Size of each record (adjust value)
 
 buf = bytearray(record_size)
 with open('somefile', 'rb') as f:
-	while True:
-		n = f.readinto(buf)
-		if n < record_size:
-			break
-		# Use the contents of buf
-		...
+    while True:
+        n = f.readinto(buf)
+        if n < record_size:
+            break
+        # Use the contents of buf
+        ...
 ``` 
 
 Ещё одна интересная возможность — функция memoryview(), которая позволяет делать срезы [zero-copy](https://ru.wikipedia.org/wiki/Zero-copy) существующего буфера, и даже менять его содержимое. Например:
@@ -6128,17 +6128,17 @@ import os
 import mmap
 
 def memory_map(filename, access=mmap.ACCESS_WRITE):
-	size = os.path.getsize(filename)
-	fd = os.open(filename, os.O_RDWR)
-	return mmap.mmap(fd, size, access=access)
+    size = os.path.getsize(filename)
+    fd = os.open(filename, os.O_RDWR)
+    return mmap.mmap(fd, size, access=access)
 ```
 
 Чтобы использовать эту функцию, вам нужен уже созданный и наполненный данными файл. Вот пример того, как вы можете сначала создать файл и увеличить его до нужного размера:
 ```python
 >>> size = 1000000
 >>> with open('data', 'wb') as f:
-...		f.seek(size-1)
-...		f.write(b'\x00')
+...     f.seek(size-1)
+...     f.write(b'\x00')
 ...
 >>>
 ```
@@ -6158,7 +6158,7 @@ b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
 >>> # Verify that changes were made
 >>> with open('data', 'rb') as f:
-... 	print(f.read(11))
+...     print(f.read(11))
 ...
 b'Hello World'
 >>>
@@ -6167,8 +6167,8 @@ b'Hello World'
 Объект *mmap*, возвращаемый функцией *mmap()*, может быть также использован в качестве менеджера контекста. В это случае отображенный файл закрывается автоматически. Например:
 ```python
 >>> with memory_map('data') as m:
-... 	print(len(m))
-...		print(m[0:10])
+...     print(len(m))
+...     print(m[0:10])
 ...
 1000000
 b'Hello World'
@@ -6301,9 +6301,9 @@ True
 ```python
 >>> os.path.getsize('/Users/guido/Desktop/foo.txt')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "/usr/local/lib/python3.3/genericpath.py", line 49, in getsize
-		return os.stat(filename).st_size
+    File "<stdin>", line 1, in <module>
+    File "/usr/local/lib/python3.3/genericpath.py", line 49, in getsize
+        return os.stat(filename).st_size
 PermissionError: [Errno 13] Permission denied: '/Users/guido/Desktop/foo.txt'
 >>>
 ``` 
@@ -6324,17 +6324,17 @@ names = os.listdir('somedir')
 import os.path
 # Get all regular files
 names = [name for name in os.listdir('somedir')
-		 if os.path.isfile(os.path.join('somedir', name))]
+         if os.path.isfile(os.path.join('somedir', name))]
 
 # Get all dirs
 dirnames = [name for name in os.listdir('somedir')
-			if os.path.isdir(os.path.join('somedir', name))]
+            if os.path.isdir(os.path.join('somedir', name))]
 ```
 
 Строковые методы *startswith()* и *endswith()* также могут быть полезны для фильтрации содержимого каталога. Например:
 ```python
 pyfiles = [name for name in os.listdir('somedir')
-		   if name.endswith('.py')]
+           if name.endswith('.py')]
 ```
 
 Для поиска совпадений по имени файла вы можете использовать модули *glob* или *fnmatch*. Например:
@@ -6344,7 +6344,7 @@ pyfiles = glob.glob('somedir/*.py')
 
 from fnmatch import fnmatch
 pyfiles = [name for name in os.listdir('somedir')
-		   if fnmatch(name, '*.py')]
+           if fnmatch(name, '*.py')]
 ```
 
 ### Обсуждение
@@ -6360,15 +6360,15 @@ pyfiles = glob.glob('*.py')
 
 # Get file sizes and modification dates
 name_sz_date = [(name, os.path.getsize(name), os.path.getmtime(name))
-				for name in pyfiles]
+                for name in pyfiles]
 
 for name, size, mtime in name_sz_date:
-	print(name, size, mtime)
+    print(name, size, mtime)
 
 # Alternative: Get file metadata
 file_metadata = [(name, os.stat(name)) for name in pyfiles]
 for name, meta in file_metadata:
-	print(name, meta.st_size, meta.st_mtime)
+    print(name, meta.st_size, meta.st_mtime)
 ``` 
 
 И последнее: в работе с именами файлов есть тонкие моменты, связанные с кодировками. Обычно записи, возвращаемые функциями типа *os.listdir()*, декодируются согласно установленной по умолчанию в системе кодировки имен файлов. Однако возможно, что при некоторых обстоятельствах вам придётся столкнуться с недекодируемыми именами файлов. Рецепты **5.14.** и **5.15.** содержат дополнительную информацию о работе с такими именами.  
@@ -6389,7 +6389,7 @@ for name, meta in file_metadata:
 ```python
 >>> # Write a file using a unicode filename
 >>> with open('jalape\xf1o.txt', 'w') as f:
-...		f.write('Spicy!')
+...     f.write('Spicy!')
 ...
 6
 >>> # Directory listing (decoded)
@@ -6403,7 +6403,7 @@ for name, meta in file_metadata:
 
 >>> # Open file with raw filename
 >>> with open(b'jalapen\xcc\x83o.txt') as f:
-...		print(f.read())
+...     print(f.read())
 ...
 Spicy!
 >>>
@@ -6427,12 +6427,12 @@ not allowed”.
 При выводе имен файлов неизвестного происхождения, используйте конвертирование для избежания ошибок:
 ```python
 def bad_filename(filename):
-	return repr(filename)[1:-1]
+    return repr(filename)[1:-1]
 
 try:
-	print(filename)
+    print(filename)
 except UnicodeEncodeError:
-	print(bad_filename(filename))
+    print(bad_filename(filename))
 ``` 
 
 ### Обсуждение
@@ -6450,11 +6450,11 @@ except UnicodeEncodeError:
 Если у вас есть код, который манипулирует именами файлов или даже передает их функциям (таким как *open()*), всё работает нормально. Вы попадете в неприятности только в ситуациях, где вы хотите вывести имя файла (вывод, логирование и т.п.) Ваша программа упадет, если вы захотите вывести показанный выше листинг:
 ```python
 >>> for name in files:
-...		print(name)
+...     print(name)
 ...
 spam.py
 Traceback (most recent call last):
-	File "<stdin>", line 2, in <module>
+    File "<stdin>", line 2, in <module>
 UnicodeEncodeError: 'utf-8' codec can't encode character '\udce4' in
 position 1: surrogates not allowed
 >>>
@@ -6463,10 +6463,10 @@ position 1: surrogates not allowed
 Причина падения в том, что символ \\udce4 не является валидным Unicode. Это вторая половина двухсимвольной комбинации, известной как «суррогатная пара». Поскольку первая часть отсутствует, это не валидный Unicode. Поэтому единственный способ успешно произвести вывод — предпринять корректирующее действие, если встретится неправильно имя файла. Например:
 ```python
 >> for name in files:
-...		try:
-...			print(name)
-...		except UnicodeEncodeError:
-...			print(bad_filename(name))
+...     try:
+...         print(name)
+...     except UnicodeEncodeError:
+...         print(bad_filename(name))
 ...
 spam.py
 b\udce4d.txt
@@ -6477,17 +6477,17 @@ foo.txt
 Выбор того, что будет делать функция *bad_filename()*, во многом зависит от вас. Другая возможность — как-то перекодировать значение:
 ```python
 def bad_filename(filename):
-	temp = filename.encode(sys.getfilesystemencoding(), errors='surrogateescape')
-	return temp.decode('latin-1')
+    temp = filename.encode(sys.getfilesystemencoding(), errors='surrogateescape')
+    return temp.decode('latin-1')
 ``` 
 
 При использовани этой версии вы получите следующее:
 ```python
 >>> for name in files:
-...		try:
-...			print(name)
-...		except UnicodeEncodeError:
-...			print(bad_filename(name))
+...     try:
+...         print(name)
+...     except UnicodeEncodeError:
+...         print(bad_filename(name))
 ...
 spam.py
 bäd.txt
@@ -6566,7 +6566,7 @@ ValueError: I/O operation on closed file.
 <_io.BufferedWriter name='sample.txt'>
 >>> f.write('hello')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ValueError: underlying buffer has been detached
 >>>
 ```
@@ -6582,7 +6582,7 @@ ValueError: underlying buffer has been detached
 Хотя здесь мы показали изменение кодировки, этот приём может быть использован для изменения обработки строк, политики обработки ошибок и других аспектов работы с файлами. Например:
 ```python
 >>> sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='ascii',
-...		errors='xmlcharrefreplace')
+...     errors='xmlcharrefreplace')
 >>> print('Jalape\u00f1o')
 Jalape&#241;o
 >>>
@@ -6600,7 +6600,7 @@ Jalape&#241;o
 >>> import sys
 >>> sys.stdout.write(b'Hello\n')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: must be str, not bytes
 >>> sys.stdout.buffer.write(b'Hello\n')
 Hello
@@ -6645,27 +6645,27 @@ f = open(fd, 'wt', closefd=False)
 from socket import socket, AF_INET, SOCK_STREAM
 
 def echo_client(client_sock, addr):
-	print('Got connection from', addr)
+    print('Got connection from', addr)
 
-	# Make text-mode file wrappers for socket reading/writing
-	client_in = open(client_sock.fileno(), 'rt', encoding='latin-1',
-					 closefd=False)
-	client_out = open(client_sock.fileno(), 'wt', encoding='latin-1',
-					  closefd=False)
+    # Make text-mode file wrappers for socket reading/writing
+    client_in = open(client_sock.fileno(), 'rt', encoding='latin-1',
+                     closefd=False)
+    client_out = open(client_sock.fileno(), 'wt', encoding='latin-1',
+                      closefd=False)
 
-	# Echo lines back to the client using file I/O
-	for line in client_in:
-		client_out.write(line)
-		client_out.flush()
-	client_sock.close()
+    # Echo lines back to the client using file I/O
+    for line in client_in:
+        client_out.write(line)
+        client_out.flush()
+    client_sock.close()
 
 def echo_server(address):
-	sock = socket(AF_INET, SOCK_STREAM)
-	sock.bind(address)
-	sock.listen(1)
-	while True:
-		client, addr = sock.accept()
-		echo_client(client, addr)
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.bind(address)
+    sock.listen(1)
+    while True:
+        client, addr = sock.accept()
+        echo_client(client, addr)
 ```
 
 Важно подчеркнуть, что вышеприведённый пример нужен только для иллюстрации возможности встроенной функции *open()*, и он работает только в Unix. Если вы пытаетесь накрутить файлоподобный интерфейс на сокет, и вы хотите, чтобы ваш код был кроссплатформенным, используйте метод сокетов *makefile()*. Однако если переносимость вас не беспокоит, вы можете обнаружить, что представленное выше решение обладает намного большей производительностью, нежели *makefile()*.
@@ -6691,13 +6691,13 @@ bstdout.flush()
 from tempfile import TemporaryFile
 
 with TemporaryFile('w+t') as f:
-	# Read/write to the file
-	f.write('Hello World\n')
-	f.write('Testing\n')
+    # Read/write to the file
+    f.write('Hello World\n')
+    f.write('Testing\n')
 
-	# Seek back to beginning and read the data
-	f.seek(0)
-	data = f.read()
+    # Seek back to beginning and read the data
+    f.seek(0)
+    data = f.read()
 
 # Temporary file is destroyed
 ``` 
@@ -6714,7 +6714,7 @@ f.close()
 Первый аргумент, передаваемый в *TemporaryFile()*, это режим файла: обычно для текстовых файлов это *w+t*, а для бинарных — *w+b*. Этот режим одновременно поддерживает чтение и запись, что в данном случае полезно, поскольку закрытие файла для смены режима его бы разрушило. *TemporaryFile()* дополнительно принимает те же аргументы, что и встроенная функция *open()*. Например:
 ```python
 with TemporaryFile('w+t', encoding='utf-8', errors='ignore') as f:
-	...
+    ...
 ```
 
 На большинстве Unix-систем файл, созданный функцией *TemporaryFile()*, является безымянным и даже не имеет местоположения в каталоге. Если вы хотите преодолеть это ограничение, используйте *NamedTemporaryFile()*. Например:
@@ -6722,8 +6722,8 @@ with TemporaryFile('w+t', encoding='utf-8', errors='ignore') as f:
 from tempfile import NamedTemporaryFile
 
 with NamedTemporaryFile('w+t') as f:
-	print('filename is:', f.name)
-	...
+    print('filename is:', f.name)
+    ...
 
 # File automatically destroyed
 ```
@@ -6731,17 +6731,17 @@ with NamedTemporaryFile('w+t') as f:
 Здесь атрибут *f.name* открытого файла содержит имя временного файла. Это может быть полезно, если оно передается какой-то другой программе, которой нужно будет открыть этот файл. Как и в случае *TemporaryFile()*, получившийся файл будет автоматически уничтожен после закрытия. Если вы не хотите, чтобы это произошло, передайте в функцию именованный аргумент *delete=False*. Например:
 ```python
 with NamedTemporaryFile('w+t', delete=False) as f:
-	print('filename is:', f.name)
-	...
+    print('filename is:', f.name)
+    ...
 ```
 
 Чтобы создать временный каталог, используйте *tempfile.TemporaryDirectory()*. Например:
 ```python
 from tempfile import TemporaryDirectory
 with TemporaryDirectory() as dirname:
-	print('dirname is:', dirname)
-	# Use the directory
-	...
+    print('dirname is:', dirname)
+    # Use the directory
+    ...
 # Directory and all contents destroyed
 ```
 
@@ -6784,10 +6784,10 @@ with TemporaryDirectory() as dirname:
 ```python
 import serial
 ser = serial.Serial('/dev/tty.usbmodem641',
-					 baudrate=9600,
-				     bytesize=8,
-					 parity='N',
-					 stopbits=1)
+                     baudrate=9600,
+                     bytesize=8,
+                     parity='N',
+                     stopbits=1)
 ```
 
 Имя устройства меняется в зависимости от типа устройства и операционной системы. Например, в Windows вы можете использовать устройство 0, 1 и так далее, чтобы открыть такие порты как COM0 и COM1. Когда они открыты, вы можете читать и записывать данные, используя вызовы *read()*, *readline()* и *write()*. Например:
@@ -6875,23 +6875,23 @@ import time
 import threading
 
 class Countdown:
-	def __init__(self, n):
-		self.n = n
-		self.thr = threading.Thread(target=self.run)
-		self.thr.daemon = True
-		self.thr.start()
-	
-	def run(self):	
-		while self.n > 0:
-			print('T-minus', self.n)
-			self.n -= 1
-			time.sleep(5)
-		
-	def __getstate__(self):
-		return self.n
+    def __init__(self, n):
+        self.n = n
+        self.thr = threading.Thread(target=self.run)
+        self.thr.daemon = True
+        self.thr.start()
+    
+    def run(self):  
+        while self.n > 0:
+            print('T-minus', self.n)
+            self.n -= 1
+            time.sleep(5)
+        
+    def __getstate__(self):
+        return self.n
 
-	def __setstate__(self, n):
-		self.__init__(n)
+    def __setstate__(self, n):
+        self.__init__(n)
 ``` 
 
 Попробуйте применить *pickle*:
@@ -6951,11 +6951,11 @@ Symbol,Price,Date,Time,Change,Volume
 ```python
 import csv
 with open('stocks.csv') as f:
-	f_csv = csv.reader(f)
-	headers = next(f_csv)
-	for row in f_csv:
-		# Process row
-		...
+    f_csv = csv.reader(f)
+    headers = next(f_csv)
+    for row in f_csv:
+        # Process row
+        ...
 ```
 
 В приведённым выше коде строке соответствует кортеж. Поэтому для доступа к определенному полю вам нужно использовать индексирование: row[0] — Symbol, row[4] — Change.
@@ -6964,13 +6964,13 @@ with open('stocks.csv') as f:
 ```python
 from collections import namedtuple
 with open('stock.csv') as f:
-	f_csv = csv.reader(f)
-	headings = next(f_csv)
-	Row = namedtuple('Row', headings)
-	for r in f_csv:
-		row = Row(*r)
-		# Process row
-		...
+    f_csv = csv.reader(f)
+    headings = next(f_csv)
+    Row = namedtuple('Row', headings)
+    for r in f_csv:
+        row = Row(*r)
+        # Process row
+        ...
 ```
 
 Это позволит использовать заголовки колонок, такие как row.Symbol и row.Change вместо индексов. Стоит отметить, что это сработает только в том случае, если заголовки колонок являются валидными идентификаторами Python. Если это не так, вы должны будете обработать эти заголовки (например, заменить неподходящие символы подчеркиваниями и т.п.)
@@ -6979,10 +6979,10 @@ with open('stock.csv') as f:
 ```python
 import csv
 with open('stocks.csv') as f:
-	f_csv = csv.DictReader(f)
-	for row in f_csv:
-		# process row
-		...
+    f_csv = csv.DictReader(f)
+    for row in f_csv:
+        # process row
+        ...
 ```
 
 В этой версии вы можете обращаться к элементом каждой строки, используя заголовки строки. Например, row['Symbol'] или row['Change']. 
@@ -6996,9 +6996,9 @@ rows = [('AA', 39.48, '6/11/2007', '9:36am', -0.18, 181800),
 ]
 
 with open('stocks.csv','w') as f:
-	f_csv = csv.writer(f)
-	f_csv.writerow(headers)
-	f_csv.writerows(rows)
+    f_csv = csv.writer(f)
+    f_csv.writerow(headers)
+    f_csv.writerows(rows)
 ``` 
 
 Если у вас есть данные в форме последовательности словарей, сделайте так:
@@ -7013,19 +7013,19 @@ rows = [{'Symbol':'AA', 'Price':39.48, 'Date':'6/11/2007',
 ]
 
 with open('stocks.csv','w') as f:
-	f_csv = csv.DictWriter(f, headers)
-	f_csv.writeheader()
-	f_csv.writerows(rows)
+    f_csv = csv.DictWriter(f, headers)
+    f_csv.writeheader()
+    f_csv.writerows(rows)
 ```
 
 ### Обсуждение
 Вы должны практически всегда предпочитать модуль *csv* ручному разрезанию и парсингу CSV-данных. Например, вы можете подумывать, что надо бы написать такой код:
 ```python
 with open('stocks.csv') as f:
-	for line in f:
-		row = line.split(',')
-		# process row
-		...
+    for line in f:
+        row = line.split(',')
+        # process row
+        ...
 ```
 
 Проблема такого подхода в том, что вам нужно разбираться с надоедливыми деталями. Например, если одно из полей окружено кавычками, вы должны будете их срезать. А если это закавыченное поле содержит запятую, код сломается, поскольку выдаст строку неверного размера. 
@@ -7034,10 +7034,10 @@ with open('stocks.csv') as f:
 ```python
 # Example of reading tab-separated values
 with open('stock.tsv') as f:
-	f_tsv = csv.reader(f, delimiter='\t')
-	for row in f_tsv:
-	# Process row
-	...
+    f_tsv = csv.reader(f, delimiter='\t')
+    for row in f_tsv:
+    # Process row
+    ...
 ``` 
 
 Если вы читаете данные в CSV и конвертируете их в именованные кортежи, вам нужно быть аккуратными с валидацией заголовков колонок. Например, CSV-файл может иметь строку заголовка, содержащую невалидный символ: 
@@ -7050,39 +7050,39 @@ Street Address,Num-Premises,Latitude,Longitude
 ```python
 import re
 with open('stock.csv') as f:
-	f_csv = csv.reader(f)
-	headers = [ re.sub('[^a-zA-Z_]', '_', h) for h in next(f_csv) ]
-	Row = namedtuple('Row', headers)
-	for r in f_csv:
-		row = Row(*r)
-		# Process row
-		...
+    f_csv = csv.reader(f)
+    headers = [ re.sub('[^a-zA-Z_]', '_', h) for h in next(f_csv) ]
+    Row = namedtuple('Row', headers)
+    for r in f_csv:
+        row = Row(*r)
+        # Process row
+        ...
 ```
 
 Важно отметить, что модуль *csv* не пытается интерпретировать данные или конвертировать их в какой-то другой тип, нежели строку. Если такие конвертации нужны, их вам придется выполнить самостоятельно. Вот пример выполнения дополнительных преобразований типов на CSV-данных:
 ```python
 col_types = [str, float, str, str, float, int]
 with open('stocks.csv') as f:
-	f_csv = csv.reader(f)
-	headers = next(f_csv)
-	for row in f_csv:
-		# Apply conversions to the row items
-		row = tuple(convert(value) for convert, value in zip(col_types, row))
-		...
+    f_csv = csv.reader(f)
+    headers = next(f_csv)
+    for row in f_csv:
+        # Apply conversions to the row items
+        row = tuple(convert(value) for convert, value in zip(col_types, row))
+        ...
 ```
 
 Альтернативный пример преобразования выбранных полей словарей:
 ```python
 print('Reading as dicts with type conversion')
 field_types = [ ('Price', float),
-				('Change', float),
-				('Volume', int) ]
+                ('Change', float),
+                ('Volume', int) ]
 
 with open('stocks.csv') as f:
-	for row in csv.DictReader(f):
-		row.update((key, conversion(row[key]))
-			for key, conversion in field_types)
-		print(row)
+    for row in csv.DictReader(f):
+        row.update((key, conversion(row[key]))
+            for key, conversion in field_types)
+        print(row)
 ```
 
 В общем, вам стоит быть осторожными с такими преобразованиями. В реальном мире в CSV-файлах часто попадаются отсутствующие поля, повреждённые данные и прочие проблемы, которые могут поломать преобразования типов. Так что если ваши данные не являются гарантированно безошибочными, об этом стоит помнить (например, вы можете добавить подходящую обработку исключений).
@@ -7099,9 +7099,9 @@ with open('stocks.csv') as f:
 import json
 
 data = {
-	'name' : 'ACME',
-	'shares' : 100,
-	'price' : 542.23
+    'name' : 'ACME',
+    'shares' : 100,
+    'price' : 542.23
 }
 
 json_str = json.dumps(data)
@@ -7111,11 +7111,11 @@ json_str = json.dumps(data)
 ```python
 # Writing JSON data
 with open('data.json', 'w') as f:
-	json.dump(data, f)
+    json.dump(data, f)
 
 # Reading data back
 with open('data.json', 'r') as f:
-	data = json.load(f)
+    data = json.load(f)
 ``` 
 
 ### Обсуждение
@@ -7126,8 +7126,8 @@ with open('data.json', 'r') as f:
 >>> json.dumps(False)
 'false'
 >>> d = {'a': True,
-...		'b': 'Hello',
-...		'c': None}
+...     'b': 'Hello',
+...     'c': None}
 >>> json.dumps(d)
 '{"b": "Hello", "c": null, "a": true}'
 >>>
@@ -7149,23 +7149,23 @@ with open('data.json', 'r') as f:
  'query': 'python',
  'refresh_url': '?since_id=264043230692245504&q=python',
  'results': [{'created_at': 'Thu, 01 Nov 2012 16:36:26 +0000',
-			  'from_user': ...
+              'from_user': ...
 },
-		  	 {'created_at': 'Thu, 01 Nov 2012 16:36:14 +0000',
-			  'from_user': ...
-		   	 },
-			 {'created_at': 'Thu, 01 Nov 2012 16:36:13 +0000',
-			  'from_user': ...
-			 },
-			 {'created_at': 'Thu, 01 Nov 2012 16:36:07 +0000',
-			  'from_user': ...
-			 }
-			 {'created_at': 'Thu, 01 Nov 2012 16:36:04 +0000',
-			  'from_user': ...
-			 }],
-	'results_per_page': 5,
-	'since_id': 0,
-	'since_id_str': '0'}
+             {'created_at': 'Thu, 01 Nov 2012 16:36:14 +0000',
+              'from_user': ...
+             },
+             {'created_at': 'Thu, 01 Nov 2012 16:36:13 +0000',
+              'from_user': ...
+             },
+             {'created_at': 'Thu, 01 Nov 2012 16:36:07 +0000',
+              'from_user': ...
+             }
+             {'created_at': 'Thu, 01 Nov 2012 16:36:04 +0000',
+              'from_user': ...
+             }],
+    'results_per_page': 5,
+    'since_id': 0,
+    'since_id_str': '0'}
 >>>
 ```
 
@@ -7182,8 +7182,8 @@ OrderedDict([('name', 'ACME'), ('shares', 50), ('price', 490.1)])
 Вот как вы можете превратить словарь JSON в объект Python:
 ```python
 >>> class JSONObject:
-... 	def __init__(self, d):
-...			self.__dict__ = d
+...     def __init__(self, d):
+...         self.__dict__ = d
 ...
 >>>
 >>> data = json.loads(s, object_hook=JSONObject)
@@ -7204,9 +7204,9 @@ OrderedDict([('name', 'ACME'), ('shares', 50), ('price', 490.1)])
 {"price": 542.23, "name": "ACME", "shares": 100}
 >>> print(json.dumps(data, indent=4))
 {
-	"price": 542.23,
-	"name": "ACME",
-	"shares": 100
+    "price": 542.23,
+    "name": "ACME",
+    "shares": 100
 }
 >>>
 ```
@@ -7221,22 +7221,22 @@ OrderedDict([('name', 'ACME'), ('shares', 50), ('price', 490.1)])
 Экземпляры в обычном случае не являются сериализуемыми. Например:
 ```python
 >>> class Point:
-... 	def __init__(self, x, y):
-...			self.x = x
-...			self.y = y
+...     def __init__(self, x, y):
+...         self.x = x
+...         self.y = y
 ...
 >>> p = Point(2, 3)
 >>> json.dumps(p)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "/usr/local/lib/python3.3/json/__init__.py", line 226, in dumps
-		return _default_encoder.encode(obj)
-	File "/usr/local/lib/python3.3/json/encoder.py", line 187, in encode
-		chunks = self.iterencode(o, _one_shot=True)
-	File "/usr/local/lib/python3.3/json/encoder.py", line 245, in iterencode
-		return _iterencode(o, 0)
-	File "/usr/local/lib/python3.3/json/encoder.py", line 169, in default
-		raise TypeError(repr(o) + " is not JSON serializable")
+    File "<stdin>", line 1, in <module>
+    File "/usr/local/lib/python3.3/json/__init__.py", line 226, in dumps
+        return _default_encoder.encode(obj)
+    File "/usr/local/lib/python3.3/json/encoder.py", line 187, in encode
+        chunks = self.iterencode(o, _one_shot=True)
+    File "/usr/local/lib/python3.3/json/encoder.py", line 245, in iterencode
+        return _iterencode(o, 0)
+    File "/usr/local/lib/python3.3/json/encoder.py", line 169, in default
+        raise TypeError(repr(o) + " is not JSON serializable")
 TypeError: <__main__.Point object at 0x1006f2650> is not JSON serializable
 >>>
 ```
@@ -7244,28 +7244,28 @@ TypeError: <__main__.Point object at 0x1006f2650> is not JSON serializable
 Если вы хотите сериализовать экземпляры, вы можете предоставить функцию, которая принимает экземпляр на вход и возвращает словарь, который может быть сериализован. Например:
 ```python
 def serialize_instance(obj):
-	d = { '__classname__' : type(obj).__name__ }
-	d.update(vars(obj))
-	return d
+    d = { '__classname__' : type(obj).__name__ }
+    d.update(vars(obj))
+    return d
 ```
 
 Если вы хотите получить экземпляр обратно, вы можете сделать это так:
 ```python
 # Dictionary mapping names to known classes
 classes = {
-	'Point' : Point
+    'Point' : Point
 }
 
 def unserialize_object(d):
-	clsname = d.pop('__classname__', None)
-	if clsname:
-		cls = classes[clsname]
-		obj = cls.__new__(cls) # Make instance without calling __init__
-			for key, value in d.items():
-			setattr(obj, key, value)
-			return obj
-	else:
-		return d
+    clsname = d.pop('__classname__', None)
+    if clsname:
+        cls = classes[clsname]
+        obj = cls.__new__(cls) # Make instance without calling __init__
+            for key, value in d.items():
+            setattr(obj, key, value)
+            return obj
+    else:
+        return d
 ```
 
 Вот пример того, как используются эти функции:
@@ -7302,14 +7302,14 @@ doc = parse(u)
 
 # Extract and output tags of interest
 for item in doc.iterfind('channel/item'):
-	title = item.findtext('title')
-	date = item.findtext('pubDate')
-	link = item.findtext('link')
+    title = item.findtext('title')
+    date = item.findtext('pubDate')
+    link = item.findtext('link')
 
-	print(title)
-	print(date)
-	print(link)
-	print()
+    print(title)
+    print(date)
+    print(link)
+    print()
 ```
 
 Если вы запустите вышеприведённый скрипт, вывод будет примерно таким:
@@ -7345,30 +7345,30 @@ http://feedproxy.google.com/~r/EmptysquarePython/~3/_DOZT2Kd0hQ/
 <?xml version="1.0"?>
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
 <channel>
-	<title>Planet Python</title>
-	<link>http://planet.python.org/</link>
-	<language>en</language>
-	<description>Planet Python - http://planet.python.org/</description>
-	<item>
-	  <title>Steve Holden: Python for Data Analysis</title>
-		<guid>http://holdenweb.blogspot.com/...-data-analysis.html</guid>
-		<link>http://holdenweb.blogspot.com/...-data-analysis.html</link>
-		<description>...</description>
-		<pubDate>Mon, 19 Nov 2012 02:13:51 +0000</pubDate>
+    <title>Planet Python</title>
+    <link>http://planet.python.org/</link>
+    <language>en</language>
+    <description>Planet Python - http://planet.python.org/</description>
+    <item>
+      <title>Steve Holden: Python for Data Analysis</title>
+        <guid>http://holdenweb.blogspot.com/...-data-analysis.html</guid>
+        <link>http://holdenweb.blogspot.com/...-data-analysis.html</link>
+        <description>...</description>
+        <pubDate>Mon, 19 Nov 2012 02:13:51 +0000</pubDate>
  </item>
  <item>
-	<title>Vasudev Ram: The Python Data model (for v2 and v3)</title>
-	<guid>http://jugad2.blogspot.com/...-data-model.html</guid>
-	<link>http://jugad2.blogspot.com/...-data-model.html</link>
-	<description>...</description>
-	<pubDate>Sun, 18 Nov 2012 22:06:47 +0000</pubDate>
-	</item>
+    <title>Vasudev Ram: The Python Data model (for v2 and v3)</title>
+    <guid>http://jugad2.blogspot.com/...-data-model.html</guid>
+    <link>http://jugad2.blogspot.com/...-data-model.html</link>
+    <description>...</description>
+    <pubDate>Sun, 18 Nov 2012 22:06:47 +0000</pubDate>
+    </item>
  <item>
-	<title>Python Diary: Been playing around with Object Databases</title>
-	<guid>http://www.pythondiary.com/...-object-databases.html</guid>
-	<link>http://www.pythondiary.com/...-object-databases.html</link>
-	<description>...</description>
-	<pubDate>Sun, 18 Nov 2012 20:40:29 +0000</pubDate>
+    <title>Python Diary: Been playing around with Object Databases</title>
+    <guid>http://www.pythondiary.com/...-object-databases.html</guid>
+    <link>http://www.pythondiary.com/...-object-databases.html</link>
+    <description>...</description>
+    <pubDate>Sun, 18 Nov 2012 20:40:29 +0000</pubDate>
  </item>
 ...
 </channel>
@@ -7406,73 +7406,73 @@ http://feedproxy.google.com/~r/EmptysquarePython/~3/_DOZT2Kd0hQ/
 from xml.etree.ElementTree import iterparse
 
 def parse_and_remove(filename, path):
-	path_parts = path.split('/')
-	doc = iterparse(filename, ('start', 'end'))
-	# Skip the root element
-	next(doc)
+    path_parts = path.split('/')
+    doc = iterparse(filename, ('start', 'end'))
+    # Skip the root element
+    next(doc)
 
 tag_stack = []
 elem_stack = []
 for event, elem in doc:
-	if event == 'start':
-		tag_stack.append(elem.tag)
-		elem_stack.append(elem)
-	elif event == 'end':
-		if tag_stack == path_parts:
-			yield elem
-			elem_stack[-2].remove(elem)
-		try:
-			tag_stack.pop()
-			elem_stack.pop()
-		except IndexError:
-			pass
+    if event == 'start':
+        tag_stack.append(elem.tag)
+        elem_stack.append(elem)
+    elif event == 'end':
+        if tag_stack == path_parts:
+            yield elem
+            elem_stack[-2].remove(elem)
+        try:
+            tag_stack.pop()
+            elem_stack.pop()
+        except IndexError:
+            pass
 ```
 
 Чтобы протестировать функцию, вам потребуется большой XML-файл. Часто такие файлы можно найти на государственных сайтах и ресурсах с открытой информацией. Например, вы можете скачать [базу данных выбоин на дорогах Чикаго](http://bit.ly/YQh2Oh) в формате XML. Когда писалась эта книга, этот файл состоял из более чем 100 000 строк данных, который были закодированы так:
 ```xml
 <response>
-	<row>
-		<row ...>
-			<creation_date>2012-11-18T00:00:00</creation_date>
-			<status>Completed</status>
-			<completion_date>2012-11-18T00:00:00</completion_date>
-			<service_request_number>12-01906549</service_request_number>
-			<type_of_service_request>Pot Hole in Street</type_of_service_request>
-			<current_activity>Final Outcome</current_activity>
-			<most_recent_action>CDOT Street Cut ... Outcome</most_recent_action>
-			<street_address>4714 S TALMAN AVE</street_address>
-			<zip>60632</zip>
-			<x_coordinate>1159494.68618856</x_coordinate>
-			<y_coordinate>1873313.83503384</y_coordinate>
-			<ward>14</ward>
-			<police_district>9</police_district>
-			<community_area>58</community_area>
-			<latitude>41.808090232127896</latitude>
-			<longitude>-87.69053684711305</longitude>
-			<location latitude="41.808090232127896"
-					  longitude="-87.69053684711305" />
-		/row>
-		<row ...>
-			<creation_date>2012-11-18T00:00:00</creation_date>
-			<status>Completed</status>
-			<completion_date>2012-11-18T00:00:00</completion_date>
-			<service_request_number>12-01906695</service_request_number>
-			<type_of_service_request>Pot Hole in Street</type_of_service_request>
-			<current_activity>Final Outcome</current_activity>
-			<most_recent_action>CDOT Street Cut ... Outcome</most_recent_action>
-			<street_address>3510 W NORTH AVE</street_address>
-			<zip>60647</zip>
-			<x_coordinate>1152732.14127696</x_coordinate>
-			<y_coordinate>1910409.38979075</y_coordinate>
-			<ward>26</ward>
-			<police_district>14</police_district>
-			<community_area>23</community_area>
-			<latitude>41.91002084292946</latitude>
-			<longitude>-87.71435952353961</longitude>
-			<location latitude="41.91002084292946"
-					  longitude="-87.71435952353961" />
-		</row>
-	</row>
+    <row>
+        <row ...>
+            <creation_date>2012-11-18T00:00:00</creation_date>
+            <status>Completed</status>
+            <completion_date>2012-11-18T00:00:00</completion_date>
+            <service_request_number>12-01906549</service_request_number>
+            <type_of_service_request>Pot Hole in Street</type_of_service_request>
+            <current_activity>Final Outcome</current_activity>
+            <most_recent_action>CDOT Street Cut ... Outcome</most_recent_action>
+            <street_address>4714 S TALMAN AVE</street_address>
+            <zip>60632</zip>
+            <x_coordinate>1159494.68618856</x_coordinate>
+            <y_coordinate>1873313.83503384</y_coordinate>
+            <ward>14</ward>
+            <police_district>9</police_district>
+            <community_area>58</community_area>
+            <latitude>41.808090232127896</latitude>
+            <longitude>-87.69053684711305</longitude>
+            <location latitude="41.808090232127896"
+                      longitude="-87.69053684711305" />
+        /row>
+        <row ...>
+            <creation_date>2012-11-18T00:00:00</creation_date>
+            <status>Completed</status>
+            <completion_date>2012-11-18T00:00:00</completion_date>
+            <service_request_number>12-01906695</service_request_number>
+            <type_of_service_request>Pot Hole in Street</type_of_service_request>
+            <current_activity>Final Outcome</current_activity>
+            <most_recent_action>CDOT Street Cut ... Outcome</most_recent_action>
+            <street_address>3510 W NORTH AVE</street_address>
+            <zip>60647</zip>
+            <x_coordinate>1152732.14127696</x_coordinate>
+            <y_coordinate>1910409.38979075</y_coordinate>
+            <ward>26</ward>
+            <police_district>14</police_district>
+            <community_area>23</community_area>
+            <latitude>41.91002084292946</latitude>
+            <longitude>-87.71435952353961</longitude>
+            <location latitude="41.91002084292946"
+                      longitude="-87.71435952353961" />
+        </row>
+    </row>
 </response>
 ```
 
@@ -7485,9 +7485,9 @@ potholes_by_zip = Counter()
 
 doc = parse('potholes.xml')
 for pothole in doc.iterfind('row/row'):
-	potholes_by_zip[pothole.findtext('zip')] += 1
+    potholes_by_zip[pothole.findtext('zip')] += 1
 for zipcode, num in potholes_by_zip.most_common():
-	print(zipcode, num)
+    print(zipcode, num)
 ```
 
 Единственная проблема с этим скриптом заключается в том, что он читает в память XML-файл целиком. На нашем компьютере при запуске он отъел 450 мегабайт оперативной памяти. Если же применить код из этого рецепта, программа изменится совсем чуть-чуть:
@@ -7497,10 +7497,10 @@ potholes_by_zip = Counter()
 
 data = parse_and_remove('potholes.xml', 'row/row')
 for pothole in data:
-	potholes_by_zip[pothole.findtext('zip')] += 1
+    potholes_by_zip[pothole.findtext('zip')] += 1
 
 for zipcode, num in potholes_by_zip.most_common():
-	print(zipcode, num)
+    print(zipcode, num)
 ```
 
 При этом эта версия занимает при запуске всего 7 мегабайт оперативной памяти — огромная экономия налицо!
@@ -7552,15 +7552,15 @@ elem_stack[-2].remove(elem)
 from xml.etree.ElementTree import Element
 
 def dict_to_xml(tag, d):
-	'''
-	Turn a simple dict of key/value pairs into XML
-	'''
-	elem = Element(tag)
-	for key, val in d.items():
-		child = Element(key)
-		child.text = str(val)
-		elem.append(child)
-	return elem
+    '''
+    Turn a simple dict of key/value pairs into XML
+    '''
+    elem = Element(tag)
+    for key, val in d.items():
+        child = Element(key)
+        child.text = str(val)
+        elem.append(child)
+    return elem
 ```
 
 Вот пример её работы:
@@ -7595,14 +7595,14 @@ b'<stock _id="1234"><price>490.1</price><shares>100</shares><name>GOOG</name>
 При генерации XML вы можете склоняться к простому созданию строк. Например:
 ```python
 def dict_to_xml_str(tag, d):
-	'''
-	Turn a simple dict of key/value pairs into XML
-	'''
-	parts = ['<{}>'.format(tag)]
-	for key, val in d.items():
-		parts.append('<{0}>{1}</{0}>'.format(key,val))
-		parts.append('</{}>'.format(tag))
-	return ''.join(parts)
+    '''
+    Turn a simple dict of key/value pairs into XML
+    '''
+    parts = ['<{}>'.format(tag)]
+    for key, val in d.items():
+        parts.append('<{0}>{1}</{0}>'.format(key,val))
+        parts.append('</{}>'.format(tag))
+    return ''.join(parts)
 ```
 
 Проблема в том, что вы влезете в большие неприятности, если попытаетесь сделать это вручную. Например, что случится, если значение словаря содержат спецсимволы? Например:
@@ -7643,26 +7643,26 @@ b'<item><name>&lt;spam&gt;</name></item>'
 ```xml
 <?xml version="1.0"?>
 <stop>
-	<id>14791</id>
-	<nm>Clark &amp; Balmoral</nm>
-	<sri>
-		<rt>22</rt>
-		<d>North Bound</d>
-		<dd>North Bound</dd>
-	</sri>
-	<cr>22</cr>
-	<pre>
-		<pt>5 MIN</pt>
-		<fd>Howard</fd>
-		<v>1378</v>
-		<rn>22</rn>
-	</pre>
-	<pre>
-		<pt>15 MIN</pt>
-		<fd>Howard</fd>
-		<v>1867</v>
-		<rn>22</rn>
-	</pre>
+    <id>14791</id>
+    <nm>Clark &amp; Balmoral</nm>
+    <sri>
+        <rt>22</rt>
+        <d>North Bound</d>
+        <dd>North Bound</dd>
+    </sri>
+    <cr>22</cr>
+    <pre>
+        <pt>5 MIN</pt>
+        <fd>Howard</fd>
+        <v>1378</v>
+        <rn>22</rn>
+    </pre>
+    <pre>
+        <pt>15 MIN</pt>
+        <fd>Howard</fd>
+        <v>1867</v>
+        <rn>22</rn>
+    </pre>
 </stop>
 ```
 
@@ -7696,21 +7696,21 @@ b'<item><name>&lt;spam&gt;</name></item>'
 ```python
 <?xml version='1.0' encoding='us-ascii'?>
 <stop>
-	<id>14791</id>
-	<nm>Clark &amp; Balmoral</nm>
-	<spam>This is a test</spam>
-	<pre>
-		<pt>5 MIN</pt>
-		<fd>Howard</fd>
-		<v>1378</v>
-		<rn>22</rn>
-	</pre>
-	<pre>
-		<pt>15 MIN</pt>
-		<fd>Howard</fd>
-		<v>1867</v>
-		<rn>22</rn>
-	</pre>
+    <id>14791</id>
+    <nm>Clark &amp; Balmoral</nm>
+    <spam>This is a test</spam>
+    <pre>
+        <pt>5 MIN</pt>
+        <fd>Howard</fd>
+        <v>1378</v>
+        <rn>22</rn>
+    </pre>
+    <pre>
+        <pt>15 MIN</pt>
+        <fd>Howard</fd>
+        <v>1867</v>
+        <rn>22</rn>
+    </pre>
 </stop>
 ```
 
@@ -7728,17 +7728,17 @@ b'<item><name>&lt;spam&gt;</name></item>'
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <top>
-	<author>David Beazley</author>
-		<content>
-			<html xmlns="http://www.w3.org/1999/xhtml">
-				<head>
-					<title>Hello World</title>
-				</head>
-				<body>
-					<h1>Hello World!</h1>
-				</body>
-			</html>
-		</content>
+    <author>David Beazley</author>
+        <content>
+            <html xmlns="http://www.w3.org/1999/xhtml">
+                <head>
+                    <title>Hello World</title>
+                </head>
+                <body>
+                    <h1>Hello World!</h1>
+                </body>
+            </html>
+        </content>
 </top>
 ```
 
@@ -7770,14 +7770,14 @@ b'<item><name>&lt;spam&gt;</name></item>'
 Часто вы можете упростить дело путем оборачивания работы с пространством имён во вспомогательный класс:
 ```python
 class XMLNamespaces:
-	def __init__(self, **kwargs):
-		self.namespaces = {}
-		for name, uri in kwargs.items():
-			self.register(name, uri)	
-	def register(self, name, uri):
-		self.namespaces[name] = '{'+uri+'}'
-	def __call__(self, path):
-		return path.format_map(self.namespaces)
+    def __init__(self, **kwargs):
+        self.namespaces = {}
+        for name, uri in kwargs.items():
+            self.register(name, uri)    
+    def register(self, name, uri):
+        self.namespaces[name] = '{'+uri+'}'
+    def __call__(self, path):
+        return path.format_map(self.namespaces)
 ``` 
 
 Чтобы использовать этот класс, вы можете поступить так:
@@ -7825,10 +7825,10 @@ end <Element 'top' at 0x10110dd60>
 Стандартный способ представления строк данных в Python — это последовательность кортежей. Например:
 ```python
 stocks = [
-	('GOOG', 100, 490.1),
-	('AAPL', 50, 545.75),
-	('FB', 150, 7.45),
-	('HPQ', 75, 33.2),
+    ('GOOG', 100, 490.1),
+    ('AAPL', 50, 545.75),
+    ('FB', 150, 7.45),
+    ('HPQ', 75, 33.2),
 ]
 ```
 
@@ -7863,7 +7863,7 @@ stocks = [
 Чтобы сделать запрос, используйте такую инструкцию:
 ```python
 >>> for row in db.execute('select * from portfolio'):
-... 	print(row)
+...     print(row)
 ...
 ('GOOG', 100, 490.1)
 ('AAPL', 50, 545.75)
@@ -7876,8 +7876,8 @@ stocks = [
 ```python
 >>> min_price = 100
 >>> for row in db.execute('select * from portfolio where price >= ?',
-						 (min_price,)):
-... 	print(row)
+                         (min_price,)):
+...     print(row)
 ...
 ('GOOG', 100, 490.1)
 ('AAPL', 50, 545.75)
@@ -7986,21 +7986,21 @@ b'hello'
 from struct import Struct
 
 def write_records(records, format, f):
-	'''
-	Write a sequence of tuples to a binary file of structures.
-	'''
-	record_struct = Struct(format)
-	for r in records:
-		f.write(record_struct.pack(*r))
+    '''
+    Write a sequence of tuples to a binary file of structures.
+    '''
+    record_struct = Struct(format)
+    for r in records:
+        f.write(record_struct.pack(*r))
 
 # Example
 if __name__ == '__main__':
-	records = [ (1, 2.3, 4.5),
-				(6, 7.8, 9.0),
-				(12, 13.4, 56.7) ]
+    records = [ (1, 2.3, 4.5),
+                (6, 7.8, 9.0),
+                (12, 13.4, 56.7) ]
 
 with open('data.b', 'wb') as f:
-	write_records(records, '<idd', f)
+    write_records(records, '<idd', f)
 ```
 
 Есть несколько подходов к обратному превращению этого файла в список кортежей. Во-первых, если вы читаете файл кусочками (чанками) инкрементально, вы можете написать такой код:
@@ -8008,16 +8008,16 @@ with open('data.b', 'wb') as f:
 from struct import Struct
 
 def read_records(format, f):
-	record_struct = Struct(format)
-	chunks = iter(lambda: f.read(record_struct.size), b'')
-	return (record_struct.unpack(chunk) for chunk in chunks)
+    record_struct = Struct(format)
+    chunks = iter(lambda: f.read(record_struct.size), b'')
+    return (record_struct.unpack(chunk) for chunk in chunks)
 
 # Example
 if __name__ == '__main__':
-	with open('data.b','rb') as f:
-		for rec in read_records('<idd', f):
-			# Process rec
-			...
+    with open('data.b','rb') as f:
+        for rec in read_records('<idd', f):
+            # Process rec
+            ...
 ```
 
 Если вы хотите прочесть файл целиком в байтовую строку за один проход и конвертировать его кусочек за кусочком, вы можете сделать это так:
@@ -8025,17 +8025,17 @@ if __name__ == '__main__':
 from struct import Struct
 
 def unpack_records(format, data):
-	record_struct = Struct(format)
-	return (record_struct.unpack_from(data, offset)
-		for offset in range(0, len(data), record_struct.size))
+    record_struct = Struct(format)
+    return (record_struct.unpack_from(data, offset)
+        for offset in range(0, len(data), record_struct.size))
 
 # Example
 if __name__ == '__main__':
-	with open('data.b', 'rb') as f:
-		data = f.read()
-			for rec in unpack_records('<idd', data):
-			# Process rec
-			...
+    with open('data.b', 'rb') as f:
+        data = f.read()
+            for rec in unpack_records('<idd', data):
+            # Process rec
+            ...
 ```
 
 В обоих случаях результатом будет итерируемый объект, который производит кортежи, которые были сохранены в файле при его создании.
@@ -8083,7 +8083,7 @@ b'\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\x08@'
 >>> chunks
 <callable_iterator object at 0x10069e6d0>
 >>> for chk in chunks:
-... 	print(chk)
+...     print(chk)
 ...
 b'\x01\x00\x00\x00ffffff\x02@\x00\x00\x00\x00\x00\x00\x12@'
 b'\x06\x00\x00\x00333333\x1f@\x00\x00\x00\x00\x00\x00"@'
@@ -8094,12 +8094,12 @@ b'\x0c\x00\x00\x00\xcd\xcc\xcc\xcc\xcc\xcc*@\x9a\x99\x99\x99\x99YL@'
 Причина создавать итератор в том, что он позволяет записям создаваться с помощью генератора (generator comprehension), как показано в примере. Если бы вы не использовали это решение, ваш код мог бы выглядеть так:
 ```python
 def read_records(format, f):
-	record_struct = Struct(format)
-	while True:
-		chk = f.read(record_struct.size)
-		if chk == b'':
-			break
-	yield record_struct.unpack(chk)
+    record_struct = Struct(format)
+    while True:
+        chk = f.read(record_struct.size)
+        if chk == b'':
+            break
+    yield record_struct.unpack(chk)
 return records
 ```
 
@@ -8108,9 +8108,9 @@ return records
 Если вы использовали *unpack()* вместо *unpack_from()*, вы можете захотеть изменить код, чтобы создать большое количество маленьких срезов и вычислений сдвига. Например:
 ```python
 def unpack_records(format, data):
-	record_struct = Struct(format)
-	return (record_struct.unpack(data[offset:offset + record_struct.size])
-		for offset in range(0, len(data), record_struct.size))
+    record_struct = Struct(format)
+    return (record_struct.unpack(data[offset:offset + record_struct.size])
+        for offset in range(0, len(data), record_struct.size))
 ```
 
 В дополнение к тому, что эта версия сложнее читается, она также требует намного больше работы, поскольку она выполняет различные вычисления сдвига, копирует данные и создаёт объекты среза. Если вы будете распаковывать много структур из большой байтовой строки, которую уже прочитали, *unpack_from()* будет более элегантным решением.
@@ -8122,10 +8122,10 @@ from collections import namedtuple
 Record = namedtuple('Record', ['kind','x','y'])
 
 with open('data.p', 'rb') as f:
-	records = (Record(*r) for r in read_records('<idd', f))
+    records = (Record(*r) for r in read_records('<idd', f))
 
 for r in records:
-	print(r.kind, r.x, r.y)
+    print(r.kind, r.x, r.y)
 ```
 
 Если вы пишите программу, которой нужно работать с большим количеством бинарных данных, вам стоит использовать библиотеку типа *numpy*. Например, вместо чтения бинарного файла в список кортежей вы можете прочесть его в структурированный массив:
@@ -8135,7 +8135,7 @@ for r in records:
 >>> records = np.fromfile(f, dtype='<i,<d,<d')
 >>> records
 array([(1, 2.3, 4.5), (6, 7.8, 9.0), (12, 13.4, 56.7)],
-	  dtype=[('f0', '<i4'), ('f1', '<f8'), ('f2', '<f8')])
+      dtype=[('f0', '<i4'), ('f1', '<f8'), ('f2', '<f8')])
 >>> records[0]
 (1, 2.3, 4.5)
 >>> records[1]
@@ -8155,28 +8155,28 @@ array([(1, 2.3, 4.5), (6, 7.8, 9.0), (12, 13.4, 56.7)],
 Модуль *struct* может быть использован для декодирования и кодирования бинарных данных практически любой структуры. Чтобы проиллюстрировать работы с задачей этого рецепта, предположим, что у вас есть структура данных Python, представляющая коллекцию точек, составляющих набор многоугольников:
 ```python
 polys = [
-		 [ (1.0, 2.5), (3.5, 4.0), (2.5, 1.5) ],
-		 [ (7.0, 1.2), (5.1, 3.0), (0.5, 7.5), (0.8, 9.0) ],
-		 [ (3.4, 6.3), (1.2, 0.5), (4.6, 9.2) ],
+         [ (1.0, 2.5), (3.5, 4.0), (2.5, 1.5) ],
+         [ (7.0, 1.2), (5.1, 3.0), (0.5, 7.5), (0.8, 9.0) ],
+         [ (3.4, 6.3), (1.2, 0.5), (4.6, 9.2) ],
 ]
 ```
 
 Теперь предположим, что данные были закодированы в бинарный файл, который начинается следующим заголовком:
 ```
-Byte 	Type 		Description
-0		int 		File code (0x1234, little endian)
-4 		double 		Minimum x (little endian)
-12 		double 		Minimum y (little endian)
-20		double		Maximum x (little endian)
-28 		double  	Maximum y (little endian)
-36 		int 		Number of polygons (little endian)
+Byte    Type        Description
+0       int         File code (0x1234, little endian)
+4       double      Minimum x (little endian)
+12      double      Minimum y (little endian)
+20      double      Maximum x (little endian)
+28      double      Maximum y (little endian)
+36      int         Number of polygons (little endian)
 ```
 
 После заголовка идёт набор многоугольников, каждый из которых закодирован так:
 ```
-Byte 	Type 		Description
-0 		int 		Record length including length (N bytes)
-4-N 	Points 		Pairs of (X,Y) coords as doubles
+Byte    Type        Description
+0       int         Record length including length (N bytes)
+4-N     Points      Pairs of (X,Y) coords as doubles
 ```
 
 Чтобы записать этот файл, вы можете использовать такой код:
@@ -8185,24 +8185,24 @@ import struct
 import itertools
 
 def write_polys(filename, polys):
-	# Determine bounding box
-	flattened = list(itertools.chain(*polys))
-	min_x = min(x for x, y in flattened)
-	max_x = max(x for x, y in flattened)
-	min_y = min(y for x, y in flattened)
-	max_y = max(y for x, y in flattened)
-	
-	with open(filename, 'wb') as f:
-		f.write(struct.pack('<iddddi',
-						    0x1234,
-							min_x, min_y,
-							max_x, max_y,
-							len(polys)))
-		for poly in polys:
-			size = len(poly) * struct.calcsize('<dd')
-			f.write(struct.pack('<i', size+4))
-			for pt in poly:
-				f.write(struct.pack('<dd', *pt))
+    # Determine bounding box
+    flattened = list(itertools.chain(*polys))
+    min_x = min(x for x, y in flattened)
+    max_x = max(x for x, y in flattened)
+    min_y = min(y for x, y in flattened)
+    max_y = max(y for x, y in flattened)
+    
+    with open(filename, 'wb') as f:
+        f.write(struct.pack('<iddddi',
+                            0x1234,
+                            min_x, min_y,
+                            max_x, max_y,
+                            len(polys)))
+        for poly in polys:
+            size = len(poly) * struct.calcsize('<dd')
+            f.write(struct.pack('<i', size+4))
+            for pt in poly:
+                f.write(struct.pack('<dd', *pt))
 
 # Call it with our polygon data
 write_polys('polys.bin', polys)
@@ -8213,21 +8213,21 @@ write_polys('polys.bin', polys)
 import struct
 
 def read_polys(filename):
-	with open(filename, 'rb') as f:
-	# Read the header
-		header = f.read(40)
-		file_code, min_x, min_y, max_x, max_y, num_polys = \
-			struct.unpack('<iddddi', header)
+    with open(filename, 'rb') as f:
+    # Read the header
+        header = f.read(40)
+        file_code, min_x, min_y, max_x, max_y, num_polys = \
+            struct.unpack('<iddddi', header)
 
-	polys = []
-	for n in range(num_polys):
-		pbytes, = struct.unpack('<i', f.read(4))
-		poly = []
-		for m in range(pbytes // 16):
-			pt = struct.unpack('<dd', f.read(16))
-			poly.append(pt)
-		polys.append(poly)
-	return polys
+    polys = []
+    for n in range(num_polys):
+        pbytes, = struct.unpack('<i', f.read(4))
+        poly = []
+        for m in range(pbytes // 16):
+            pt = struct.unpack('<dd', f.read(16))
+            poly.append(pt)
+        polys.append(poly)
+    return polys
 ``` 
 
 Хотя этот код работает, он представляет собой довольно-таки беспорядочный набор небольших операций чтения, распаковки структур и т.п. Если такой код используется для обработки реального файла с данными, он быстро станет еще более запутанным. Это делает очевидным необходимость поиска альтернативного решения, которое могло бы упростить некоторые шаги и позволить программисту сосредоточиться на более важных вещах.
@@ -8239,23 +8239,23 @@ def read_polys(filename):
 import struct
 
 class StructField:
-	'''
-	Descriptor representing a simple structure field
-	'''
-	def __init__(self, format, offset):
-		self.format = format
-		self.offset = offset
-	def __get__(self, instance, cls):
-		if instance is None:
-			return self
-		else:
-			r = struct.unpack_from(self.format,
-								   instance._buffer, self.offset)
-			return r[0] if len(r) == 1 else r
+    '''
+    Descriptor representing a simple structure field
+    '''
+    def __init__(self, format, offset):
+        self.format = format
+        self.offset = offset
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            r = struct.unpack_from(self.format,
+                                   instance._buffer, self.offset)
+            return r[0] if len(r) == 1 else r
 
 class Structure:
-	def __init__(self, bytedata):
-		self._buffer = memoryview(bytedata)
+    def __init__(self, bytedata):
+        self._buffer = memoryview(bytedata)
 ```
 
 Этот код использует дескриптор для представления каждого поля структуры. Каждый дескриптор содержит совместимый со *struct* формат кода вместе с байтовым сдвигом используемого буфера памяти. В методе *__get()__* функция *struct.unpack_from()* используется для распаковки значения из буфера без необходимости делать дополнительные срезы или копии.
@@ -8265,12 +8265,12 @@ class Structure:
 Этот код позволит вам определить структуру как высокоуровневый класс, который отражает информацию, найденную в таблицах, которые описывают ожидаемый формат файла. Например:
 ```python
 class PolyHeader(Structure):
-	file_code = StructField('<i', 0)
-	min_x = StructField('<d', 4)
-	min_y = StructField('<d', 12)
-	max_x = StructField('<d', 20)
-	max_y = StructField('<d', 28)
-	num_polys = StructField('<i', 36)
+    file_code = StructField('<i', 0)
+    min_x = StructField('<d', 4)
+    min_y = StructField('<d', 12)
+    max_x = StructField('<d', 20)
+    max_y = StructField('<d', 28)
+    num_polys = StructField('<i', 36)
 ```
 
 Вот пример использования этого класса для чтения заголовка из данных о многоугольниках, которые мы записали ранее:
@@ -8297,42 +8297,42 @@ True
 Каждый раз, когда вы сталкиваетесь с подобным излишне многословным определением класса, вы можете подумать об использовании декоратора класса или метакласса. Одна из возможностей метакласса в том, что он может быть использован для заполнения множества низкоуровневых деталей реализации, снимая это бремя с пользователя. В качестве примере рассмотрите этот метакласс и слегка переработанный класса *Structure*:
 ```python
 class StructureMeta(type):
-	'''
-	Metaclass that automatically creates StructField descriptors
-	'''
-	def __init__(self, clsname, bases, clsdict):
-		fields = getattr(self, '_fields_', [])
-		byte_order = ''
-		offset = 0
-		for format, fieldname in fields:
-			if format.startswith(('<','>','!','@')):
-				byte_order = format[0]
-				format = format[1:]
-			format = byte_order + format
-			setattr(self, fieldname, StructField(format, offset))
-			offset += struct.calcsize(format)
-		setattr(self, 'struct_size', offset)
+    '''
+    Metaclass that automatically creates StructField descriptors
+    '''
+    def __init__(self, clsname, bases, clsdict):
+        fields = getattr(self, '_fields_', [])
+        byte_order = ''
+        offset = 0
+        for format, fieldname in fields:
+            if format.startswith(('<','>','!','@')):
+                byte_order = format[0]
+                format = format[1:]
+            format = byte_order + format
+            setattr(self, fieldname, StructField(format, offset))
+            offset += struct.calcsize(format)
+        setattr(self, 'struct_size', offset)
 
 class Structure(metaclass=StructureMeta):
-	def __init__(self, bytedata):
-		self._buffer = bytedata
+    def __init__(self, bytedata):
+        self._buffer = bytedata
 
 @classmethod
 def from_file(cls, f):
-	return cls(f.read(cls.struct_size))
+    return cls(f.read(cls.struct_size))
 ``` 
 
 Используя этот новый класс *Structure*, вы можете записывать определение структуры так:
 ```python
 class PolyHeader(Structure):
-	_fields_ = [
-		('<i', 'file_code'),
-		('d', 'min_x'),
-		('d', 'min_y'),
-		('d', 'max_x'),
-		('d', 'max_y'),
-		('i', 'num_polys')
-	]
+    _fields_ = [
+        ('<i', 'file_code'),
+        ('d', 'min_x'),
+        ('d', 'min_y'),
+        ('d', 'max_x'),
+        ('d', 'max_y'),
+        ('i', 'num_polys')
+    ]
 ```
 
 Как вы можете видеть, эта спецификация намного компактнее. Добавленный метод класса *from_file()* также делает более чтение данных из файла без необходимости знать какие-либо детали о размере или структуре данных. Например:
@@ -8357,47 +8357,47 @@ True
 Когда вы вводите метакласс, вы можете встроить в него больше «ума». Например, предположим, что вы хотите обеспечить поддержку вложенных бинарных структур. Вот переделанный метакласс вместе с новым дескриптором, который это поддерживает:
 ```python
 class NestedStruct:
-	'''
-	Descriptor representing a nested structure
-	'''
-	def __init__(self, name, struct_type, offset):
-		self.name = name
-		self.struct_type = struct_type
-		self.offset = offset
-		
-	def __get__(self, instance, cls):
-	if instance is None:
-		return self
-	else:
-		data = instance._buffer[self.offset:
-								self.offset+self.struct_type.struct_size]
-		result = self.struct_type(data)
-		# Save resulting structure back on instance to avoid
-		# further recomputation of this step
-		setattr(instance, self.name, result)
-		return result
+    '''
+    Descriptor representing a nested structure
+    '''
+    def __init__(self, name, struct_type, offset):
+        self.name = name
+        self.struct_type = struct_type
+        self.offset = offset
+        
+    def __get__(self, instance, cls):
+    if instance is None:
+        return self
+    else:
+        data = instance._buffer[self.offset:
+                                self.offset+self.struct_type.struct_size]
+        result = self.struct_type(data)
+        # Save resulting structure back on instance to avoid
+        # further recomputation of this step
+        setattr(instance, self.name, result)
+        return result
 
 class StructureMeta(type):
-	'''
-	Metaclass that automatically creates StructField descriptors
-	'''
-	def __init__(self, clsname, bases, clsdict):
-		fields = getattr(self, '_fields_', [])
-		byte_order = ''
-		offset = 0
-		for format, fieldname in fields:
-			if isinstance(format, StructureMeta):
-				setattr(self, fieldname,
-						NestedStruct(fieldname, format, offset))
-				offset += format.struct_size
-			else:
-				if format.startswith(('<','>','!','@')):
-					byte_order = format[0]
-					format = format[1:]
-				format = byte_order + format
-				setattr(self, fieldname, StructField(format, offset))
-				offset += struct.calcsize(format)
-		setattr(self, 'struct_size', offset)
+    '''
+    Metaclass that automatically creates StructField descriptors
+    '''
+    def __init__(self, clsname, bases, clsdict):
+        fields = getattr(self, '_fields_', [])
+        byte_order = ''
+        offset = 0
+        for format, fieldname in fields:
+            if isinstance(format, StructureMeta):
+                setattr(self, fieldname,
+                        NestedStruct(fieldname, format, offset))
+                offset += format.struct_size
+            else:
+                if format.startswith(('<','>','!','@')):
+                    byte_order = format[0]
+                    format = format[1:]
+                format = byte_order + format
+                setattr(self, fieldname, StructField(format, offset))
+                offset += struct.calcsize(format)
+        setattr(self, 'struct_size', offset)
 ```
 
 В этом примере кода дескриптор *NestedStruct* используется для наложения другого определения структуры на область памяти. Он делает это путём извлечения среза изначального буфера памяти и использования его для создания экземпляра данного структурного типа. Поскольку буфер памяти был инициализирован как memoryview, это извлечение среза не приводит к созданию дополнительных копий в памяти. Вместо этого оно накладывается на изначальную память. Более того, чтобы избежать повторения создания экземпляров, дескриптор сохраняет получившуюся внутреннюю структуру объекта в экземпляр, используя тот же приём, что мы описали в **рецепте 8.10.*
@@ -8405,18 +8405,18 @@ class StructureMeta(type):
 Используя эту новую формулировку, вы можете начать писать код так:
 ```python
 class Point(Structure):
-	_fields_ = [
-			('<d', 'x'),
-			('d', 'y')
-	]
-	
+    _fields_ = [
+            ('<d', 'x'),
+            ('d', 'y')
+    ]
+    
 class PolyHeader(Structure):
-	_fields_ = [
-		('<i', 'file_code'),
-		(Point, 'min'),
-		(Point, 'max'),
-		('i', 'num_polys')
-	]
+    _fields_ = [
+        ('<i', 'file_code'),
+        (Point, 'min'),
+        (Point, 'max'),
+        ('i', 'num_polys')
+    ]
 ``` 
 
 Удивительно, но код всё еще работает так, как вы ожидаете. Например:
@@ -8445,27 +8445,27 @@ True
 Один путь — написать класс, который просто представляет кусок (чанк) бинарных данных вместе с вспомогательной функцией для интерпретирования содержимого различными способами. Это тесно связано с подходом, описанным в **рецепте 6.11.**:
 ```python
 class SizedRecord:
-	def __init__(self, bytedata):
-		self._buffer = memoryview(bytedata)
-		
-	@classmethod
-	def from_file(cls, f, size_fmt, includes_size=True):
-		sz_nbytes = struct.calcsize(size_fmt)
-		sz_bytes = f.read(sz_nbytes)
-		sz, = struct.unpack(size_fmt, sz_bytes)
-		buf = f.read(sz - includes_size * sz_nbytes)
-		return cls(buf)
+    def __init__(self, bytedata):
+        self._buffer = memoryview(bytedata)
+        
+    @classmethod
+    def from_file(cls, f, size_fmt, includes_size=True):
+        sz_nbytes = struct.calcsize(size_fmt)
+        sz_bytes = f.read(sz_nbytes)
+        sz, = struct.unpack(size_fmt, sz_bytes)
+        buf = f.read(sz - includes_size * sz_nbytes)
+        return cls(buf)
 
-	def iter_as(self, code):
-		if isinstance(code, str):
-			s = struct.Struct(code)
-			for off in range(0, len(self._buffer), s.size):
-				yield s.unpack_from(self._buffer, off)
-		elif isinstance(code, StructureMeta):
-			size = code.struct_size
-			for off in range(0, len(self._buffer), size):
-				data = self._buffer[off:off+size]
-				yield code(data)
+    def iter_as(self, code):
+        if isinstance(code, str):
+            s = struct.Struct(code)
+            for off in range(0, len(self._buffer), s.size):
+                yield s.unpack_from(self._buffer, off)
+        elif isinstance(code, StructureMeta):
+            size = code.struct_size
+            for off in range(0, len(self._buffer), size):
+                data = self._buffer[off:off+size]
+                yield code(data)
 ```
 
 Метод класса *SizedRecord.from_file()* используется для чтения куска (чанка) данных с префиксом, определяющим размер, из файла, что является обычным для многих форматов файлов. На вход он принимает код форматирования структуры, который содержит кодировку размера, который должен быть представлен в байтах. Необязательный аргумент *includes_size* определяет, включает ли число байтов заголовок размера или нет. Вот пример того, как вы можете использовать этот код для прочтения отдельного многоугольника из файла с многоугольниками:
@@ -8475,7 +8475,7 @@ class SizedRecord:
 >>> phead.num_polys
 3
 >>> polydata = [ SizedRecord.from_file(f, '<i')
-...		for n in range(phead.num_polys) ]
+...     for n in range(phead.num_polys) ]
 >>> polydata
 [<__main__.SizedRecord object at 0x1006a4d50>,
  <__main__.SizedRecord object at 0x1006a4f50>,
@@ -8487,9 +8487,9 @@ class SizedRecord:
 ```python
 ample:
 >>> for n, poly in enumerate(polydata):
-...		print('Polygon', n)
-...		for p in poly.iter_as('<dd'):
-...			print(p)
+...     print('Polygon', n)
+...     for p in poly.iter_as('<dd'):
+...         print(p)
 ...
 Polygon 0
 (1.0, 2.5)
@@ -8507,9 +8507,9 @@ Polygon 2
 >>>
 
 >>> for n, poly in enumerate(polydata):
-...		print('Polygon', n)
-...		for p in poly.iter_as(Point):
-...			print(p.x, p.y)
+...     print('Polygon', n)
+...     for p in poly.iter_as(Point):
+...         print(p.x, p.y)
 ...
 Polygon 0
 1.0 2.5
@@ -8530,29 +8530,29 @@ Polygon 2
 Собирая всё в месте, представим альтернативную реализацию функции *read_polys()*:
 ```python
 class Point(Structure):
-	_fields_ = [
-		('<d', 'x'),
-		('d', 'y')
-		]
+    _fields_ = [
+        ('<d', 'x'),
+        ('d', 'y')
+        ]
 
 class PolyHeader(Structure):
-	_fields_ = [
-		('<i', 'file_code'),
-		(Point, 'min'),
-		(Point, 'max'),
-		('i', 'num_polys')
-	]
+    _fields_ = [
+        ('<i', 'file_code'),
+        (Point, 'min'),
+        (Point, 'max'),
+        ('i', 'num_polys')
+    ]
 
 def read_polys(filename):
-	polys = []
-	with open(filename, 'rb') as f:
-		phead = PolyHeader.from_file(f)
-		for n in range(phead.num_polys):
-			rec = SizedRecord.from_file(f, '<i')
-			poly = [ (p.x, p.y)
-					  for p in rec.iter_as(Point) ]
-			polys.append(poly)
-	return polys
+    polys = []
+    with open(filename, 'rb') as f:
+        phead = PolyHeader.from_file(f)
+        for n in range(phead.num_polys):
+            rec = SizedRecord.from_file(f, '<i')
+            poly = [ (p.x, p.y)
+                      for p in rec.iter_as(Point) ]
+            polys.append(poly)
+    return polys
 ```
 
 ### Обсуждение
@@ -8565,19 +8565,19 @@ def read_polys(filename):
 Тонкий момент использования метакласса *StructureMeta* в том, что он делает порядок байтов липким. Так что если любой атрибут определил порядок байтов (< для little endian или > для big endian), этот порядок будет применён ко всем последующим полям. Это помогает избежать излишнего ввода с клавиатуры, но также оставляет возможным переключение на другой порядок в середине опеределения. Например, у вас может быть что-то сложное:
 ```python
 class ShapeFile(Structure):
-	_fields_ = [ ('>i', 'file_code'),
-		 		 ('20s', 'unused'),
-				 ('i', 'file_length'),
-				 ('<i', 'version'),
-				 ('i', 'shape_type'),
-				 ('d', 'min_x'),
-				 ('d', 'min_y'),
-				 ('d', 'max_x'),
-				 ('d', 'max_y'),
-				 ('d', 'min_z'),
-				 ('d', 'max_z'),
-				 ('d', 'min_m'),
-				 ('d', 'max_m') ]
+    _fields_ = [ ('>i', 'file_code'),
+                 ('20s', 'unused'),
+                 ('i', 'file_length'),
+                 ('<i', 'version'),
+                 ('i', 'shape_type'),
+                 ('d', 'min_x'),
+                 ('d', 'min_y'),
+                 ('d', 'max_x'),
+                 ('d', 'max_y'),
+                 ('d', 'min_z'),
+                 ('d', 'max_z'),
+                 ('d', 'min_m'),
+                 ('d', 'max_m') ]
 ```
 
 Как было отмечено, использование *memoryview()* в решении позволяет избавиться от копий в памяти. Когда структуры начинают вкладываться одна в другую, просмотрщики памяти (memoryviews) могут быть использованы для наложения разных частей определения структуры на одну и ту же область памяти. Этот аспект решения довольно тонкий, он касается различий работы со срезами при использовании просмотрщиков памяти и при использовании обычных байтовых массивов. Если вы извлекаете срез из байтовой строки или массива, вы обычно получаете копию данных. А с просмотрщиком памяти это не так: срезы просто накладываются на существующую память. Поэтому этот подход эффективнее.
@@ -8601,26 +8601,26 @@ class ShapeFile(Structure):
 <class 'pandas.core.frame.DataFrame'>
 Int64Index: 74055 entries, 0 to 74054
 Data columns:
-Creation Date 						74055 non-null values
-Status 								74055 non-null values
-Completion Date 					72154 non-null values
-Service Request Number 				74055 non-null values
-Type of Service Request 			74055 non-null values
-Number of Premises Baited			65804 non-null values
-Number of Premises with Garbage 	65600 non-null values
-Number of Premises with Rats 		65752 non-null values
-Current Activity 					66041 non-null values
-Most Recent Action 					66023 non-null values
-Street Address 						74055 non-null values
-ZIP Code 							73584 non-null values
-X Coordinate 						74043 non-null values
-Y Coordinate 						74043 non-null values
-Ward 								74044 non-null values
-Police District 					74044 non-null values
-Community Area 						74044 non-null values
-Latitude 							74043 non-null values
-Longitude 							74043 non-null values
-Location 							74043 non-null values
+Creation Date                       74055 non-null values
+Status                              74055 non-null values
+Completion Date                     72154 non-null values
+Service Request Number              74055 non-null values
+Type of Service Request             74055 non-null values
+Number of Premises Baited           65804 non-null values
+Number of Premises with Garbage     65600 non-null values
+Number of Premises with Rats        65752 non-null values
+Current Activity                    66041 non-null values
+Most Recent Action                  66023 non-null values
+Street Address                      74055 non-null values
+ZIP Code                            73584 non-null values
+X Coordinate                        74043 non-null values
+Y Coordinate                        74043 non-null values
+Ward                                74044 non-null values
+Police District                     74044 non-null values
+Community Area                      74044 non-null values
+Latitude                            74043 non-null values
+Longitude                           74043 non-null values
+Location                            74043 non-null values
 dtypes: float64(11), object(9)
 
 >>> # Investigate range of values for a certain field
@@ -8635,16 +8635,16 @@ array([nan, Dispatch Crew, Request Sanitation Inspector], dtype=object)
 
 >> # Find 10 most rat-infested ZIP codes in Chicago
 >>> crew_dispatched['ZIP Code'].value_counts()[:10]
-60647 	3837
-60618 	3530
-60614 	3284
-60629 	3251
-60636 	2801
-60657 	2465
-60641 	2238
-60609 	2206
-60651 	2152
-60632 	2071
+60647   3837
+60618   3530
+60614   3284
+60629   3251
+60636   2801
+60657   2465
+60641   2238
+60609   2206
+60651   2152
+60632   2071
 >>>
 
 >>> # Group by completion date
@@ -8658,32 +8658,32 @@ array([nan, Dispatch Crew, Request Sanitation Inspector], dtype=object)
 >>> date_counts = dates.size()
 >>> date_counts[0:10]
 Completion Date
-01/03/2011 		4
-01/03/2012 		125
-01/04/2011 		54
-01/04/2012 		38
-01/05/2011 		78
-01/05/2012 		100
-01/06/2011 		100
-01/06/2012 		58
-01/07/2011 		1
-01/09/2012 		12
+01/03/2011      4
+01/03/2012      125
+01/04/2011      54
+01/04/2012      38
+01/05/2011      78
+01/05/2012      100
+01/06/2011      100
+01/06/2012      58
+01/07/2011      1
+01/09/2012      12
 >>>
 
 >>> # Sort the counts
 >>> date_counts.sort()
 >>> date_counts[-10:]
 Completion Date
-10/12/2012 		313
-10/21/2011 		314
-09/20/2011 		316
-10/26/2011 		319
-02/22/2011 		325
-10/26/2012		333
-03/17/2011 		336
-10/13/2011 		378
-10/14/2011 		391
-10/07/2011 		457
+10/12/2012      313
+10/21/2011      314
+09/20/2011      316
+10/26/2011      319
+02/22/2011      325
+10/26/2012      333
+03/17/2011      336
+10/13/2011      378
+10/14/2011      391
+10/07/2011      457
 >>>
 ```
 
@@ -8706,11 +8706,11 @@ Completion Date
 Чтобы определить функцию, которая принимает любое количество позиционных аргументов, используйте аргумент со звездочкой (*argument):
 ```python
 def avg(first, *rest):
-	return (first + sum(rest)) / (1 + len(rest))
+    return (first + sum(rest)) / (1 + len(rest))
 
 # Sample use
-avg(1, 2) 			# 1.5
-avg(1, 2, 3, 4) 	# 2.5
+avg(1, 2)           # 1.5
+avg(1, 2, 3, 4)     # 2.5
 ```  
 
 Чтобы принять любое количество именованных аргументов, используйте аргумент, который начинается с **. Например:
@@ -8718,13 +8718,13 @@ avg(1, 2, 3, 4) 	# 2.5
 import html
 
 def make_element(name, value, **attrs):
-	keyvals = [' %s="%s"' % item for item in attrs.items()]
-	attr_str = ''.join(keyvals)
-	element = '<{name}{attrs}>{value}</{name}>'.format(
-				name=name,
-				attrs=attr_str,
-				value=html.escape(value))
-	return element
+    keyvals = [' %s="%s"' % item for item in attrs.items()]
+    attr_str = ''.join(keyvals)
+    element = '<{name}{attrs}>{value}</{name}>'.format(
+                name=name,
+                attrs=attr_str,
+                value=html.escape(value))
+    return element
 
 # Example
 # Creates '<item size="large" quantity="6">Albatross</item>'
@@ -8739,8 +8739,8 @@ make_element('p', '<spam>')
 Если вам нужна функция, которая может принимать и любое количество позиционных, и любое количество именованных аргументов, используйте * и ** вместе. Например:
 ```python
 def anyargs(*args, **kwargs):
-print(args) 	# A tuple
-print(kwargs)  	# A dict
+print(args)     # A tuple
+print(kwargs)   # A dict
 ``` 
 
 В этой функции позиционные аргументы попадают в кортеж *args*, а все именованные аргументы — в словарь *kwargs*.
@@ -8749,10 +8749,10 @@ print(kwargs)  	# A dict
 Аргумент * может быть только последним в списке позиционных аргументов в определении функции. Аргумент ** может быть только последним. Тонкость тут в том, что аргумент без звёздочки может идти и после аргумента со звёздочкой:
 ```python
 def a(x, *args, y):
-	pass
+    pass
 
 def b(x, *args, y, **kwargs):
-	pass
+    pass
 ``` 
 
 Такие аргументы известны как «обязательные именованные аргументы», они обсуждаются далее в *рецепте 7.2.* 
@@ -8765,23 +8765,23 @@ def b(x, *args, y, **kwargs):
 Эту возможность легко реализовать, если вы поместите именованные аргументы после аргумента со звёздочкой или единственной звёздочки. Например:
 ```python
 def recv(maxsize, *, block):
-	'Receives a message'
-	pass
+    'Receives a message'
+    pass
 
-recv(1024, True) 		# TypeError
+recv(1024, True)        # TypeError
 recv(1024, block=True)  # Ok
 ```  
 
 Этот приём может быть также использован для определения именованных аргументов для функций, которые принимают различное число позиционных аргументов. Например:
 ```python
 def mininum(*values, clip=None):
-	m = min(values)
-	if clip is not None:
-		m = clip if clip > m else m
-	return m
+    m = min(values)
+    if clip is not None:
+        m = clip if clip > m else m
+    return m
 
-minimum(1, 5, 2, -5, 10) 			# Returns -5
-minimum(1, 5, 2, -5, 10, clip=0) 	# Returns 0
+minimum(1, 5, 2, -5, 10)            # Returns -5
+minimum(1, 5, 2, -5, 10, clip=0)    # Returns 0
 ```
 
 ### Обсуждение
@@ -8813,7 +8813,7 @@ Receives a message
 Аннотации аргументов функций могут быть полезны, чтобы помочь программистам разобраться в том, как нужно применять функцию. Например, рассмотрим такую аннотированную функцию:
 ```python
 def add(x:int, y:int) -> int:
-	return x + y
+    return x + y
 ```  
 
 Интерпретатор Python не прикрепляет никакого семантического смысла к аннотациям. Это не проверки типов, они вообще никак не влияют на поведение Python. Однако они могут помогать другим людям читать исходный код и понимать, что вы имели в виду. А вот сторонние инструменты и фреймворки могут прикреплять к аннотациям семантический смысл. Также они появляются в документации:
@@ -8847,7 +8847,7 @@ add(x: int, y: int) -> int
 Чтобы вернуть несколько значений из функции, просто сделайте возвращаемым значением кортеж. Например:
 ```python
 >>> def myfun()
-... 	return 1, 2, 3
+...     return 1, 2, 3
 ...
 >>> a, b, c = myfun()
 >>> a
@@ -8861,10 +8861,10 @@ add(x: int, y: int) -> int
 ### Обсуждение
 Хотя это выглядит так, будто *myfun()* возвращает несколько значений, на самом деле создается кортеж. Это кажется немного замысловатым, но кортеж задается не скобками, а запятыми. Например:
 ```python
->>> a = (1, 2)	 # With parentheses
+>>> a = (1, 2)   # With parentheses
 >>> a
 (1, 2)
->>> b = 1, 2 	 # Without parentheses
+>>> b = 1, 2     # Without parentheses
 >>> b
 (1, 2)
 >>>
@@ -8887,17 +8887,17 @@ add(x: int, y: int) -> int
 ```python
 def spam(a, b=42):
 print(a, b)
-spam(1)			 # Ok. a=1, b=42
-spam(1, 2)		 # Ok. a=1, b=2
+spam(1)          # Ok. a=1, b=42
+spam(1, 2)       # Ok. a=1, b=2
 ``` 
 
 Если значение по умолчанию — это изменяемый (мутабельный) контейнер, такой как список, множество или словарь, используйте None в качестве значения по умолчанию:
 ```python
 # Using a list as a default value
 def spam(a, b=None):
-	if b is None:
-		b = []
-		...
+    if b is None:
+        b = []
+        ...
 ```
 
 Если вместо предоставления значения по умолчанию вы хотите написать код, который просто проверяет, передано ли в необязательном аргументе целевое значение, используйте такую идиому:
@@ -8905,17 +8905,17 @@ def spam(a, b=None):
 _no_value = object()
 
 def spam(a, b=_no_value):
-	if b is _no_value:
-		print('No b value supplied')
-	...
+    if b is _no_value:
+        print('No b value supplied')
+    ...
 ```
 
 Вот как эта функция себя ведёт:
 ```python
 >>> spam(1)
 No b value supplied
->>> spam(1, 2) 		# b = 2
->>> spam(1, None) 	# b = None
+>>> spam(1, 2)      # b = 2
+>>> spam(1, None)   # b = None
 >>>
 ``` 
 
@@ -8928,10 +8928,10 @@ No b value supplied
 ```python
 >>> x = 42
 >>> def spam(a, b=x):
-...		print(a, b)
+...     print(a, b)
 ...
 >>> spam(1)
-1 42			# Has no effect
+1 42            # Has no effect
 >>> x = 23
 >>> spam(1)
 1 42
@@ -8942,15 +8942,15 @@ No b value supplied
 
 Во-вторых, значения, назначенные значениями по умолчанию, всегда должны быть неизменяемыми объектами, такими как None, True, False, числа или строки. Никогда не пишите такой код:
 ```python
-def spam(a, b=[]): 		# NO!
+def spam(a, b=[]):      # NO!
 ...
 ```
 
 Если вы это сделаете, вы столкнетесь со всеми возможными неприятностями, если значение по умолчанию когда-либо покинет пределы функции будет изменено. Такие изменения навсегда поменяют значение по умолчанию и воздействуют на все будущие вызовы функции. Например:
 ```python
 >>> def spam(a, b=[]):
-...		print(b)
-...		return b
+...     print(b)
+...     return b
 ...
 >>> x = spam(1)
 >>> x
@@ -8959,7 +8959,7 @@ def spam(a, b=[]): 		# NO!
 >>> x.append('Yow!')
 >>> x
 [99, 'Yow!']
->>> spam(1) 	# Modified list gets returned!
+>>> spam(1)     # Modified list gets returned!
 [99, 'Yow!']
 >>>
 ```
@@ -8969,18 +8969,18 @@ def spam(a, b=[]): 		# NO!
 Использование оператора *is* при проверке None — важнейшая часть этого рецепта. Некоторые делают такую ошибку:
 ```python
 def spam(a, b=None):
-	if not b: 			# NO! Use 'b is None' instead
-		b = []
-	...
+    if not b:           # NO! Use 'b is None' instead
+        b = []
+    ...
 ```
 
 Проблема в том, что хотя None выдает значение False, многие другие объекты (например, строки нулевой длины, пустые списки, кортежи и словари) ведут себя так же. Так что показанная выше проверка будет ошибочно считать некоторые входные значения отсутствующими. Например:
 ```python
->>> spam(1)			# ОК
+>>> spam(1)         # ОК
 >>> x = []
->>> spam(1, x) 		# Silent error. x value overwritten by default
->>> spam(1, 0)		# Silent error. 0 ignored
->>> spam(1, '')		# Silent error. '' ignored
+>>> spam(1, x)      # Silent error. x value overwritten by default
+>>> spam(1, 0)      # Silent error. 0 ignored
+>>> spam(1, '')     # Silent error. '' ignored
 >>> 
 ```
 
@@ -9008,7 +9008,7 @@ def spam(a, b=None):
 Использование *lambda* абсолютно равноценно такому примеру:
 ```python
 >>> def add(x, y):
-...		return x + y
+...     return x + y
 ...
 >>> add(2,3)
 5
@@ -9018,7 +9018,7 @@ def spam(a, b=None):
 Обычно *lambda* используется в контексте какой-то другой операции, такой как сортировка или сокращение данных:
 ```python
 >>> names = ['David Beazley', 'Brian Jones',
-...			 'Raymond Hettinger', 'Ned Batchelder']
+...          'Raymond Hettinger', 'Ned Batchelder']
 >>> sorted(names, key=lambda name: name.split()[-1].lower())
 ['Ned Batchelder', 'David Beazley', 'Raymond Hettinger', 'Brian Jones']
 >>>
@@ -9082,7 +9082,7 @@ def spam(a, b=None):
 ```python
 >>> funcs = [lambda x: x+n for n in range(5)]
 >>> for f in funcs:
-...		print(f(0))
+...     print(f(0))
 ...
 4
 4
@@ -9096,7 +9096,7 @@ def spam(a, b=None):
 ```python
 >>> funcs = [lambda x, n=n: x+n for n in range(5)]
 >>> for f in funcs:
-...		print(f(0))
+...     print(f(0))
 ...
 0
 1
@@ -9117,18 +9117,18 @@ def spam(a, b=None):
 Если вам нужно уменьшить количество аргументов функции, используйте *functools.partial()*. Функция *partial()* позволяет присваивать фиксированные значения одному или более аргументам, что уменьшает количество аргументов, которые должны быть переданы в последующих вызовах. Например, у вас есть вот такая функция:
 ```python
 def spam(a, b, c, d):
-	print(a, b, c, d)
+    print(a, b, c, d)
 ```
 
 А теперь попробуем *partial()*, чтобы зафиксировать значения некоторых аргументов:
 ```python
 >>> from functools import partial
->>> s1 = partial(spam, 1)			# a = 1
+>>> s1 = partial(spam, 1)           # a = 1
 >>>  s1(2, 3, 4)
 1 2 3 4
 >>> s1(4, 5, 6)
 1 2 5 6
->>> s2 = partial(spam, d=42) 		# d = 42
+>>> s2 = partial(spam, d=42)        # d = 42
 >>> s2(1, 2, 3)
 1 2 3 42
 >>> s2(4, 5, 5)
@@ -9153,9 +9153,9 @@ points = [ (1, 2), (3, 4), (5, 6), (7, 8) ]
 
 import math
 def distance(p1, p2):
-	x1, y1 = p1
-	x2, y2 = p2
-	return math.hypot(x2 - x1, y2 - y1)
+    x1, y1 = p1
+    x2, y2 = p2
+    return math.hypot(x2 - x1, y2 - y1)
 ```   
 
 А теперь предположим, что вы хотите отсортировать все точки по их расстоянию до какой-то другой точки. Метод списков *sort()* принимает аргумент *key*, который может быть использован для настройки поиска, он работает только с функциями, которые принимают один аргумент (то есть *distance()* не подходит). Вот как вы можете использовать *partial()*, чтобы решить эту проблему:
@@ -9170,24 +9170,24 @@ def distance(p1, p2):
 Развивая эту идею, заметим, что *partial()* часто может использоваться для настройки сигнатур аргументов функций обратного вызова, используемых в других библиотеках. Например, вот пример кода, который использует *multiprocessing* для асинхронного вычисления результата, который передается функции обратного вызова, которая принимает результат и необязательный аргумент настройки логирования:
 ```python
 def output_result(result, log=None):
-	if log is not None:
-		log.debug('Got: %r', result)
+    if log is not None:
+        log.debug('Got: %r', result)
 
 # A sample function
 def add(x, y):
-	return x + y
+    return x + y
 
 if __name__ == '__main__':
-	import logging
-	from multiprocessing import Pool
-	from functools import partial
+    import logging
+    from multiprocessing import Pool
+    from functools import partial
 
-	logging.basicConfig(level=logging.DEBUG)
-	log = logging.getLogger('test')
-	p = Pool()
-	p.apply_async(add, (3, 4), callback=partial(output_result, log=log))
-	p.close()
-	p.join()
+    logging.basicConfig(level=logging.DEBUG)
+    log = logging.getLogger('test')
+    p = Pool()
+    p.apply_async(add, (3, 4), callback=partial(output_result, log=log))
+    p.close()
+    p.join()
 ```
 
 При передаче функции обратного вызова с использованием *apply_async()*, дополнительный аргумент настройки логирования передается с использованием *partial()*. *multiprocessing* просто вызывает функцию обратного вызова (коллбэк) с единственным значением.
@@ -9197,9 +9197,9 @@ if __name__ == '__main__':
 from socketserver import StreamRequestHandler, TCPServer
 
 class EchoHandler(StreamRequestHandler):
-	def handle(self):
-	for line in self.rfile:
-		self.wfile.write(b'GOT:' + line)
+    def handle(self):
+    for line in self.rfile:
+        self.wfile.write(b'GOT:' + line)
 
 serv = TCPServer(('', 15000), EchoHandler)
 serv.serve_forever(
@@ -9208,14 +9208,14 @@ serv.serve_forever(
 Предположим, однако, что вы хотите наделить класс *EchoHandler* методом *__init__()*, который принимает дополнительный конфигурирующий аргумент. Например:
 ```python
 class EchoHandler(StreamRequestHandler):
-	# ack is added keyword-only argument. *args, **kwargs are
-	# any normal parameters supplied (which are passed on)
-	def __init__(self, *args, ack, **kwargs):
-		self.ack = ack
-		super().__init__(*args, **kwargs)
-	def handle(self):
-		for line in self.rfile:
-			self.wfile.write(self.ack + line)
+    # ack is added keyword-only argument. *args, **kwargs are
+    # any normal parameters supplied (which are passed on)
+    def __init__(self, *args, ack, **kwargs):
+        self.ack = ack
+        super().__init__(*args, **kwargs)
+    def handle(self):
+        for line in self.rfile:
+            self.wfile.write(self.ack + line)
 ```
 
 Если вы внесёте это изменение, вы обнаружите, что больше нет очевидного пути вставить его в класс *TCPServer*. На самом деле вы обнаружите, что код начал возбуждать такие исключения:
@@ -9242,9 +9242,9 @@ points.sort(key=lambda p: distance(pt, p))
 p.apply_async(add, (3, 4), callback=lambda result: output_result(result,log))
 
 serv = TCPServer(('', 15000),
-	lambda *args, **kwargs: EchoHandler(*args,
-										ack=b'RECEIVED:',
-										**kwargs))
+    lambda *args, **kwargs: EchoHandler(*args,
+                                        ack=b'RECEIVED:',
+                                        **kwargs))
 ``` 
 
 Этот код работает, но он более многословен и может запутать того, кто его читает. Использование *partial()* более явно сообщает о ваших намерениях (передать значения некоторым аргументам).
@@ -9260,28 +9260,28 @@ serv = TCPServer(('', 15000),
 from urllib.request import urlopen
 
 class UrlTemplate:
-	def __init__(self, template):
-		self.template = template
-	def open(self, **kwargs):
-		return urlopen(self.template.format_map(kwargs))
+    def __init__(self, template):
+        self.template = template
+    def open(self, **kwargs):
+        return urlopen(self.template.format_map(kwargs))
 
 # Example use. Download stock data from yahoo
 yahoo = UrlTemplate('http://finance.yahoo.com/d/quotes.csv?s={names}&f={fields}')
 for line in yahoo.open(names='IBM,AAPL,FB', fields='sl1c1v'):
-	print(line.decode('utf-8'))
+    print(line.decode('utf-8'))
 ```
 
 Этот класс может быть заменен намного более простой функцией:
 ```python
 def urltemplate(template):
-	def opener(**kwargs):
-		return urlopen(template.format_map(kwargs))
-	return opener
+    def opener(**kwargs):
+        return urlopen(template.format_map(kwargs))
+    return opener
 
 # Example use
 yahoo = urltemplate('http://finance.yahoo.com/d/quotes.csv?s={names}&f={fields}')
 for line in yahoo(names='IBM,AAPL,FB', fields='sl1c1v'):
-	print(line.decode('utf-8'))
+    print(line.decode('utf-8'))
 ```
 
 ### Обсуждение
@@ -9299,8 +9299,8 @@ for line in yahoo(names='IBM,AAPL,FB', fields='sl1c1v'):
 Этот рецепт относится к способу использования функций обратного вызова, который можно обнаружить во многих библиотеках и фреймворках — особенно тех, которые связаны с асинхронной обработкой. Рассмотрим следующую функцию, которая вызывает коллбэк:
 ```python
 def apply_async(func, args, *, callback):
-	# Compute the result
-	result = func(*args)
+    # Compute the result
+    result = func(*args)
 
 # Invoke the callback with the result
 callback(result)
@@ -9309,10 +9309,10 @@ callback(result)
 В реальной жизни такой код может выполнять различные типы продвинутой обработки, включая треды, процессы и таймеры, но в данном случае это не главное. Мы просто сосредоточимся на вызове коллбэка. Вот пример использования приведённого выше кода:
 ```python
 >>> def print_result(result):
-...		print('Got:', result)
+...     print('Got:', result)
 ...
 >>> def add(x, y):
-...		return x + y
+...     return x + y
 ...
 >>> apply_async(add, (2, 3), callback=print_result)
 Got: 5
@@ -9326,11 +9326,11 @@ Got: helloworld
 Один способ передать дополнительную информацию в функцию обратного вызова — это использовать связанный метод вместо простой функции. Например, этот класс хранит внутренний последовательный номер, который инкрементально увеличивается каждый раз, когда получен результат:
 ```python
 class ResultHandler:
-	def __init__(self):
-		self.sequence = 0
-	def handler(self, result):
-		self.sequence += 1
-		print('[{}] Got: {}'.format(self.sequence, result))
+    def __init__(self):
+        self.sequence = 0
+    def handler(self, result):
+        self.sequence += 1
+        print('[{}] Got: {}'.format(self.sequence, result))
 ```
 
 Чтобы использовать этот класс, вы могли бы создать экземпляр и использовать связанный метод *handler* в качестве функции обратного вызова (коллбэка):
@@ -9346,12 +9346,12 @@ class ResultHandler:
 В качестве альтернативы классу вы также можете использовать для хранения состояния замыкание:
 ```python
 def make_handler():
-	sequence = 0
-	def handler(result):
-		nonlocal sequence
-		sequence += 1
-		print('[{}] Got: {}'.format(sequence, result))
-	return handle
+    sequence = 0
+    def handler(result):
+        nonlocal sequence
+        sequence += 1
+        print('[{}] Got: {}'.format(sequence, result))
+    return handle
 ``` 
 
 Вот пример использования такого варианта:
@@ -9367,17 +9367,17 @@ def make_handler():
 В качестве ещё одной вариации на эту тему вы также иногда можете использовать корутину (сопрограмму) для выполнения той же задачи:
 ```python
 def make_handler():
-	sequence = 0
-	while True:
-		result = yield
-		sequence += 1
-		print('[{}] Got: {}'.format(sequence, result))
+    sequence = 0
+    while True:
+        result = yield
+        sequence += 1
+        print('[{}] Got: {}'.format(sequence, result))
 ```
 
 Для корутины вы можете использовать метод *send()* в качестве коллбэка:
 ```python
 >> handler = make_handler()
->>> next(handler) 			# Advance to the yield
+>>> next(handler)           # Advance to the yield
 >>> apply_async(add, (2, 3), callback=handler.send)
 [1] Got: 5
 >>> apply_async(add, ('hello', 'world'), callback=handler.send)
@@ -9388,12 +9388,12 @@ def make_handler():
 И последнее: вы также можете передать состояние в коллбэк, используя дополнительный аргумент и применяя функцию *partial()*. Например:
 ```python
 >>> class SequenceNo:
-...		def __init__(self):
-...			self.sequence = 0
-...	
+...     def __init__(self):
+...         self.sequence = 0
+... 
 >>> def handler(result, seq):
-...		seq.sequence += 1
-...		print('[{}] Got: {}'.format(seq.sequence, result))
+...     seq.sequence += 1
+...     print('[{}] Got: {}'.format(seq.sequence, result))
 
 >>> seq = SequenceNo()
 >>> from functools import partial
@@ -9431,11 +9431,11 @@ def make_handler():
 Коллбэки могут быть встроены в функцию путём использования генераторов и корутин (сопрограмм). Предположим, у вас есть функция, которая выполняет какую-то работу и вызывает коллбэк (см. **рецепт 7.10.**):
 ```python
 def apply_async(func, args, *, callback):
-	# Compute the result
-	result = func(*args)
+    # Compute the result
+    result = func(*args)
 
-	# Invoke the callback with the result
-	callback(result)
+    # Invoke the callback with the result
+    callback(result)
 ```  
 
 Теперь взгляните на поддерживающий код, который использует класс *Async* и декоратор *inlined_async*:
@@ -9444,41 +9444,41 @@ from queue import Queue
 from functools import wraps
 
 class Async:
-	def __init__(self, func, args):
-		self.func = func
-		self.args = args
+    def __init__(self, func, args):
+        self.func = func
+        self.args = args
 
-	def inlined_async(func):
-		@wraps(func)
-		def wrapper(*args):
-			f = func(*args)
-			result_queue = Queue()
-			result_queue.put(None)
-			while True:
-				result = result_queue.get()
-				try:
-					a = f.send(result)
-					apply_async(a.func, a.args, callback=result_queue.put)
-				except StopIteration:
-					break
-		return wrapper
+    def inlined_async(func):
+        @wraps(func)
+        def wrapper(*args):
+            f = func(*args)
+            result_queue = Queue()
+            result_queue.put(None)
+            while True:
+                result = result_queue.get()
+                try:
+                    a = f.send(result)
+                    apply_async(a.func, a.args, callback=result_queue.put)
+                except StopIteration:
+                    break
+        return wrapper
 ``` 
 
 Эти два фрагмента кода позволят вам встроить в строку шаги функции обраного вызова, используя инструкции *yield*. Например:
 ```python
 def add(x, y):
-	return x + y
+    return x + y
 
 @inlined_async
 def test():
-	r = yield Async(add, (2, 3))
-	print(r)
-	r = yield Async(add, ('hello', 'world'))
-	print(r)
-	for n in range(10):
-		r = yield Async(add, (n, n))
-		print(r)
-	print('Goodbye')
+    r = yield Async(add, (2, 3))
+    print(r)
+    r = yield Async(add, ('hello', 'world'))
+    print(r)
+    for n in range(10):
+        r = yield Async(add, (n, n))
+        print(r)
+    print('Goodbye')
 ```
 
 Если вы вызовете *test()*, то получите такой вывод:
@@ -9507,19 +9507,19 @@ Goodbye
 
 Идея того, что вычисление приостановится и возобновится естественным образом отображается на модель выполнения генератора. Если точнее, то операция *yield* заставляет генератор выдавать значение и приостанавливаться. Последующие вызовы методов генератора *__next()__* или *send()* заставят его снова запуститься.
 
-Имея это в виду, мы можем понять, что суть этого рецепта находится в декораторе *inline_async()*. Ключевая идея в том, что декоратор пошагово проводит генератор через все его инструкции *yield*. Чтобы это сделать, создается и изначально наполняется значениями *None* очередь результатов. Затем инициируется цикл, в котором результат вынимается из очереди и посылается в генератор. Это вызывает следующий *yield*, где принимается экземпляр *Async*. Затем цикл смотрит на функцию и аргументы и вызывает асинхронное вычисление *apply_sync()*. Однако наиболее хитрая часть этого вычисления в том, что вместо использования обычного коллбэка, функция обратного вызова установлена на метод очереди *put()*.	
+Имея это в виду, мы можем понять, что суть этого рецепта находится в декораторе *inline_async()*. Ключевая идея в том, что декоратор пошагово проводит генератор через все его инструкции *yield*. Чтобы это сделать, создается и изначально наполняется значениями *None* очередь результатов. Затем инициируется цикл, в котором результат вынимается из очереди и посылается в генератор. Это вызывает следующий *yield*, где принимается экземпляр *Async*. Затем цикл смотрит на функцию и аргументы и вызывает асинхронное вычисление *apply_sync()*. Однако наиболее хитрая часть этого вычисления в том, что вместо использования обычного коллбэка, функция обратного вызова установлена на метод очереди *put()*. 
 
 В этот момент он остается открытым вопрос о том, что произойдет. Главный цикл немедленно возвращается наверх и просто выполняет операцию *get()* на очереди. Если данные присутствуют, это должен быть результат, помещенный туда коллбэком *put()*. Если же ничего нет, операция блокируется и ждёт, когда придёт результат. Как это может произойти — зависит от конкретной реализации функции *apply_async()*.
 
 Если вы сомневаетесь, что такая безумная штука может работать, вы можете попробовать ее с библиотекой *multiprocessing* и заставить асинхронные операции выполняться в отдельных процессах:
 ```python
 if __name__ == '__main__':
-	import multiprocessing
-	pool = multiprocessing.Pool()
-	apply_async = pool.apply_async
-	
-	# Run the test function
-	test()
+    import multiprocessing
+    pool = multiprocessing.Pool()
+    apply_async = pool.apply_async
+    
+    # Run the test function
+    test()
 ```
 
 Вы обнаружите, что это работает, но чтобы разобраться в потоке управления, вам может потребоваться немало кофе.
@@ -9534,23 +9534,23 @@ if __name__ == '__main__':
 В обычном случае внутренние переменные замыкания полностью скрыты от внешнего мира. Однако вы можете предоставить доступ путём написания функций для доступа и прикрепления их к замыканию как атрибутов функции. Например:
 ```python
 def sample():
-	n = 0
-	# Closure function
-	def func():
-		print('n=', n)
-	
-	# Accessor methods for n
-	def get_n():
-		return n
-	
-	def set_n(value):
-		nonlocal n
-		n = value
-	
-	# Attach as function attributes
-	func.get_n = get_n
-	func.set_n = set_n
-	return func
+    n = 0
+    # Closure function
+    def func():
+        print('n=', n)
+    
+    # Accessor methods for n
+    def get_n():
+        return n
+    
+    def set_n(value):
+        nonlocal n
+        n = value
+    
+    # Attach as function attributes
+    func.get_n = get_n
+    func.set_n = set_n
+    return func
 ``` 
 
 Вот пример использования этого кода:
@@ -9573,29 +9573,29 @@ n = 10
 ```python
 import sys
 class ClosureInstance:
-	def __init__(self, locals=None):
-		if locals is None:
-			locals = sys._getframe(1).f_locals
+    def __init__(self, locals=None):
+        if locals is None:
+            locals = sys._getframe(1).f_locals
 
-	# Update instance dictionary with callables
-		self.__dict__.update((key,value) for key, value in locals.items()
-							  if callable(value) )
-	# Redirect special methods
-	def __len__(self):
-		return self.__dict__['__len__']()
+    # Update instance dictionary with callables
+        self.__dict__.update((key,value) for key, value in locals.items()
+                              if callable(value) )
+    # Redirect special methods
+    def __len__(self):
+        return self.__dict__['__len__']()
 
 # Example use
 def Stack():
-	items = []
+    items = []
 
-	def push(item):
-		items.append(item)
-	def pop():
-		return items.pop()
-	def __len__():
-		return len(items)
+    def push(item):
+        items.append(item)
+    def pop():
+        return items.pop()
+    def __len__():
+        return len(items)
 
-	return ClosureInstance()
+    return ClosureInstance()
 ``` 
 
 Вот интерактивный сеанс, который показывает, как всё это работает:
@@ -9620,17 +9620,17 @@ def Stack():
 Интересно, что этот код работает немного быстрее аналога, использующего  обычное определение класса. Например, вы можете проверить производительность по сравнению с таким классом:
 ```python
 class Stack2:
-	def __init__(self):
-		self.items = []
+    def __init__(self):
+        self.items = []
 
-	def push(self, item):
-		self.items.append(item)
+    def push(self, item):
+        self.items.append(item)
 
-	def pop(self):
-		return self.items.pop()
+    def pop(self):
+        return self.items.pop()
 
-	def __len__(self):
-		return len(self.items)
+    def __len__(self):
+        return len(self.items)
 ```
 
 Если вы это сделаете, то получите похожие результаты:
@@ -9666,22 +9666,22 @@ class Stack2:
 Чтобы изменить строковое представление экземпляра, определите методы *__str__()* и *__repr__()*. Например:
 ```python
 class Pair:
-	def __init__(self, x, y):
-		self.x = x
-		self.y = y
-	def __repr__(self):
-		return 'Pair({0.x!r}, {0.y!r})'.format(self)
-	def __str__(self):
-		return '({0.x!s}, {0.y!s})'.format(self)
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    def __repr__(self):
+        return 'Pair({0.x!r}, {0.y!r})'.format(self)
+    def __str__(self):
+        return '({0.x!s}, {0.y!s})'.format(self)
 ```
 
 Метод *__repr__()* возвращает кодовое представление экземпляра, и обычно это текст, который нужно ввести, чтобы воссоздать объект. Встроенная функция *repr()* возвращает этот текст, как и интерактивный сеанс интерпретатора при проверке значений. Метод *__str__()* преобразует экземпляр в строку, что и будет выводом функций *str()* и *print()*. Например:
 ```python
 >>> p = Pair(3, 4)
 >>> p
-Pair(3, 4) 			# __repr__() output
+Pair(3, 4)          # __repr__() output
 >>> print(p)
-(3, 4)				# __str__() output
+(3, 4)              # __str__() output
 >>>
 ```
 
@@ -9711,13 +9711,13 @@ p is (3, 4)
 Использование в решении *format()* может показаться немного странным, но код форматирования {0.x} определяет атрибут *x* аргумента *0*. Так, в следующей функции 0 — это аргумент *self* экземпляра:
 ```python
 def __repr__(self):
-	return 'Pair({0.x!r}, {0.y!r})'.format(self)
+    return 'Pair({0.x!r}, {0.y!r})'.format(self)
 ```
 
 В качестве альтернативы этой реализации вы можете также использовать оператор *%* и такой код:
 ```python
 def __repr__(self):
-	return 'Pair(%r, %r)' % (self.x, self.y)
+    return 'Pair(%r, %r)' % (self.x, self.y)
 ```
 
 ## 8.2. Настройка строкового форматирования
@@ -9728,22 +9728,22 @@ def __repr__(self):
 Чтобы кастомизировать строковое форматирование, определите в классе метод *__format__()*. Например:
 ```python
 _formats = {
-	'ymd' : '{d.year}-{d.month}-{d.day}',
-	'mdy' : '{d.month}/{d.day}/{d.year}',
-	'dmy' : '{d.day}/{d.month}/{d.year}'
-	}
+    'ymd' : '{d.year}-{d.month}-{d.day}',
+    'mdy' : '{d.month}/{d.day}/{d.year}',
+    'dmy' : '{d.day}/{d.month}/{d.year}'
+    }
 
 class Date:
-	def __init__(self, year, month, day):
-		self.year = year
-		self.month = month
-		self.day = day
-	
-	def __format__(self, code):
-		if code == '':
-			code = 'ymd'
-		fmt = _formats[code]
-		return fmt.format(d=self)
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
+    
+    def __format__(self, code):
+        if code == '':
+            code = 'ymd'
+        fmt = _formats[code]
+        return fmt.format(d=self)
 ```
 
 Экземпляры класса *Date* теперь поддерживают операции форматирования:
@@ -9787,21 +9787,21 @@ class Date:
 from socket import socket, AF_INET, SOCK_STREAM
 
 class LazyConnection:
-	def __init__(self, address, family=AF_INET, type=SOCK_STREAM):
-		self.address = address
-		self.family = AF_INET
-		self.type = SOCK_STREAM
-		self.sock = None
-	
-	def __enter__(self):
-		if self.sock is not None:
-			raise RuntimeError('Already connected')
-		self.sock = socket(self.family, self.type)
-		self.sock.connect(self.address)
-		return self.sock
-	def __exit__(self, exc_ty, exc_val, tb):
-		self.sock.close()
-		self.sock = None
+    def __init__(self, address, family=AF_INET, type=SOCK_STREAM):
+        self.address = address
+        self.family = AF_INET
+        self.type = SOCK_STREAM
+        self.sock = None
+    
+    def __enter__(self):
+        if self.sock is not None:
+            raise RuntimeError('Already connected')
+        self.sock = socket(self.family, self.type)
+        self.sock.connect(self.address)
+        return self.sock
+    def __exit__(self, exc_ty, exc_val, tb):
+        self.sock.close()
+        self.sock = None
 ```
 
 Ключевая возможность этого класса в том, что он представляет сетевое соединение, но изначально ничего не делает (т.е., не устанавливает соединение). Вместо этого соединение устаналивается и закрывается по запросу, с использованием инструкции *with*. Например:
@@ -9811,12 +9811,12 @@ from functools import partial
 conn = LazyConnection(('www.python.org', 80))
 # Connection closed
 with conn as s:
-	# conn.__enter__() executes: connection open
-	s.send(b'GET /index.html HTTP/1.0\r\n')
-	s.send(b'Host: www.python.org\r\n')
-	s.send(b'\r\n')
-	resp = b''.join(iter(partial(s.recv, 8192), b''))
-	# conn.__exit__() executes: connection closed
+    # conn.__enter__() executes: connection open
+    s.send(b'GET /index.html HTTP/1.0\r\n')
+    s.send(b'Host: www.python.org\r\n')
+    s.send(b'\r\n')
+    resp = b''.join(iter(partial(s.recv, 8192), b''))
+    # conn.__exit__() executes: connection closed
 ```
 
 
@@ -9830,30 +9830,30 @@ with conn as s:
 from socket import socket, AF_INET, SOCK_STREAM
 
 class LazyConnection:
-	def __init__(self, address, family=AF_INET, type=SOCK_STREAM):
-		self.address = address
-		self.family = AF_INET
-		self.type = SOCK_STREAM
-		self.connections = []
-	
-	def __enter__(self):
-		sock = socket(self.family, self.type)
-		sock.connect(self.address)
-		self.connections.append(sock)
-		return sock
-	
-	def __exit__(self, exc_ty, exc_val, tb):
-		self.connections.pop().close()
+    def __init__(self, address, family=AF_INET, type=SOCK_STREAM):
+        self.address = address
+        self.family = AF_INET
+        self.type = SOCK_STREAM
+        self.connections = []
+    
+    def __enter__(self):
+        sock = socket(self.family, self.type)
+        sock.connect(self.address)
+        self.connections.append(sock)
+        return sock
+    
+    def __exit__(self, exc_ty, exc_val, tb):
+        self.connections.pop().close()
 
 # Example use
 from functools import partial
 
 conn = LazyConnection(('www.python.org', 80))
 with conn as s1:
-	...
-	with conn as s2:
-		...
-		# s1 and s2 are independent sockets
+    ...
+    with conn as s2:
+        ...
+        # s1 and s2 are independent sockets
 ``` 
 
 В этой второй версии класс *LazyConnection* служит своего рода фабрикой соединений. Внутри для хранения стека используется список. Когда бы ни был вызван метод *__enter__()*, он создает новое соединение и добавляет его в стек. Метод *__exit__()* просто выталкивает последнее соединение со стека и закрывает его. Это тонкий момент, но это позволяет создавать множество соединений за раз с помощью вложенных инструкций *with*, как и показано выше.
@@ -9870,11 +9870,11 @@ with conn as s1:
 Для классов, которые в основном служат простыми структурами данных, вы часто можете значительно уменьшить потребление памяти экземплярами путем добавления атрибута *__slots__* в определение класса. Например:
 ```python
 class Date:
-	__slots__ = ['year', 'month', 'day']
-	def __init__(self, year, month, day):
-		self.year = year
-		self.month = month
-		self.day = day
+    __slots__ = ['year', 'month', 'day']
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
 ```
 
 Когда вы определяете *__slots__*, Python использует намного более компактное внутреннее представление экземпляров. Вместо снабжения каждого экземпляра словарём, они создаются на базе небольшого массива фиксированного размера, похожего на кортеж или список. Атрибуты, перечисленные в спецификаторе *__slots__*, отображаются внутри на конкретные индексы внутри массива. Побочный эффект использования слотов в том, что теряется возможность добавления новых атрибутов к экземплярам — у вас будет возможность использовать только атрибуты, перечисленные в спецификаторе *__slots__*.
@@ -9894,18 +9894,18 @@ class Date:
 Вместо того, чтобы полагаться на возможности языка по инкапсулированию данных, от программистов на Python ожидается соблюдение определённых соглашений о наименовании, касающихся намеренного использования данных и методов. Первое соглашение состоит в том, что любое имя, которое начинается с одного нижнего подчеркивания (_) должно рассматриваться как внутренняя реализация. Например:
 ```python
 class A:
-	def __init__(self):
-		self._internal = 0	 # An internal attribute
-		self.public = 1		 # A public attribute
-	
-	def public_method(self):
-		'''
-		A public method
-		'''
-		...
-		
-	def _internal_method(self):
-		...
+    def __init__(self):
+        self._internal = 0   # An internal attribute
+        self.public = 1      # A public attribute
+    
+    def public_method(self):
+        '''
+        A public method
+        '''
+        ...
+        
+    def _internal_method(self):
+        ...
 ``` 
 
 Python не запрещает доступ к внутренним именам. Однако это считается неправильным, и в результате может получиться хрупкий код. Также стоит отметить, что начало имен с нижнего подчеркивания также используется для имён модулей и функций уровня модуля. Например, если вы видите имя модуля, которое начинается с нижнего подчёркивания, (например, *_socket*), то это внутренняя реализация. Похожим образом функции уровня модуля, такие как *sys._getframe()*, должны применяться очень осторожно. 
@@ -9913,25 +9913,25 @@ Python не запрещает доступ к внутренним именам
 Вы можете натолкнуться на имена внутри классов, которые начинаются с двух нижних подчёркиваний (__). Например:
 ```python
 class B:
-	def __init__(self):
-		self.__private = 0
-	def __private_method(self):
-		...
-	def public_method(self):
-		...
-	self.__private_method()
-		...
+    def __init__(self):
+        self.__private = 0
+    def __private_method(self):
+        ...
+    def public_method(self):
+        ...
+    self.__private_method()
+        ...
 ``` 
 
 Использование двойного нижнего подчёркивания вызывает искажение имени в другое. Если говорить конкретно, то частные атрибуты в представленном выше классе переименуются в *_B__private* и *_B__private_method* соответственно. Здесь вы можете спросить, зачем нужны такие искажения? Причина — наследование: такие атрибуты не могут быть переопределены через наследование. Например:
 ```python
 class C(B):
-	def __init__(self):
-		super().__init__()
-		self.__private = 1 	# Does not override B.__private
-	# Does not override B.__private_method()
-	def __private_method(self):
-		...
+    def __init__(self):
+        super().__init__()
+        self.__private = 1  # Does not override B.__private
+    # Does not override B.__private_method()
+    def __private_method(self):
+        ...
 ```
 
 Здесь частные имена *__private* и *__private_method* переименуются в *_C__private* и *_C__private_method*, которые отличаются от искаженных имён в базовом классе B.
@@ -9941,7 +9941,7 @@ class C(B):
 
 Также стоит отметить, что иногда вы можете определить переменную, которая вступает в конфликт с зарезервированным именем. Для таких случаев нужно использовать нижнее подчёркивание в конце:
 ```python
-lambda_ = 2.0	# Trailing _ to avoid clash with lambda keyword
+lambda_ = 2.0   # Trailing _ to avoid clash with lambda keyword
 ```
 
 Причина не использовать нижнее подчеркивание в начале имени в этом случае заключается в том, что это позволяет избежать сомнений по поводу причины его использования (то есть использование подчёркивания в начале может быть истолковано как указание на приватность значения). Использование одного подчёркивания в конце решает эту проблему.
@@ -9954,25 +9954,25 @@ lambda_ = 2.0	# Trailing _ to avoid clash with lambda keyword
 Простой способ кастомизировать доступ к атрибуту заключается в определении свойства (property). Например, этот код определяет свойство, которое добавляет простую проверку типов к атрибуту:
 ```python
 class Person:
-	def __init__(self, first_name):
-		self.first_name = first_name
-	
-	# Getter function
-	@property
-	def first_name(self):
-		return self._first_name
-	
-	# Setter function
-	@first_name.setter
-	def first_name(self, value):
-		if not isinstance(value, str):
-			raise TypeError('Expected a string')
-		self._first_name = value
-	
-	# Deleter function (optional)
-	@first_name.deleter
-	def first_name(self):
-		raise AttributeError("Can't delete attribute")
+    def __init__(self, first_name):
+        self.first_name = first_name
+    
+    # Getter function
+    @property
+    def first_name(self):
+        return self._first_name
+    
+    # Setter function
+    @first_name.setter
+    def first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._first_name = value
+    
+    # Deleter function (optional)
+    @first_name.deleter
+    def first_name(self):
+        raise AttributeError("Can't delete attribute")
 ```
 
 В представленном коде есть три относящихся друг к другу метода, которые должны иметь одинаковое имя. Первый метод — это функция-геттер (getter), она устанавливает *first_name* как свойство. Два других метода прикрепляют необязательные функции сеттер (setter) и делитер (deleter) к свойству (property) *first_name*. Важно подчеркнуть, что декораторы *@first_name.setter* и *@first_name.deleter* не будут определены, если *first_name* не было установлено как свойство с помощью *@property*.
@@ -9980,17 +9980,17 @@ class Person:
 Важнейшая возможность свойства в том, что оно выглядит так же, как обычный атрибут, но при доступе автоматически активируются методы геттер, сеттер и делитер. Например:
 ```python
 >>> a = Person('Guido')
->>> a.first_name 		# Calls the getter
+>>> a.first_name        # Calls the getter
 'Guido'
->>> a.first_name = 42 	# Calls the setter
+>>> a.first_name = 42   # Calls the setter
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "prop.py", line 14, in first_name
-		raise TypeError('Expected a string')
+    File "<stdin>", line 1, in <module>
+    File "prop.py", line 14, in first_name
+        raise TypeError('Expected a string')
 TypeError: Expected a string
 >>> del a.first_name
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 AttributeError: can't delete attribute
 >>>
 ```
@@ -10000,25 +10000,25 @@ AttributeError: can't delete attribute
 Свойства также могут быть определены для существующих методов получения и установки. Например:
 ```python 
 class Person:
-	def __init__(self, first_name):
-		self.set_first_name(first_name)
-	
-	# Getter function
-	def get_first_name(self):
-		return self._first_name
-	
-	# Setter function
-	def set_first_name(self, value):
-		if not isinstance(value, str):
-			raise TypeError('Expected a string')
-		self._first_name = value
-	
-	# Deleter function (optional)
-	def del_first_name(self):
-		raise AttributeError("Can't delete attribute")
-	
-	# Make a property from existing get/set methods
-	name = property(get_first_name, set_first_name, del_first_name)
+    def __init__(self, first_name):
+        self.set_first_name(first_name)
+    
+    # Getter function
+    def get_first_name(self):
+        return self._first_name
+    
+    # Setter function
+    def set_first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._first_name = value
+    
+    # Deleter function (optional)
+    def del_first_name(self):
+        raise AttributeError("Can't delete attribute")
+    
+    # Make a property from existing get/set methods
+    name = property(get_first_name, set_first_name, del_first_name)
 ```
 
 ### Обсуждение
@@ -10037,14 +10037,14 @@ class Person:
 Свойства должны быть использованы только в случаях, когда вы на самом деле нуждаетесь в выполнении дополнительных операций при доступе к атрибутам. Иногда программисты, пришедшие из языков типа Java, считают, что любой доступ нужно осуществлять с помощью геттеров и сеттеров, и пишут такой код:
 ```python
 class Person:
-	def __init__(self, first_name):
-		self.first_name = name
-	@property
-	def first_name(self):
-		return self._first_name
-	@first_name.setter
-	def first_name(self, value):
-		self._first_name = value
+    def __init__(self, first_name):
+        self.first_name = name
+    @property
+    def first_name(self):
+        return self._first_name
+    @first_name.setter
+    def first_name(self, value):
+        self._first_name = value
 ```
 
 Не пишите свойства, которые не ничего не добавляют (как в примере выше). Во-первых, они делают ваш код многословным и непонятным другим. Во-вторых, они сделают вашу программу намного медленнее. И последнее: с точки зрения проектирования в этом нет никакого преимущества. Если вы в будущем решите, что нужно добавить дополнительную обработку к доступу к обычному атрибуту, то просто превратите его в свойство, что не приведет к необходимости менять существующий код. Это возможно, потому что синтаксис кода, который осуществляет доступ к атрибуту, останется неизменным. 
@@ -10053,14 +10053,14 @@ class Person:
 ```python
 import math
 class Circle:
-	def __init__(self, radius):
-		self.radius = radius
-	@property
-	def area(self):
-		return math.pi * self.radius ** 2
-	@property
-	def perimeter(self):
-		return 2 * math.pi * self.radius
+    def __init__(self, radius):
+        self.radius = radius
+    @property
+    def area(self):
+        return math.pi * self.radius ** 2
+    @property
+    def perimeter(self):
+        return 2 * math.pi * self.radius
 ```  
 
 Здесь использование свойств позволяет создать единообразный интерфейс экземпляра, в котором к *radius*, *area* и *perimeter* доступ осуществляется как к простым атрибутам, в противоположность смеси простых атрибутов и вызовов методов. Например:
@@ -10068,9 +10068,9 @@ class Circle:
 >>> c = Circle(4.0)
 >>> c.radius
 4.0
->>> c.area 			# Notice lack of ()
+>>> c.area          # Notice lack of ()
 50.26548245743669
->>> c.perimeter   	# Notice lack of ()
+>>> c.perimeter     # Notice lack of ()
 25.132741228718345
 >>>
 ```
@@ -10089,30 +10089,30 @@ class Circle:
 И последнее: не пишите код на Python, в котором много повторяющихся определений свойств. Например:
 ```python
 class Person:
-	def __init__(self, first_name, last_name):
-		self.first_name = first_name
-		self.last_name = last_name
-		
-	@property
-	def first_name(self):
-		return self._first_name
+    def __init__(self, first_name, last_name):
+        self.first_name = first_name
+        self.last_name = last_name
+        
+    @property
+    def first_name(self):
+        return self._first_name
 
-	@first_name.setter
-	def first_name(self, value):
-		if not isinstance(value, str):
-			raise TypeError('Expected a string')
-		self._first_name = value
-	
-	# Repeated property code, but for a different name (bad!)
-	@property
-	def last_name(self):
-		return self._last_name
+    @first_name.setter
+    def first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._first_name = value
+    
+    # Repeated property code, but for a different name (bad!)
+    @property
+    def last_name(self):
+        return self._last_name
 
-	@last_name.setter
-	def last_name(self, value):
-		if not isinstance(value, str):	
-			raise TypeError('Expected a string')
-		self._last_name = value
+    @last_name.setter
+    def last_name(self, value):
+        if not isinstance(value, str):  
+            raise TypeError('Expected a string')
+        self._last_name = value
 ```
 
 Повторение кода ведёт к раздутому, подверженному ошибкам и уродливому коду. Есть намного лучшие пути добиться того же, используя дескрипторы или замыкания. См. **рецепт 8.9.** и рецепт **9.21.**.
@@ -10125,43 +10125,43 @@ class Person:
 Чтобы вызвать метод из родительского класса (суперкласса), используйте функцию *super()*. Например:
 ```python
 class A:
-	def spam(self):
-		print('A.spam')
+    def spam(self):
+        print('A.spam')
 
 class B(A):
-	def spam(self):
-		print('B.spam')
-		super().spam()		# Call parent spam()
+    def spam(self):
+        print('B.spam')
+        super().spam()      # Call parent spam()
 ```
 
 Очень распространённый случай использования *super()* — это применение её к методу __init__(), чтобы убедиться в правильной инициализации родителей:
 ```python
 class A:
-	def __init__(self):
-		self.x = 0
+    def __init__(self):
+        self.x = 0
 
 class B(A):
-	def __init__(self):
-		super().__init__()
-		self.y = 1
+    def __init__(self):
+        super().__init__()
+        self.y = 1
 ```  
 
 Также *super()* часто используется в коде, который переопределяет один из специальных методов Python. Например:
 ```python
 class Proxy:
-	def __init__(self, obj):
-		self._obj = obj
+    def __init__(self, obj):
+        self._obj = obj
 
-	# Delegate attribute lookup to internal obj
-	def __getattr__(self, name):
-		return getattr(self._obj, name)
-	
-	# Delegate attribute assignment
-	def __setattr__(self, name, value):
-		if name.startswith('_'):
-			super().__setattr__(name, value) 	# Call original __setattr__
-	else:
-		setattr(self._obj, name, value)
+    # Delegate attribute lookup to internal obj
+    def __getattr__(self, name):
+        return getattr(self._obj, name)
+    
+    # Delegate attribute assignment
+    def __setattr__(self, name, value):
+        if name.startswith('_'):
+            super().__setattr__(name, value)    # Call original __setattr__
+    else:
+        setattr(self._obj, name, value)
 ```
 
 В этом коде реализация *__setaddr__()* включает проверку имени. Если имя начинается с нижнего подчёркивания (_), он вызывает изначальную реализацию *__setaddr__()* через использование *super()*. В противном случае оно делегируется внутреннему объекту *self._obj*. Это выглядит немного странно, но *super()* работает, даже если явно не указан базовый класс. 
@@ -10170,36 +10170,36 @@ class Proxy:
 Правильное использование функции *super()* — это один из самых плохо понимаемых аспектов Python. Вы наверняка встретите код, который напрямую вызывает метод родительского класса:
 ```python
 class Base:
-	def __init__(self):
-		print('Base.__init__')
+    def __init__(self):
+        print('Base.__init__')
 
 class A(Base):
-	def __init__(self):
-		Base.__init__(self)	
-		print('A.__init__')
+    def __init__(self):
+        Base.__init__(self) 
+        print('A.__init__')
 ```
 
 Хотя это обычно «работает», это может привести к странным проблемам в продвинутых программах, использующих множественное наследование. Например:
 ```python
 class Base:
-	def __init__(self):
-		print('Base.__init__')
+    def __init__(self):
+        print('Base.__init__')
 
 class A(Base):
-	def __init__(self):
-		Base.__init__(self)
-		print('A.__init__')
+    def __init__(self):
+        Base.__init__(self)
+        print('A.__init__')
 
 class B(Base):
-	def __init__(self):
-		Base.__init__(self)
-		print('B.__init__')
+    def __init__(self):
+        Base.__init__(self)
+        print('B.__init__')
 
 class C(A,B):
-	def __init__(self):
-		A.__init__(self)
-		B.__init__(self)
-		print('C.__init__')
+    def __init__(self):
+        A.__init__(self)
+        B.__init__(self)
+        print('C.__init__')
 ``` 
 
 Если вы запустите эту программу, то увидите, что метод *Base.__init__()* вызывается дважды:
@@ -10216,23 +10216,23 @@ C.__init__
 Дублирование вызова *Base.__init__()* может не нанести вреда, но может и всё поломать. Если же вы измените код так, чтобы он использовал *super()* всё будет работать:
 ```python
 class Base:
-	def __init__(self):
-		print('Base.__init__')
+    def __init__(self):
+        print('Base.__init__')
 
 class A(Base):
-	def __init__(self):
-		super().__init__()
-		print('A.__init__')
+    def __init__(self):
+        super().__init__()
+        print('A.__init__')
 
 class B(Base):
-	def __init__(self):
-		super().__init__()
-		print('B.__init__')
+    def __init__(self):
+        super().__init__()
+        print('B.__init__')
 
 class C(A,B):
-	def __init__(self):
-		super().__init__()	 # Only one call to super() here
-		print('C.__init__')
+    def __init__(self):
+        super().__init__()   # Only one call to super() here
+        print('C.__init__')
 ```
 
 При использовании этой новой версии вы обнаружите, что каждый метод *__init__()* вызывается только один раз:
@@ -10267,9 +10267,9 @@ C.__init__
 Аспект *super()*, который может удивить, это то, что она не обязательно идёт в прямого родителя следующего в ПРМ класса, а также то, что вы можете использовать её даже с классом, не имеющим прямого родителя. Рассмотрим, например, такой класс:
 ```python
 class A:
-	def spam(self):
-		print('A.spam')
-		super().spam()
+    def spam(self):
+        print('A.spam')
+        super().spam()
 ``` 
 
 Если вы попробуете его использовать, вы обнаружите, что он не работает:
@@ -10278,8 +10278,8 @@ class A:
 >>> a.spam()
 A.spam
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "<stdin>", line 4, in spam
+    File "<stdin>", line 1, in <module>
+    File "<stdin>", line 4, in spam
 AttributeError: 'super' object has no attribute 'spam'
 >>>
 ```
@@ -10287,11 +10287,11 @@ AttributeError: 'super' object has no attribute 'spam'
 Но посмотрите, что случится, если вы будете использовать этот класс с множественным наследованием:
 ```python
 >>> class B:
-...		def spam(self):
-...			print('B.spam')
+...     def spam(self):
+...         print('B.spam')
 ...
 >>> class C(A,B):
-...		pass
+...     pass
 ...
 >>> c = C()
 >>> c.spam()
@@ -10323,44 +10323,44 @@ B.spam
 Рассмотрите следующий код, в котором определяется свойство:
 ```python
 class Person:
-	def __init__(self, name):
-		self.name = name
-	
-	# Getter function
-	@property
-	def name(self):
-		return self._name
-	
-	# Setter function
-	@name.setter
-	def name(self, value):
-		if not isinstance(value, str):
-			raise TypeError('Expected a string')
-		self._name = value
-	
-	# Deleter function
-	@name.deleter
-	def name(self):
-		raise AttributeError("Can't delete attribute")
+    def __init__(self, name):
+        self.name = name
+    
+    # Getter function
+    @property
+    def name(self):
+        return self._name
+    
+    # Setter function
+    @name.setter
+    def name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._name = value
+    
+    # Deleter function
+    @name.deleter
+    def name(self):
+        raise AttributeError("Can't delete attribute")
 ```
 
 Вот пример класса, который наследует от *Person* и расширяет свойство *name* новой функциональностью:
 ```python
 class SubPerson(Person):
-	@property
-	def name(self):
-		print('Getting name')
-		return super().name
-	
-	@name.setter
-	def name(self, value):
-		print('Setting name to', value)
-		super(SubPerson, SubPerson).name.__set__(self, value)
-	
-	@name.deleter
-	def name(self):
-		print('Deleting name')
-		super(SubPerson, SubPerson).name.__delete__(self)
+    @property
+    def name(self):
+        print('Getting name')
+        return super().name
+    
+    @name.setter
+    def name(self, value):
+        print('Setting name to', value)
+        super(SubPerson, SubPerson).name.__set__(self, value)
+    
+    @name.deleter
+    def name(self):
+        print('Deleting name')
+        super(SubPerson, SubPerson).name.__delete__(self)
 ```
 
 Вот пример использования нового класса:
@@ -10374,9 +10374,9 @@ Getting name
 Setting name to Larry
 >>> s.name = 42
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "example.py", line 16, in name
-		raise TypeError('Expected a string')
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 16, in name
+        raise TypeError('Expected a string')
 TypeError: Expected a string
 >>>
 ```
@@ -10384,19 +10384,19 @@ TypeError: Expected a string
 Если вы хотите расширить только один из методов свойства, используйте такой код:
 ```python
 class SubPerson(Person):
-	@Person.name.getter
-	def name(self):
-		print('Getting name')
-		return super().name
+    @Person.name.getter
+    def name(self):
+        print('Getting name')
+        return super().name
 ```
 
 Или, альтернативно, только для сеттера, используйте такой код:
 ```python
 class SubPerson(Person):
-	@Person.name.setter
-	def name(self, value):
-		print('Setting name to', value)
-		super(SubPerson, SubPerson).name.__set__(self, value)
+    @Person.name.setter
+    def name(self, value):
+        print('Setting name to', value)
+        super(SubPerson, SubPerson).name.__set__(self, value)
 ```
 
 ### Обсуждение
@@ -10407,19 +10407,19 @@ class SubPerson(Person):
 Если хотите переопределить только один из методов, недостаточно использовать само *@property*. Например, вот такой код не работает:
 ```python
 class SubPerson(Person):
-	@property					# Doesn't work
-	def name(self):
-		print('Getting name')
-		return super().name
+    @property                   # Doesn't work
+    def name(self):
+        print('Getting name')
+        return super().name
 ``` 
 
 Если вы попробуете использовать получившийся код, вы обнаружите, что функция-сеттер полностью исчезла:
 ```python
 >>> s = SubPerson('Guido')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "example.py", line 5, in __init__
-		self.name = name
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 5, in __init__
+        self.name = name
 AttributeError: can't set attribute
 >>>
 ```
@@ -10427,10 +10427,10 @@ AttributeError: can't set attribute
 Вместо этого вы должны были изменить код так, как показано в решении:
 ```python
 class SubPerson(Person):
-	@Person.getter
-	def name(self):
-		print('Getting name')
-		return super().name
+    @Person.getter
+    def name(self):
+        print('Getting name')
+        return super().name
 ```
 
 Когда вы это сделаете, все ранее определённые методы свойства будут скопированы, а функция-геттер заменена. Теперь оно работает так, как ожидается:
@@ -10445,9 +10445,9 @@ Getting name
 'Larry'
 >>> s.name = 42
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "example.py", line 16, in name
-		raise TypeError('Expected a string')
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 16, in name
+        raise TypeError('Expected a string')
 TypeError: Expected a string
 >>>
 ```
@@ -10458,41 +10458,41 @@ TypeError: Expected a string
 ```python
 # A descriptor
 class String:
-	def __init__(self, name):
-		self.name = name
+    def __init__(self, name):
+        self.name = name
 
-	def __get__(self, instance, cls):
-		if instance is None:
-			return self
-		return instance.__dict__[self.name]
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        return instance.__dict__[self.name]
 
-	def __set__(self, instance, value):
-		if not isinstance(value, str):
-			raise TypeError('Expected a string')
-		instance.__dict__[self.name] = value
+    def __set__(self, instance, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        instance.__dict__[self.name] = value
 
 # A class with a descriptor
 class Person:
-	name = String('name')
-	def __init__(self, name):
-		self.name = name
+    name = String('name')
+    def __init__(self, name):
+        self.name = name
 
 # Extending a descriptor with a property
 class SubPerson(Person):
-	@property
-	def name(self):
-		print('Getting name')
-		return super().name
-	
-	@name.setter
-	def name(self, value):
-		print('Setting name to', value)
-		super(SubPerson, SubPerson).name.__set__(self, value)
-	
-	@name.deleter
-	def name(self):
-		print('Deleting name')
-		super(SubPerson, SubPerson).name.__delete__(self)
+    @property
+    def name(self):
+        print('Getting name')
+        return super().name
+    
+    @name.setter
+    def name(self, value):
+        print('Setting name to', value)
+        super(SubPerson, SubPerson).name.__set__(self, value)
+    
+    @name.deleter
+    def name(self):
+        print('Deleting name')
+        super(SubPerson, SubPerson).name.__delete__(self)
 ``` 
 
 Наконец, стоит отметить, что к тому моменту, когда вы это прочитаете, расширение сеттеров и делитеров в подклассах может быть уже как-то упрощено. Показанное решение работает, но баг, описанный на [странице проблем Python](http://bugs.python.org/issue14965), может быть исправлен путём реализации более ясного подхода в будущих версиях Python.
@@ -10506,22 +10506,22 @@ class SubPerson(Person):
 ```python
 # Descriptor attribute for an integer type-checked attribute
 class Integer:
-	def __init__(self, name):
-		self.name = name
-	
-	def __get__(self, instance, cls):
-		if instance is None:
-			return self
-		else:
-			return instance.__dict__[self.name]
-	
-	def __set__(self, instance, value):
-		if not isinstance(value, int):
-			raise TypeError('Expected an int')
-		instance.__dict__[self.name] = value
-	
-	def __delete__(self, instance):
-		del instance.__dict__[self.name]
+    def __init__(self, name):
+        self.name = name
+    
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            return instance.__dict__[self.name]
+    
+    def __set__(self, instance, value):
+        if not isinstance(value, int):
+            raise TypeError('Expected an int')
+        instance.__dict__[self.name] = value
+    
+    def __delete__(self, instance):
+        del instance.__dict__[self.name]
 ```
 
 Дескриптор — это класс, который реализует три ключевых операции доступа к атрибутам (получение, установки и удаления) в форме специальных методов *__get__()*, *__set__()* и *__delete__()*. Эти методы работают путем получения экземпляра на вход. Затем происходит манипуляции над словарём экземпляра. 
@@ -10529,24 +10529,24 @@ class Integer:
 Чтобы использовать дескриптор, экземпляры дескриптора размещаются в определении класса как переменные класса. Например:
 ```python
 class Point:
-	x = Integer('x')
-	y = Integer('y')
-	def __init__(self, x, y):
-		self.x = x
-		self.y = y
+    x = Integer('x')
+    y = Integer('y')
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 ```
 
 Когда вы это делаете, все попытки доступа к атрибуту дескриптора (то есть *x* или *y*) перехватываются методами *__get__()*, *__set__()* и *__delete__()*. Например:
 ```python
 >>> p = Point(2, 3)
->>> p.x 			# Calls Point.x.__get__(p,Point)
+>>> p.x             # Calls Point.x.__get__(p,Point)
 2
->>> p.y = 5 		# Calls Point.y.__set__(p, 5)
->>> p.x = 2.3		# Calls Point.x.__set__(p, 2.3)
+>>> p.y = 5         # Calls Point.y.__set__(p, 5)
+>>> p.x = 2.3       # Calls Point.x.__set__(p, 2.3)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "descrip.py", line 12, in __set__
-		raise TypeError('Expected an int')
+    File "<stdin>", line 1, in <module>
+    File "descrip.py", line 12, in __set__
+        raise TypeError('Expected an int')
 TypeError: Expected an int
 >>>
 ```
@@ -10562,32 +10562,32 @@ TypeError: Expected an int
 ```python
 # Does NOT work
 class Point:
-	def __init__(self, x, y):	
-		self.x = Integer('x') 	# No! Must be a class variable
-		self.y = Integer('y')
-		self.x = x
-		self.y = y
+    def __init__(self, x, y):   
+        self.x = Integer('x')   # No! Must be a class variable
+        self.y = Integer('y')
+        self.x = x
+        self.y = y
 ``` 
 
 А реализация метода *__get__()* сложнее, чем может показаться:
 ```python
 # Descriptor attribute for an integer type-checked attribute
 class Integer:
-	...
-	def __get__(self, instance, cls):
-		if instance is None:
-			return self
-		else:
-		return instance.__dict__[self.name]
-	...
+    ...
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+        return instance.__dict__[self.name]
+    ...
 ```
 
 Причина того, что *__get__()* выглядит довольно сложным, заключается в различии между переменными экземпляра и переменными класса. Если доступ к дескриптору осуществляется как к переменной класса, аргумент *instance* имеет значение *None*. В этом случае стандартным подходом будет просто вернуть сам экземпляр дескриптора (хотя разрешается также любой тип нестандартной обработки). Например:
 ```python
 >>> p = Point(2,3)
->>> p.x 			# Calls Point.x.__get__(p, Point)
+>>> p.x             # Calls Point.x.__get__(p, Point)
 2
->>> Point.x 		# Calls Point.x.__get__(None, Point)
+>>> Point.x         # Calls Point.x.__get__(None, Point)
 <__main__.Integer object at 0x100671890>
 >>>
 ```  
@@ -10596,40 +10596,40 @@ class Integer:
 ```python
 # Descriptor for a type-checked attribute
 class Typed:
-	def __init__(self, name, expected_type):
-		self.name = name
-		self.expected_type = expected_type
+    def __init__(self, name, expected_type):
+        self.name = name
+        self.expected_type = expected_type
 
-	def __get__(self, instance, cls):
-		if instance is None:
-			return self
-		else:
-			return instance.__dict__[self.name]
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            return instance.__dict__[self.name]
 
-	def __set__(self, instance, value):
-		if not isinstance(value, self.expected_type):
-			raise TypeError('Expected ' + str(self.expected_type))
-		instance.__dict__[self.name] = value
+    def __set__(self, instance, value):
+        if not isinstance(value, self.expected_type):
+            raise TypeError('Expected ' + str(self.expected_type))
+        instance.__dict__[self.name] = value
 
-	def __delete__(self, instance):
-		del instance.__dict__[self.name]
+    def __delete__(self, instance):
+        del instance.__dict__[self.name]
 
 # Class decorator that applies it to selected attributes
 def typeassert(**kwargs):
-	def decorate(cls):
-		for name, expected_type in kwargs.items():
-			# Attach a Typed descriptor to the class
-			setattr(cls, name, Typed(name, expected_type))
-		return cls
-	return decorate
+    def decorate(cls):
+        for name, expected_type in kwargs.items():
+            # Attach a Typed descriptor to the class
+            setattr(cls, name, Typed(name, expected_type))
+        return cls
+    return decorate
 
 # Example use
 @typeassert(name=str, shares=int, price=float)
 class Stock:
-	def __init__(self, name, shares, price):
-		self.name = name
-		self.shares = shares
-		self.price = price
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
 ```
 
 Стоит подчеркнуть, что вам, вероятно, не стоит писать дескриптор, если вы хотите просто кастомизировать доступ к одному атрибуту конкретного класса. Для этого проще использовать свойство, как описано в **рецепте 8.6.** Дескрипторы более полезны в ситуациях, где предполагается много переиспользовать код (то есть если вы хотите использовать функциональность, предоставленную дескриптором, в сотнях мест в вашем коде или предоставить ее как возможность библиотеки).
@@ -10642,16 +10642,16 @@ class Stock:
 Эффективный путь определения ленивых атрибутов — это использование класса-дескриптора:
 ```python
 class lazyproperty:
-	def __init__(self, func):
-		self.func = func
-	
-	def __get__(self, instance, cls):
-		if instance is None:
-			return self
-		else:
-			value = self.func(instance)
-			setattr(instance, self.func.__name__, value)
-			return value
+    def __init__(self, func):
+        self.func = func
+    
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            value = self.func(instance)
+            setattr(instance, self.func.__name__, value)
+            return value
 ```
 
 Чтобы использовать этот код, вы можете применить его в классе:
@@ -10659,18 +10659,18 @@ class lazyproperty:
 import math
 
 class Circle:
-	def __init__(self, radius):
-		self.radius = radius
+    def __init__(self, radius):
+        self.radius = radius
 
-	@lazyproperty
-	def area(self):
-		print('Computing area')
-		return math.pi * self.radius ** 2
+    @lazyproperty
+    def area(self):
+        print('Computing area')
+        return math.pi * self.radius ** 2
 
-	@lazyproperty
-	def perimeter(self):
-		print('Computing perimeter')
-		return 2 * math.pi * self.radius
+    @lazyproperty
+    def perimeter(self):
+        print('Computing perimeter')
+        return 2 * math.pi * self.radius
 ```
 
 Вот пример использования в интерактивном сеансе:
@@ -10740,16 +10740,16 @@ Computing area
 Если это проблема, вы можете использовать немного менее эффективную реализацию:
 ```python
 def lazyproperty(func):
-	name = '_lazy_' + func.__name__
-	@property
-	def lazy(self):
-		if hasattr(self, name):
-			return getattr(self, name)
-		else:
-			value = func(self)
-			setattr(self, name, value)
-			return value
-	return lazy
+    name = '_lazy_' + func.__name__
+    @property
+    def lazy(self):
+        if hasattr(self, name):
+            return getattr(self, name)
+        else:
+            value = func(self)
+            setattr(self, name, value)
+            return value
+    return lazy
 ```
 
 Если вы используете эту версию, вы обнаружите, что операции установки недоступны. Например:
@@ -10762,7 +10762,7 @@ Computing area
 50.26548245743669
 >>> c.area = 25
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 AttributeError: can't set attribute
 >>>
 ```
@@ -10779,28 +10779,28 @@ AttributeError: can't set attribute
 Часто вы можете обобщить инициализацию структур данных в единственной функции *__init__()*, определённой в общем базовом классе. Например:
 ```python
 class Structure:
-	# Class variable that specifies expected fields
-	_fields= []
-	def __init__(self, *args):
-		if len(args) != len(self._fields):
-			raise TypeError('Expected {} arguments'.format(len(self._fields)))
-	
-		# Set the arguments
-		for name, value in zip(self._fields, args):
-			setattr(self, name, value)
+    # Class variable that specifies expected fields
+    _fields= []
+    def __init__(self, *args):
+        if len(args) != len(self._fields):
+            raise TypeError('Expected {} arguments'.format(len(self._fields)))
+    
+        # Set the arguments
+        for name, value in zip(self._fields, args):
+            setattr(self, name, value)
 
 # Example class definitions
 if __name__ == '__main__':
-	class Stock(Structure):
-		_fields = ['name', 'shares', 'price']
+    class Stock(Structure):
+        _fields = ['name', 'shares', 'price']
 
-	class Point(Structure):
-	_fields = ['x','y']
+    class Point(Structure):
+    _fields = ['x','y']
 
-	class Circle(Structure):
-		_fields = ['radius']
-		def area(self):
-			return math.pi * self.radius ** 2
+    class Circle(Structure):
+        _fields = ['radius']
+        def area(self):
+            return math.pi * self.radius ** 2
 ```
 
 Если вы будете использовать эти классы, то обнаружите, что они легко конструируются. Например:
@@ -10810,103 +10810,103 @@ if __name__ == '__main__':
 >>> c = Circle(4.5)
 >>> s2 = Stock('ACME', 50)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "structure.py", line 6, in __init__
-		raise TypeError('Expected {} arguments'.format(len(self._fields)))
+    File "<stdin>", line 1, in <module>
+    File "structure.py", line 6, in __init__
+        raise TypeError('Expected {} arguments'.format(len(self._fields)))
 TypeError: Expected 3 arguments
 ```
 
 Если вы решите реализовать поддержку именованных аргументов, то для этого есть несколько способов проектирования. Один из них — такое отображение именованных аргументов, чтобы они соответстовали только именам атрибутов, определённым в *_fields*. Например:
 ```python
 class Structure:
-	_fields= []
-	def __init__(self, *args, **kwargs):
-		if len(args) > len(self._fields):
-			raise TypeError('Expected {} arguments'.format(len(self._fields)))
-	
-		# Set all of the positional arguments
-		for name, value in zip(self._fields, args):
-			setattr(self, name, value)
-		
-		# Set the remaining keyword arguments
-		for name in self._fields[len(args):]:
-			setattr(self, name, kwargs.pop(name))
-		
-		# Check for any remaining unknown arguments
-		if kwargs:
-			raise TypeError('Invalid argument(s): {}'.format(','.join(kwargs)))
+    _fields= []
+    def __init__(self, *args, **kwargs):
+        if len(args) > len(self._fields):
+            raise TypeError('Expected {} arguments'.format(len(self._fields)))
+    
+        # Set all of the positional arguments
+        for name, value in zip(self._fields, args):
+            setattr(self, name, value)
+        
+        # Set the remaining keyword arguments
+        for name in self._fields[len(args):]:
+            setattr(self, name, kwargs.pop(name))
+        
+        # Check for any remaining unknown arguments
+        if kwargs:
+            raise TypeError('Invalid argument(s): {}'.format(','.join(kwargs)))
 
 # Example use
 if __name__ == '__main__':
-	class Stock(Structure):
-		_fields = ['name', 'shares', 'price']
+    class Stock(Structure):
+        _fields = ['name', 'shares', 'price']
 
-	s1 = Stock('ACME', 50, 91.1)
-	s2 = Stock('ACME', 50, price=91.1)
-	s3 = Stock('ACME', shares=50, price=91.1)
+    s1 = Stock('ACME', 50, 91.1)
+    s2 = Stock('ACME', 50, price=91.1)
+    s3 = Stock('ACME', shares=50, price=91.1)
 ``` 
 
 Другой возможный выбор — использование именованных аргументов как средства добавления дополнительных атрибутов, не определённых в *_fields*, к структуре. Например:
 ```python
 class Structure:
-	# Class variable that specifies expected fields
-	_fields= []
-	def __init__(self, *args, **kwargs):
-		if len(args) != len(self._fields):
-			raise TypeError('Expected {} arguments'.format(len(self._fields)))
+    # Class variable that specifies expected fields
+    _fields= []
+    def __init__(self, *args, **kwargs):
+        if len(args) != len(self._fields):
+            raise TypeError('Expected {} arguments'.format(len(self._fields)))
 
-		# Set the arguments
-		for name, value in zip(self._fields, args):
-			setattr(self, name, value)
+        # Set the arguments
+        for name, value in zip(self._fields, args):
+            setattr(self, name, value)
 
-		# Set the additional arguments (if any)
-		extra_args = kwargs.keys() - self._fields
-		for name in extra_args:
-			setattr(self, name, kwargs.pop(name))
-		if kwargs:
-			raise TypeError('Duplicate values for {}'.format(','.join(kwargs)))
+        # Set the additional arguments (if any)
+        extra_args = kwargs.keys() - self._fields
+        for name in extra_args:
+            setattr(self, name, kwargs.pop(name))
+        if kwargs:
+            raise TypeError('Duplicate values for {}'.format(','.join(kwargs)))
 
 # Example use
 if __name__ == '__main__':
-	class Stock(Structure):
-		_fields = ['name', 'shares', 'price']
+    class Stock(Structure):
+        _fields = ['name', 'shares', 'price']
 
-	s1 = Stock('ACME', 50, 91.1)
-	s2 = Stock('ACME', 50, 91.1, date='8/2/2012')
+    s1 = Stock('ACME', 50, 91.1)
+    s2 = Stock('ACME', 50, 91.1, date='8/2/2012')
 ```
 
 ### Обсуждение
 Приём определения метода *__init__()* общего назначения может оказаться чрезвычайно полезным, если вы когда-либо будете писать программу, построенную на основе большого количества маленьких структур данных. Так вы напишете намного меньше кода, чем при ручном создании таких методов *__init__()*:
 ```python
 class Stock:
-	def __init__(self, name, shares, price):
-		self.name = name
-		self.shares = shares
-		self.price = price
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
 
 class Point:
-	def __init__(self, x, y):
-		self.x = x
-		self.y = y
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 class Circle:
-	def __init__(self, radius):
-		self.radius = radius
-		def area(self):
-		return math.pi * self.radius ** 2
+    def __init__(self, radius):
+        self.radius = radius
+        def area(self):
+        return math.pi * self.radius ** 2
 ```
 
 Тонкий аспект реализации касается механизма, который используется для установки значений с помощью функции *setattr()*. Вместо этого вы можете склоняться к прямому доступу к словарю экземпляра. Например:
 ```python
 class Structure:
 # Class variable that specifies expected fields
-	_fields= []
-	def __init__(self, *args):
-		if len(args) != len(self._fields):
-			raise TypeError('Expected {} arguments'.format(len(self._fields)))
-		
-		# Set the arguments (alternate)
-		self.__dict__.update(zip(self._fields,args))
+    _fields= []
+    def __init__(self, *args):
+        if len(args) != len(self._fields):
+            raise TypeError('Expected {} arguments'.format(len(self._fields)))
+        
+        # Set the arguments (alternate)
+        self.__dict__.update(zip(self._fields,args))
 ```
 
 Хотя это работает, часто небезопасно делать предположения о реализации подкласса. Если подкласс решит использовать *__slots__* или обернёт конкретный атрибут в свойство (или дескриптор), прямой доступ к словарю экземпляра поломается. Приведённое в рецепте решение обладает максимально общей областью применения и не делает предположений по поводу подклассов. 
@@ -10931,15 +10931,15 @@ class Stock(Structure)
 Также нужно отметить, что можно автоматически инициализировать переменные экземпляра, используя вспомогательную функцию и так называемый «фреймхак». Например:
 ```python
 def init_fromlocals(self):
-	import sys
-	locs = sys._getframe(1).f_locals
-	for k, v in locs.items():
-		if k != 'self':
-			setattr(self, k, v)
+    import sys
+    locs = sys._getframe(1).f_locals
+    for k, v in locs.items():
+        if k != 'self':
+            setattr(self, k, v)
 
 class Stock:
-	def __init__(self, name, shares, price):
-		init_fromlocals(self)
+    def __init__(self, name, shares, price):
+        init_fromlocals(self)
 ```
 
 В этом варианте функция *init_fromlocals()* использует *sys._getframe()*, чтобы подсмотреть локальные переменные вызывающего метода. Если использовать её как первый шаг в методе *__init__()*, локальные переменные будут такими же, как и переданные аргументы, и смогут быть легко использованы для установки атрибутов с такими же именами. Хотя этот подход обходит проблему получения правильной сигнатуры вызова в IDE, он работает на 50% медленнее, чем представленное в рецепте решение, и использует больше сложной «подкапотной» магии. Если вашему коду не нужна эта дополнительная способность, в большинстве случаев более простое решение работает просто отлично.
@@ -10954,34 +10954,34 @@ class Stock:
 from abc import ABCMeta, abstractmethod
 
 class IStream(metaclass=ABCMeta):
-	@abstractmethod
-	def read(self, maxbytes=-1):
-		pass
-	@abstractmethod
-	def write(self, data):
-		pass
+    @abstractmethod
+    def read(self, maxbytes=-1):
+        pass
+    @abstractmethod
+    def write(self, data):
+        pass
 ```
 
 Главная возможность абстрактного базового класса в том, что он не может напрямую порождать экземпляры. Если вы попробуете это сделать, то получите ошибку:
 ```python
-a = IStream() 	# TypeError: Can't instantiate abstract class
-				# IStream with abstract methods read, write
+a = IStream()   # TypeError: Can't instantiate abstract class
+                # IStream with abstract methods read, write
 ```
 
 Вместо этого абстрактный базовый класс предназначен для использования в качестве базового класса для других классов, от которых ожидается реализация требуемых методов. Например:
 ```python
 class SocketStream(IStream):
-	def read(self, maxbytes=-1):
-		...
-	def write(self, data):
-		...
+    def read(self, maxbytes=-1):
+        ...
+    def write(self, data):
+        ...
 ```
 
 В основном абстрактные базовые классы используются в коде, где нужно принудительно реализовать ожидаемый программный интерфейс. Например, можно посмотреть на базовый класс *IStream* как на высокоуровневую спецификацию для интерфейса, который позволяет читать и записывать данные. Код, который явно проверяет наличие этого интерфейса, может быть написан так:
 ```python
 def serialize(obj, stream):
-	if not isinstance(stream, IStream):
-		raise TypeError('Expected an IStream')
+    if not isinstance(stream, IStream):
+        raise TypeError('Expected an IStream')
 ...
 ``` 
 
@@ -10994,7 +10994,7 @@ IStream.register(io.IOBase)
 
 # Open a normal file and type check
 f = open('foo.txt')
-isinstance(f, IStream)		# Returns True
+isinstance(f, IStream)      # Returns True
 ``` 
 
 Нужно отметить, что *@abstractmethod* может быть также применён к статическим методам, методам класса и свойствам. Вам нужно просто убедиться, что вы применяете его в правильной последовательности, где *@abstractmethod* появляется сразу перед определением функции, как показано тут:
@@ -11002,25 +11002,25 @@ isinstance(f, IStream)		# Returns True
 from abc import ABCMeta, abstractmethod
 
 class A(metaclass=ABCMeta):
-	@property
-	@abstractmethod
-	def name(self):
-		pass
+    @property
+    @abstractmethod
+    def name(self):
+        pass
 
-	@name.setter
-	@abstractmethod
-	def name(self, value):
-		pass
+    @name.setter
+    @abstractmethod
+    def name(self, value):
+        pass
 
-	@classmethod
-	@abstractmethod
-	def method1(cls):
-		pass
+    @classmethod
+    @abstractmethod
+    def method1(cls):
+        pass
 
-	@staticmethod
-	@abstractmethod
-	def method2():
-		pass
+    @staticmethod
+    @abstractmethod
+    def method2():
+        pass
 ```
 
 ### Обсуждение
@@ -11032,11 +11032,11 @@ import collections
 
 # Check if x is a sequence
 if isinstance(x, collections.Sequence):
-	...
+    ...
 
 # Check if x is iterable
 if isinstance(x, collections.Iterable):
-	...
+    ...
 
 # Check if x has a size
 if isinstance(x, collections.Sized):
@@ -11044,7 +11044,7 @@ if isinstance(x, collections.Sized):
 
 # Check if x is a mapping
 if isinstance(x, collections.Mapping):
-	...
+    ...
 ```
 
 Стоит отметить, что на момент написания этой книги некоторые библиотечные модули не используют эти предопределённые классы так, как вы могли бы предположить. Например:
@@ -11053,7 +11053,7 @@ from decimal import Decimal
 import numbers
 
 x = Decimal('3.4')
-isinstance(x, numbers.Real)		# Returns False
+isinstance(x, numbers.Real)     # Returns False
 ```
 
 Хотя значение 3.4 технически является реальным числом, результат проверки типов не подтверждает этого, чтобы помочь избежать случайного смешивания чисел с плавающих точкой и десятичных дробей. Поэтому если вы используете функциональность абстрактных базовых классов, стоит аккуратно писать тесты, которые проверяют, что поведение именно таково, какое вам требуется.
@@ -11072,73 +11072,73 @@ isinstance(x, numbers.Real)		# Returns False
 ```python
 # Base class. Uses a descriptor to set a value
 class Descriptor:
-	def __init__(self, name=None, **opts):
-		self.name = name
-		for key, value in opts.items():
-			setattr(self, key, value)
-	def __set__(self, instance, value):
-		instance.__dict__[self.name] = value
+    def __init__(self, name=None, **opts):
+        self.name = name
+        for key, value in opts.items():
+            setattr(self, key, value)
+    def __set__(self, instance, value):
+        instance.__dict__[self.name] = value
 
 # Descriptor for enforcing types
 class Typed(Descriptor):
-	expected_type = type(None)
+    expected_type = type(None)
 
-	def __set__(self, instance, value):
-		if not isinstance(value, self.expected_type):
-			raise TypeError('expected ' + str(self.expected_type))
-		super().__set__(instance, value)
+    def __set__(self, instance, value):
+        if not isinstance(value, self.expected_type):
+            raise TypeError('expected ' + str(self.expected_type))
+        super().__set__(instance, value)
 
 # Descriptor for enforcing values
 class Unsigned(Descriptor):
-	def __set__(self, instance, value):
-		if value < 0:
-			raise ValueError('Expected >= 0')
-		super().__set__(instance, value)
+    def __set__(self, instance, value):
+        if value < 0:
+            raise ValueError('Expected >= 0')
+        super().__set__(instance, value)
 
 class MaxSized(Descriptor):
-	def __init__(self, name=None, **opts):
-		if 'size' not in opts:
-			raise TypeError('missing size option')
-		super().__init__(name, **opts)
+    def __init__(self, name=None, **opts):
+        if 'size' not in opts:
+            raise TypeError('missing size option')
+        super().__init__(name, **opts)
 
-	def __set__(self, instance, value):
-		if len(value) >= self.size:
-			raise ValueError('size must be < ' + str(self.size))
-		super().__set__(instance, value)
+    def __set__(self, instance, value):
+        if len(value) >= self.size:
+            raise ValueError('size must be < ' + str(self.size))
+        super().__set__(instance, value)
 ``` 
 
 Эти классы нужно рассматривать как базовые строительные блоки, из которых вы создаете модель данных или систему типов. Продолжая пример, приведём код, который реализует некоторые другие типы данных:
 ```python
 class Integer(Typed):
-	expected_type = int
+    expected_type = int
 
 class UnsignedInteger(Integer, Unsigned):
-	pass
+    pass
 
 class Float(Typed):
-	expected_type = float
+    expected_type = float
 
 class UnsignedFloat(Float, Unsigned):
-	pass
+    pass
 
 class String(Typed):
-	expected_type = str
+    expected_type = str
 
 class SizedString(String, MaxSized):
-	pass
+    pass
 ```
 
 Используя эти объекты типов, можно определить такой класс:
 ```python
 class Stock:
-	# Specify constraints
-	name = SizedString('name',size=8)
-	shares = UnsignedInteger('shares')
-	price = UnsignedFloat('price')
-	def __init__(self, name, shares, price):
-		self.name = name
-		self.shares = shares
-		self.price = price
+    # Specify constraints
+    name = SizedString('name',size=8)
+    shares = UnsignedInteger('shares')
+    price = UnsignedFloat('price')
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
 ```
 
 Применив ограничения, вы обнаружите, что присвоение атрибутов теперь валидируется. Например:
@@ -11149,25 +11149,25 @@ class Stock:
 >>> s.shares = 75
 >>> s.shares = -10
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "example.py", line 17, in __set__
-		super().__set__(instance, value)
-	File "example.py", line 23, in __set__
-		raise ValueError('Expected >= 0')
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 17, in __set__
+        super().__set__(instance, value)
+    File "example.py", line 23, in __set__
+        raise ValueError('Expected >= 0')
 ValueError: Expected >= 0
 >>> s.price = 'a lot'
 raceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "example.py", line 16, in __set__
-		raise TypeError('expected ' + str(self.expected_type))
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 16, in __set__
+        raise TypeError('expected ' + str(self.expected_type))
 TypeError: expected <class 'float'>
 >>> s.name = 'ABRACADABRA'
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "example.py", line 17, in __set__
-		super().__set__(instance, value)
-	File "example.py", line 35, in __set__
-		raise ValueError('size must be < ' + str(self.size))
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 17, in __set__
+        super().__set__(instance, value)
+    File "example.py", line 35, in __set__
+        raise ValueError('size must be < ' + str(self.size))
 ValueError: size must be < 8
 >>>
 ```
@@ -11176,47 +11176,47 @@ ValueError: size must be < 8
 ```python
 # Class decorator to apply constraints
 def check_attributes(**kwargs):
-	def decorate(cls):
-		for key, value in kwargs.items():
-			if isinstance(value, Descriptor):
-				value.name = key
-				setattr(cls, key, value)
-			else:
-				setattr(cls, key, value(key))
-		return cls
-	return decorate
+    def decorate(cls):
+        for key, value in kwargs.items():
+            if isinstance(value, Descriptor):
+                value.name = key
+                setattr(cls, key, value)
+            else:
+                setattr(cls, key, value(key))
+        return cls
+    return decorate
 
 # Example
 @check_attributes(name=SizedString(size=8),
-				  shares=UnsignedInteger,
-				  price=UnsignedFloat)
+                  shares=UnsignedInteger,
+                  price=UnsignedFloat)
 class Stock:
-	def __init__(self, name, shares, price):
-		self.name = name
-		self.shares = shares
-		self.price = price
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
 ```
 
 Ещё один подход к упрощению спецификации ограничений — использование метакласса:
 ```python
 # A metaclass that applies checking
 class checkedmeta(type):
-	def __new__(cls, clsname, bases, methods):
-		# Attach attribute names to the descriptors
-		for key, value in methods.items():
-			if isinstance(value, Descriptor):
-				value.name = key
-		return type.__new__(cls, clsname, bases, methods)
+    def __new__(cls, clsname, bases, methods):
+        # Attach attribute names to the descriptors
+        for key, value in methods.items():
+            if isinstance(value, Descriptor):
+                value.name = key
+        return type.__new__(cls, clsname, bases, methods)
 
 # Example
 class Stock(metaclass=checkedmeta):
-	name = SizedString(size=8)
-	shares = UnsignedInteger()
-	price = UnsignedFloat()
-	def __init__(self, name, shares, price):
-		self.name = name
-		self.shares = shares
-		self.price = price
+    name = SizedString(size=8)
+    shares = UnsignedInteger()
+    price = UnsignedFloat()
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
 ```
 
 ### Обсуждение
@@ -11234,13 +11234,13 @@ class Stock(metaclass=checkedmeta):
 ```python
 # Normal
 class Point:
-	x = Integer('x')
-	y = Integer('y')
+    x = Integer('x')
+    y = Integer('y')
 
 # Metaclass
 class Point(metaclass=checkedmeta):
-	x = Integer()
-	y = Integer()
+    x = Integer()
+    y = Integer()
 ```
 
 Код декоратора класса и метакласса просто сканирует словарь класса в поиске дескрипторов. Когда дескриптор найден, они просто заполняют имя дескриптора, основываясь на значении ключа.
@@ -11251,79 +11251,79 @@ class Point(metaclass=checkedmeta):
 ```python
 # Base class. Uses a descriptor to set a value
 class Descriptor:
-	def __init__(self, name=None, **opts):
-		self.name = name
-		for key, value in opts.items():
-			setattr(self, key, value)
+    def __init__(self, name=None, **opts):
+        self.name = name
+        for key, value in opts.items():
+            setattr(self, key, value)
 
-	def __set__(self, instance, value):
-		instance.__dict__[self.name] = value
+    def __set__(self, instance, value):
+        instance.__dict__[self.name] = value
 
 # Decorator for applying type checking
 def Typed(expected_type, cls=None):
-	if cls is None:
-		return lambda cls: Typed(expected_type, cls)
-	
-	super_set = cls.__set__
-	def __set__(self, instance, value):
-		if not isinstance(value, expected_type):
-			raise TypeError('expected ' + str(expected_type))
-		super_set(self, instance, value)
-	cls.__set__ = __set__
-	return cls
+    if cls is None:
+        return lambda cls: Typed(expected_type, cls)
+    
+    super_set = cls.__set__
+    def __set__(self, instance, value):
+        if not isinstance(value, expected_type):
+            raise TypeError('expected ' + str(expected_type))
+        super_set(self, instance, value)
+    cls.__set__ = __set__
+    return cls
 
 # Decorator for unsigned values
 def Unsigned(cls):
-	super_set = cls.__set__
+    super_set = cls.__set__
 
-	def __set__(self, instance, value):
-		if value < 0:
-			raise ValueError('Expected >= 0')
-		super_set(self, instance, value)
-	cls.__set__ = __set__
-	return cls
+    def __set__(self, instance, value):
+        if value < 0:
+            raise ValueError('Expected >= 0')
+        super_set(self, instance, value)
+    cls.__set__ = __set__
+    return cls
 
 # Decorator for allowing sized values
 def MaxSized(cls):
-	super_init = cls.__init__
-	def __init__(self, name=None, **opts):
-		if 'size' not in opts:
-			raise TypeError('missing size option')
-		super_init(self, name, **opts)
-	cls.__init__ = __init__
+    super_init = cls.__init__
+    def __init__(self, name=None, **opts):
+        if 'size' not in opts:
+            raise TypeError('missing size option')
+        super_init(self, name, **opts)
+    cls.__init__ = __init__
 
-	super_set = cls.__set__
-	def __set__(self, instance, value):
-		if len(value) >= self.size:
-			raise ValueError('size must be < ' + str(self.size))
-		super_set(self, instance, value)
-	cls.__set__ = __set__
-	return cls
+    super_set = cls.__set__
+    def __set__(self, instance, value):
+        if len(value) >= self.size:
+            raise ValueError('size must be < ' + str(self.size))
+        super_set(self, instance, value)
+    cls.__set__ = __set__
+    return cls
 
 # Specialized descriptors
 @Typed(int)
 class Integer(Descriptor):
-	pass
+    pass
 
 @Unsigned
 class UnsignedInteger(Integer):
-	pass
+    pass
 
 @Typed(float)
 class Float(Descriptor):
-	pass
+    pass
 
 @Unsigned
 class UnsignedFloat(Float):
-	pass
+    pass
 
 @Typed(str)
 class String(Descriptor):
-	pass
+    pass
 
 @MaxSized
 class SizedString(String):
-	pass
+    pass
 ```
 
 Классы, определённые в этом альтернативном решении, работают так же, как и раньше (ранее показанный в примерах код не изменился), за исключением того, что всё работает намного быстрее. Например, простая проверка времени исполнения установки типизированного атрибута обнаруживает, что подход с использованием декораторов классов работает почти на 100% быстрее, чем использование миксин (примесей). Теперь-то вы рады, что дочитали весь этот рецепт до конца?
@@ -11338,14 +11338,14 @@ class SizedString(String):
 import collections
 
 class A(collections.Iterable):
-	pass
+    pass
 ```
 
 Наследование от *collections.Iterable* проверяет, что вы реализовали все требуемые специальные методы. Если вы не сделаете этого, то получите ошибку при создании экземпляра:
 ```python
 >>> a = A()
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: Can't instantiate abstract class A with abstract methods __iter__
 >>>
 ```
@@ -11357,7 +11357,7 @@ TypeError: Can't instantiate abstract class A with abstract methods __iter__
 >>> import collections
 >>> collections.Sequence()
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: Can't instantiate abstract class Sequence with abstract methods \
 __getitem__, __len__
 >>>
@@ -11369,19 +11369,19 @@ import collections
 import bisect
 
 class SortedItems(collections.Sequence):
-	def __init__(self, initial=None):
-		self._items = sorted(initial) if initial is None else []
-	
-	# Required sequence methods
-	def __getitem__(self, index):
-		return self._items[index]
-	
-	def __len__(self):
-		return len(self._items)
-	
-	# Method for adding an item in the right location
-	def add(self, item):
-		bisect.insort(self._items, item)
+    def __init__(self, initial=None):
+        self._items = sorted(initial) if initial is None else []
+    
+    # Required sequence methods
+    def __getitem__(self, index):
+        return self._items[index]
+    
+    def __len__(self):
+        return len(self._items)
+    
+    # Method for adding an item in the right location
+    def add(self, item):
+        bisect.insort(self._items, item)
 ```
 
 Вот пример использования этого класса:
@@ -11444,29 +11444,29 @@ False
 Многие абстрактные базовые классы из *collections* также предоставляют дефолтные реализации обычных методов контейнеров. Предположим, например, что у вас есть класс, который наследует от *collections.MutableSequence*:
 ```python
 class Items(collections.MutableSequence):
-	def __init__(self, initial=None):
-		self._items = list(initial) if initial is None else []
-	
-	# Required sequence methods
-	def __getitem__(self, index):
-		print('Getting:', index)
-		return self._items[index]
+    def __init__(self, initial=None):
+        self._items = list(initial) if initial is None else []
+    
+    # Required sequence methods
+    def __getitem__(self, index):
+        print('Getting:', index)
+        return self._items[index]
 
-	def __setitem__(self, index, value):
-		print('Setting:', index, value)
-		self._items[index] = value
+    def __setitem__(self, index, value):
+        print('Setting:', index, value)
+        self._items[index] = value
 
-	def __delitem__(self, index):
-		print('Deleting:', index)
-		del self._items[index]
+    def __delitem__(self, index):
+        print('Deleting:', index)
+        del self._items[index]
 
-	def insert(self, index, value):
-		print('Inserting:', index, value)
-		self._items.insert(index, value)
+    def insert(self, index, value):
+        print('Inserting:', index, value)
+        self._items.insert(index, value)
 
-	def __len__(self):
-		print('Len')
-		return len(self._items)
+    def __len__(self):
+        print('Len')
+        return len(self._items)
 ``` 
 
 Если вы создадите экземпляр *Items*, то вы обнаружите, что он поддерживает практически все основные методы (например, *append()*, *remove()*, *count()* и т.д.) Эти методы реализованы таким образом, что они используют только требуемые. Вот интерактивный сеанс, которая демонстрирует это:
@@ -11508,53 +11508,53 @@ Deleting: 2
 Если не усложнять, делегирование — это паттерн программирования, который подразумевает передачу ответственности за реализацию конкретной операции другому объекту. В простейшей форме это часто выглядит как-то так:
 ```python
 class A:
-	def spam(self, x):
-		pass
+    def spam(self, x):
+        pass
 
-	def foo(self):
-		pass
+    def foo(self):
+        pass
 
 class B:
-	def __init__(self):
-		self._a = A()
-	
-	def spam(self, x):
-		# Delegate to the internal self._a instance
-		return self._a.spam(x)
-	
-	def foo(self):
-		# Delegate to the internal self._a instance
-		return self._a.foo()
-	
-	def bar(self):
-		pass
+    def __init__(self):
+        self._a = A()
+    
+    def spam(self, x):
+        # Delegate to the internal self._a instance
+        return self._a.spam(x)
+    
+    def foo(self):
+        # Delegate to the internal self._a instance
+        return self._a.foo()
+    
+    def bar(self):
+        pass
 ```
 
 Если нужно делегировать только пару методов, написать код типа вышеприведённого будет несложно. Однако если нужно делегировать много методов, существует альтернативный подход с определением метода *__getattr__()*:
 ```python
 class A:
-	def spam(self, x):
-		pass
-	
-	def foo(self):
-		pass
+    def spam(self, x):
+        pass
+    
+    def foo(self):
+        pass
 
 class B:
-	def __init__(self):
-		self._a = A()
+    def __init__(self):
+        self._a = A()
 
-	def bar(self):
-		pass
+    def bar(self):
+        pass
 
 # Expose all of the methods defined on class A
 def __getattr__(self, name):
-	return getattr(self._a, name)
+    return getattr(self._a, name)
 ```
 
 Метод *__getattr__()* — это «общая ловушка» для обращений к атрибутам. Это метод, который вызывается, когда программа пытается обратиться к несуществующему атрибуту. В приведённом выше коде она перехватит операции доступа к неопределённым методам в классе *B* и просто делегирует их *A*. Например:
 ```python
 b = B()
-b.bar() 	# Calls B.bar() (exists on B)
+b.bar()     # Calls B.bar() (exists on B)
 b.spam(42)  # Calls B.__getattr__('spam') and delegates to A.spam
 ```
 
@@ -11564,38 +11564,38 @@ b.spam(42)  # Calls B.__getattr__('spam') and delegates to A.spam
 # exposes its public attributes
 
 class Proxy:
-	def __init__(self, obj):
-	self._obj = obj
+    def __init__(self, obj):
+    self._obj = obj
 
-	# Delegate attribute lookup to internal obj
-	def __getattr__(self, name):
-		print('getattr:', name)
-		return getattr(self._obj, name)
+    # Delegate attribute lookup to internal obj
+    def __getattr__(self, name):
+        print('getattr:', name)
+        return getattr(self._obj, name)
 
-	# Delegate attribute assignment
-	def __setattr__(self, name, value):
-		if name.startswith('_'):
-			super().__setattr__(name, value)
-		else:
-			print('setattr:', name, value)
-			setattr(self._obj, name, value)
+    # Delegate attribute assignment
+    def __setattr__(self, name, value):
+        if name.startswith('_'):
+            super().__setattr__(name, value)
+        else:
+            print('setattr:', name, value)
+            setattr(self._obj, name, value)
 
-	# Delegate attribute deletion
-	def __delattr__(self, name):
-		if name.startswith('_'):
-			super().__delattr__(name)
-		else:
-			print('delattr:', name)
-			delattr(self._obj, name)
+    # Delegate attribute deletion
+    def __delattr__(self, name):
+        if name.startswith('_'):
+            super().__delattr__(name)
+        else:
+            print('delattr:', name)
+            delattr(self._obj, name)
 ```
 
 Чтобы использовать этот прокси-класс, просто оберните им другой экземпляр. Например:
 ```python
 class Spam:
-	def __init__(self, x):
-		self.x = x
-	def bar(self, y):
-		print('Spam.bar:', self.x, y)
+    def __init__(self, x):
+        self.x = x
+    def bar(self, y):
+        print('Spam.bar:', self.x, y)
 
 # Create an instance
 s = Spam(2)
@@ -11604,9 +11604,9 @@ s = Spam(2)
 p = Proxy(s)
 
 # Access the proxy
-print(p.x)			# Outputs 2
-p.bar(3)			# Outputs "Spam.bar: 2 3"
-p.x = 37			# Changes s.x to 37
+print(p.x)          # Outputs 2
+p.bar(3)            # Outputs "Spam.bar: 2 3"
+p.x = 37            # Changes s.x to 37
 ```
 
 Путём кастомизации реализации методов доступа к атрибутам вы можете настроить поведение прокси (заставить его логировать доступ, разрешить доступ только на чтение и т.д.)
@@ -11615,43 +11615,43 @@ p.x = 37			# Changes s.x to 37
 Делегирование иногда используется в качестве альтернативы наследованию. Например, вместо написания такого кода:
 ```python
 class A:
-	def spam(self, x):
-		print('A.spam', x)
-	
-	def foo(self):
-		print('A.foo')
+    def spam(self, x):
+        print('A.spam', x)
+    
+    def foo(self):
+        print('A.foo')
 
 class B(A):
-	def spam(self, x):
-		print('B.spam')
-		super().spam(x)
-	
-	def bar(self):
-		print('B.bar')
+    def spam(self, x):
+        print('B.spam')
+        super().spam(x)
+    
+    def bar(self):
+        print('B.bar')
 ``` 
 
 Вы можете написать решение с использованием делегирования:
 ```python
 class A:
-	def spam(self, x):
-		print('A.spam', x)
-	
-	def foo(self):
-		print('A.foo')
+    def spam(self, x):
+        print('A.spam', x)
+    
+    def foo(self):
+        print('A.foo')
 
 class B:
-	def __init__(self):
-		self._a = A()
+    def __init__(self):
+        self._a = A()
 
-	def spam(self, x):
-		print('B.spam', x)
-		self._a.spam(x)
+    def spam(self, x):
+        print('B.spam', x)
+        self._a.spam(x)
 
-	def bar(self):
-		print('B.bar')
-	
-	def __getattr__(self, name):
-		return getattr(self._a, name)
+    def bar(self):
+        print('B.bar')
+    
+    def __getattr__(self, name):
+        return getattr(self._a, name)
 ```
 
 Такое использование делегирования часто полезно в ситуациях, когда прямое наследование может не иметь смысла, или когда вы хотите лучше контролировать отношения между объектами (например, показывать наружу некоторые методы, реализовывать интерфейсы и т.п.)
@@ -11661,10 +11661,10 @@ class B:
 Важно подчеркнуть, что метод *__getattr__()* обычно не применяется к специальным методам, которые начинаются и заканчиваются двойным нижним подчеркиванием. Например, рассмотрите такой класс:
 ```python
 class ListLike:
-	def __init__(self):
-		self._items = []
-	def __getattr__(self, name):
-		return getattr(self._items, name)
+    def __init__(self):
+        self._items = []
+    def __getattr__(self, name):
+        return getattr(self._items, name)
 ```     
 
 Если вы попытаетесь создать объект *ListLike*, то обнаружите, что он поддерживает обычные методы списков, такие как *append()* и *insert()*. Однако он не поддерживает операторы типа *len()*, поиска элемента и т.д. Например:
@@ -11675,11 +11675,11 @@ class ListLike:
 >>> a.sort()
 >>> len(a)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: object of type 'ListLike' has no len()
 >>> a[0]
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: 'ListLike' object does not support indexing
 >>>
 ```
@@ -11687,20 +11687,20 @@ TypeError: 'ListLike' object does not support indexing
 Чтобы реализовать поддержку различных операторов, вы должны вручную делегировать специальные ассоциированные методы. Например:
 ```python
 class ListLike:
-	def __init__(self):
-		self._items = []
-	def __getattr__(self, name):
-		return getattr(self._items, name)
-	
-	# Added special methods to support certain list operations
-	def __len__(self):
-		return len(self._items)
-	def __getitem__(self, index):
-		return self._items[index]
-	def __setitem__(self, index, value):
-		self._items[index] = value
-	def __delitem__(self, index):
-		del self._items[index]
+    def __init__(self):
+        self._items = []
+    def __getattr__(self, name):
+        return getattr(self._items, name)
+    
+    # Added special methods to support certain list operations
+    def __len__(self):
+        return len(self._items)
+    def __getitem__(self, index):
+        return self._items[index]
+    def __setitem__(self, index, value):
+        self._items[index] = value
+    def __delitem__(self, index):
+        del self._items[index]
 ```
 
 См. **рецепт 11.8.**, в котором приведён другой пример использования делегирования в контексте создания прокси-классов для удалённого вызова процедуры.
@@ -11715,33 +11715,33 @@ class ListLike:
 import time
 
 class Date:
-	# Primary constructor
-	def __init__(self, year, month, day):
-		self.year = year
-		self.month = month
-		self.day = day
+    # Primary constructor
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
 
-	# Alternate constructor
-	@classmethod
-	def today(cls):
-		t = time.localtime()
-		return cls(t.tm_year, t.tm_mon, t.tm_mday)
+    # Alternate constructor
+    @classmethod
+    def today(cls):
+        t = time.localtime()
+        return cls(t.tm_year, t.tm_mon, t.tm_mday)
 ``` 
 
 Чтобы использовать альтернативный конструктор, просто вызовите его как функцию, такую как *Date.today()*. Вот пример:
 ```python
-a = Date(2012, 12, 21) 	# Primary
-b = Date.today()		# Alternate
+a = Date(2012, 12, 21)  # Primary
+b = Date.today()        # Alternate
 ```
 
 ### Обсуждение
 Одно из главных применений методов класса — это определение альтернативных конструкторов, как было показано в этом рецепте. Важнейшая возможность метода класса в том, что он получает класс в первом аргументе (*cls*). Вы заметите, что этот класс используется в методе для создания и возвращения конечного экземпляра. Это тонкий момент, но этот аспект методов класса позволяет им корректно работать с такими возможностями как наследование. Например:
 ```python
 class NewDate(Date):
-	pass
+    pass
 
-c = Date.today() 		# Creates an instance of Date (cls=Date)
-d = NewDate.today() 	# Creates an instance of NewDate (cls=NewDate)
+c = Date.today()        # Creates an instance of Date (cls=Date)
+d = NewDate.today()     # Creates an instance of NewDate (cls=NewDate)
 ```
 
 При определении класса с множественными конструкторами, вы должны делать функцию *__init__()* максимально простой — она должна просто присваивать атрибутам значения. А вот уже альтернативные конструкторы будут вызываться при необходимости выполнения продвинутых операций.
@@ -11749,20 +11749,20 @@ d = NewDate.today() 	# Creates an instance of NewDate (cls=NewDate)
 Вместо определения отдельного метода класса, вы можете склоняться к реализации метода *__init__()* таким образом, который позволяет обрабатывать различные условия вызова. Например:
 ```python
 class Date:
-	def __init__(self, *args):
-		if len(args) == 0:
-			t = time.localtime()
-			args = (t.tm_year, t.tm_mon, t.tm_mday)
-		self.year, self.month, self.day = args
+    def __init__(self, *args):
+        if len(args) == 0:
+            t = time.localtime()
+            args = (t.tm_year, t.tm_mon, t.tm_mday)
+        self.year, self.month, self.day = args
 ```
 
 Хотя этот приём в некоторых случаях работает, он часто ведёт к сложному коду, который сложно понять и поддерживать. Например, эта реализация не показывает полезные строки помощи (с именами аргументов). Также код, который создает экземпляры *Date* будет менее ясным. Сравните:
 ```python
-a = Date(2012, 12, 21) 	# Clear. A specific date.
-b = Date() 				# ??? What does this do?
+a = Date(2012, 12, 21)  # Clear. A specific date.
+b = Date()              # ??? What does this do?
 
 # Class method version
-c = Date.today() 		# Clear. Today's date.
+c = Date.today()        # Clear. Today's date.
 ```
 
 Как показано, *Date.today()* вызывает обычный метод *Date.__init__()* и создаёт экземляр класса *Date()* с подходящими аргументами года, месяца и дня. При необходимости экземпляр может быть создан без вызова метода *__init__()*. Это описывается в следующем рецепте.
@@ -11775,10 +11775,10 @@ c = Date.today() 		# Clear. Today's date.
 «Голый» экземпляр может быть создан с помощью прямого вызова метода класса *__new__()*. Например, рассмотрите такой класс:
 ```python
 class Date:
-	def __init__(self, year, month, day):
-		self.year = year
-		self.month = month
-		self.day = day
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
 ``` 
 
 Вот как вы можете создать экземпляр *Date* без вызова *__init__()*:
@@ -11788,7 +11788,7 @@ class Date:
 <__main__.Date object at 0x1006716d0>
 >>> d.year
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 AttributeError: 'Date' object has no attribute 'year'
 >>>
 ```
@@ -11797,7 +11797,7 @@ AttributeError: 'Date' object has no attribute 'year'
 ```python
 >>> data = {'year':2012, 'month':8, 'day':29}
 >>> for key, value in data.items():
-...		setattr(d, key, value)
+...     setattr(d, key, value)
 ...
 >>> d.year
 2012
@@ -11812,19 +11812,19 @@ AttributeError: 'Date' object has no attribute 'year'
 from time import localtime
 
 class Date:
-	def __init__(self, year, month, day):
-		self.year = year
-		self.month = month
-		self.day = day
+    def __init__(self, year, month, day):
+        self.year = year
+        self.month = month
+        self.day = day
 
-	@classmethod
-	def today(cls):
-		d = cls.__new__(cls)
-		t = localtime()
-		d.year = t.tm_year
-		d.month = t.tm_mon
-		d.day = t.tm_mday
-		return d
+    @classmethod
+    def today(cls):
+        d = cls.__new__(cls)
+        t = localtime()
+        d.year = t.tm_year
+        d.month = t.tm_mon
+        d.day = t.tm_mday
+        return d
 ```
 
 При десериализации данных из JSON вы можете получить похожий словарь:
@@ -11846,48 +11846,48 @@ data = { 'year': 2012, 'month': 8, 'day': 29 }
 Чтобы проиллюстрировать это, предположим, что вы заинтересованы в добавлении различных кастомизаций к объектам (например, логирования, запрета повторного присваивания, проверки типов и т.п.). Вот набор классов-миксин (примесей), которые это делают:
 ```python
 class LoggedMappingMixin:
-	'''
-	Add logging to get/set/delete operations for debugging.
-	'''
-	__slots__ = ()
+    '''
+    Add logging to get/set/delete operations for debugging.
+    '''
+    __slots__ = ()
 
-	def __getitem__(self, key):
-		print('Getting ' + str(key))
-		return super().__getitem__(key)
-	
-	def __setitem__(self, key, value):
-		print('Setting {} = {!r}'.format(key, value))
-		return super().__setitem__(key, value)
-		
-	def __delitem__(self, key):
-		print('Deleting ' + str(key))
-		return super().__delitem__(key)
+    def __getitem__(self, key):
+        print('Getting ' + str(key))
+        return super().__getitem__(key)
+    
+    def __setitem__(self, key, value):
+        print('Setting {} = {!r}'.format(key, value))
+        return super().__setitem__(key, value)
+        
+    def __delitem__(self, key):
+        print('Deleting ' + str(key))
+        return super().__delitem__(key)
 
 class SetOnceMappingMixin:
-	'''
-	Only allow a key to be set once.
-	'''
-	__slots__ = ()
-	def __setitem__(self, key, value):
-		if key in self:
-			raise KeyError(str(key) + ' already set')
-		return super().__setitem__(key, value)
+    '''
+    Only allow a key to be set once.
+    '''
+    __slots__ = ()
+    def __setitem__(self, key, value):
+        if key in self:
+            raise KeyError(str(key) + ' already set')
+        return super().__setitem__(key, value)
 
 class StringKeysMappingMixin:
-	'''
-	Restrict keys to strings only
-	'''
-	__slots__ = ()
-	def __setitem__(self, key, value):
-		if not isinstance(key, str):
-			raise TypeError('keys must be strings')
-		return super().__setitem__(key, value)
+    '''
+    Restrict keys to strings only
+    '''
+    __slots__ = ()
+    def __setitem__(self, key, value):
+        if not isinstance(key, str):
+            raise TypeError('keys must be strings')
+        return super().__setitem__(key, value)
 ```   
 
 Сами по себе эти классы бесполезны. Если вы попытаетесь создать их экземпляры, ничего полезного не получится, разве что вы полюбуетесь на исключения. На самом деле они должны быть смешаны с другими классами через множественное наследование. Например:
 ```python
 >>> class LoggedDict(LoggedMappingMixin, dict):
-...		pass
+...     pass
 ...
 >>> d = LoggedDict()
 >>> d['x'] = 23
@@ -11900,7 +11900,7 @@ Deleting x
 
 >>> from collections import defaultdict
 >>> class SetOnceDefaultDict(SetOnceMappingMixin, defaultdict):
-...		pass
+...     pass
 ...
 >>> d = SetOnceDefaultDict(list)
 >>> d['x'].append(2)
@@ -11908,32 +11908,32 @@ Deleting x
 >>> d['x'].append(10)
 >>> d['x'] = 23
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "mixin.py", line 24, in __setitem__
-		raise KeyError(str(key) + ' already set')
+    File "<stdin>", line 1, in <module>
+    File "mixin.py", line 24, in __setitem__
+        raise KeyError(str(key) + ' already set')
 KeyError: 'x already set'
 
 >>> from collections import OrderedDict
 >>> class StringOrderedDict(StringKeysMappingMixin,
-...							SetOnceMappingMixin,
-...							OrderedDict):
-...		pass
+...                         SetOnceMappingMixin,
+...                         OrderedDict):
+...     pass
 ...
 >>> d = StringOrderedDict()
 >>> d['x'] = 23
 >>> d[42] = 10
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "mixin.py", line 45, in __setitem__
-		'''
+    File "<stdin>", line 1, in <module>
+    File "mixin.py", line 45, in __setitem__
+        '''
 TypeError: keys must be strings
 >>> d['x'] = 42
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "mixin.py", line 46, in __setitem__
-		__slots__ = ()
+    File "<stdin>", line 1, in <module>
+    File "mixin.py", line 46, in __setitem__
+        __slots__ = ()
 File "mixin.py", line 24, in __setitem__
-	if key in self:
+    if key in self:
 KeyError: 'x already set'
 >>>
 ```
@@ -11946,7 +11946,7 @@ KeyError: 'x already set'
 from xmlrpc.server import SimpleXMLRPCServer
 from socketserver import ThreadingMixIn
 class ThreadedXMLRPCServer(ThreadingMixIn, SimpleXMLRPCServer):
-	pass
+    pass
 ```  
 
 Также часто можно встретить миксины в крупных библиотеках и фреймворках — опять же, в основном для расширения функциональности существующих классов дополнительными возможностями.
@@ -11960,20 +11960,20 @@ class ThreadedXMLRPCServer(ThreadingMixIn, SimpleXMLRPCServer):
 Если вы подумываете определить класс-миксин, у которого будет метод *__init__()* и переменные экземпляра, то обратите внимание, что существует серьезная опасность, связанная с тем фактом, что класс ничего не знает о других классах, с которыми он будет смешиваться. Поэтому все переменные экземпляра должны иметь такие имена, которые позволят избежать конфликтов имён. Также метод *__init__()* должен быть запрограммирован правильно вызывать метод *__init__()* других классов, к которым подмешивается миксин. В общем случае это трудно реализовать, поскольку вы ничего не знаете о сигнатурах аргументов других классов. По крайней мере, вы должны реализовать нечто очень общее, используя \*arg и \*\*kwargs. Если *__init__()* класса-миксина принимает какие-либо аргументы, эти аргументы должны быть определены только как именованные, иметь такие имена, чтобы избежать конфликтов с другими аргументами. Вот возможная реализация миксина, определяющего *__init__()* и принимающего именованный аргумент:
 ```python
 class RestrictKeysMixin:
-	def __init__(self, *args, _restrict_key_type, **kwargs):
-		self.__restrict_key_type = _restrict_key_type
-		super().__init__(*args, **kwargs)
+    def __init__(self, *args, _restrict_key_type, **kwargs):
+        self.__restrict_key_type = _restrict_key_type
+        super().__init__(*args, **kwargs)
 
-	def __setitem__(self, key, value):
-		if not isinstance(key, self.__restrict_key_type):
-			raise TypeError('Keys must be ' + str(self.__restrict_key_type))
-		super().__setitem__(key, value)
+    def __setitem__(self, key, value):
+        if not isinstance(key, self.__restrict_key_type):
+            raise TypeError('Keys must be ' + str(self.__restrict_key_type))
+        super().__setitem__(key, value)
 ```
 
 Вот пример использования этого класса:
 ```python
 >>> class RDict(RestrictKeysMixin, dict):
-...		pass
+...     pass
 ...
 >>> d = RDict(_restrict_key_type=str)
 >>> e = RDict([('name','Dave'), ('n',37)], _restrict_key_type=str)
@@ -11982,9 +11982,9 @@ class RestrictKeysMixin:
 {'n': 37, 'name': 'Dave'}
 >>> f[42] = 10
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "mixin.py", line 83, in __setitem__
-		raise TypeError('Keys must be ' + str(self.__restrict_key_type))
+    File "<stdin>", line 1, in <module>
+    File "mixin.py", line 83, in __setitem__
+        raise TypeError('Keys must be ' + str(self.__restrict_key_type))
 TypeError: Keys must be <class 'str'>
 >>>
 ```
@@ -11994,40 +11994,40 @@ TypeError: Keys must be <class 'str'>
 И последнее: использование функции *super()* — необходимая и критически важная часть написания классов-миксин. В вышеприведённом решении классы переопределяют некоторые критически важные методы, такие как __getitem__() и *__setitem__()*. Однако им также нужно вызвать изначальные реализации этих методов. Использование *super()* делегируется следующему классу в порядке разрешения методов (ПРМ, MRO — method resolution order). Этот аспект рецепта, однако, неочевиден для новичков, потому что *super()* используется в классах, у которых нет родителей (на первый взгляд это может выглядеть как ошибка). Однако в подобном определении класса:
 ```python
 class LoggedDict(LoggedMappingMixin, dict):
-	pass
+    pass
 ```
 ...использование *super()* в *LoggedMappingMixin* делегируется следующему классу в списке множественного наследования. Так, вызов типа *super().__getitem__()* в *LoggedMappingMixin* на самом деле делает дополнительный шаг и вызывает *dict.__getitem__()*. Без такого поведения класс-миксин не работал бы.
 
 Альтернативная реализация миксин подразумевает использование декораторов классов. Например, рассмотрите такой код:
 ```python
 def LoggedMapping(cls):
-	cls_getitem = cls.__getitem__
-	cls_setitem = cls.__setitem__
-	cls_delitem = cls.__delitem__
+    cls_getitem = cls.__getitem__
+    cls_setitem = cls.__setitem__
+    cls_delitem = cls.__delitem__
 
-	def __getitem__(self, key):
-		print('Getting ' + str(key))
-		return cls_getitem(self, key)
+    def __getitem__(self, key):
+        print('Getting ' + str(key))
+        return cls_getitem(self, key)
 
-	def __setitem__(self, key, value):
-		print('Setting {} = {!r}'.format(key, value))
-		return cls_setitem(self, key, value)
+    def __setitem__(self, key, value):
+        print('Setting {} = {!r}'.format(key, value))
+        return cls_setitem(self, key, value)
 
-	def __delitem__(self, key):
-		print('Deleting ' + str(key))
-		return cls_delitem(self, key)
+    def __delitem__(self, key):
+        print('Deleting ' + str(key))
+        return cls_delitem(self, key)
 
-	cls.__getitem__ = __getitem__
-	cls.__setitem__ = __setitem__
-	cls.__delitem__ = __delitem__
-	return cls
+    cls.__getitem__ = __getitem__
+    cls.__setitem__ = __setitem__
+    cls.__delitem__ = __delitem__
+    return cls
 ``` 
 
 Эта функция применяется к определению класса как декоратор. Например:
 ```python
 @LoggedMapping
 class LoggedDict(dict):
-	pass
+    pass
 ```
 
 Если вы попробуете это в работе, то получите такое же поведение, как и ранее, но без использования множественного наследования. Вместо него декоратор просто выполняет небольшую хирургическую операцию на определении класса для замены некоторых методов. Дополнительную информацию о декораторах вы можете почерпнуть в **рецепте 9.12.**
@@ -12043,28 +12043,28 @@ class LoggedDict(dict):
 В некоторых приложениях вам могут понадобиться объекты, которые работают по-разному в зависимости от некого внутреннего состояния. Например, рассмотрим простой класс, представляющий соединение:
 ```python
 class Connection:
-	def __init__(self):
-		self.state = 'CLOSED'
-	
-	def read(self):
-		if self.state != 'OPEN':
-			raise RuntimeError('Not open')
-		print('reading')
-	
-	def write(self, data):
-		if self.state != 'OPEN':
-			raise RuntimeError('Not open')
-		print('writing')
-	
-	def open(self):
-		if self.state == 'OPEN':
-			raise RuntimeError('Already open')
-		self.state = 'OPEN'
-	
-	def close(self):
-		if self.state == 'CLOSED':
-			raise RuntimeError('Already closed')
-		self.state = 'CLOSED'
+    def __init__(self):
+        self.state = 'CLOSED'
+    
+    def read(self):
+        if self.state != 'OPEN':
+            raise RuntimeError('Not open')
+        print('reading')
+    
+    def write(self, data):
+        if self.state != 'OPEN':
+            raise RuntimeError('Not open')
+        print('writing')
+    
+    def open(self):
+        if self.state == 'OPEN':
+            raise RuntimeError('Already open')
+        self.state = 'OPEN'
+    
+    def close(self):
+        if self.state == 'CLOSED':
+            raise RuntimeError('Already closed')
+        self.state = 'CLOSED'
 ```
 
 Эта реализация вводит несколько трудных моментов. Во-первых, код переусложнён большим количеством условных проверок состояния. Во-вторых, производительность страдает из-за большого количества операций (например, *read()* и *write()* всегда проверяют состояние перед выполнением).
@@ -12072,78 +12072,78 @@ class Connection:
 Более элегантный подход — закодировать каждое операционное состояние как отдельный класс, а класс *Connection* заставить делегировать операции классу состояния. Например:
 ```python
 class Connection:
-	def __init__(self):
-		self.new_state(ClosedConnectionState)
-	
-	def new_state(self, newstate):
-		self._state = newstate
-	
-	# Delegate to the state class
-	def read(self):
-		return self._state.read(self)
-	
-	def write(self, data):
-		return self._state.write(self, data)
-	
-	def open(self):
-		return self._state.open(self)
-	
-	def close(self):
-		return self._state.close(self)
+    def __init__(self):
+        self.new_state(ClosedConnectionState)
+    
+    def new_state(self, newstate):
+        self._state = newstate
+    
+    # Delegate to the state class
+    def read(self):
+        return self._state.read(self)
+    
+    def write(self, data):
+        return self._state.write(self, data)
+    
+    def open(self):
+        return self._state.open(self)
+    
+    def close(self):
+        return self._state.close(self)
 
 
 # Connection state base class
 class ConnectionState:
-	@staticmethod
-	def read(conn):
-		raise NotImplementedError()
+    @staticmethod
+    def read(conn):
+        raise NotImplementedError()
 
-	@staticmethod
-	def write(conn, data):
-		raise NotImplementedError()
+    @staticmethod
+    def write(conn, data):
+        raise NotImplementedError()
 
-	@staticmethod
-	def open(conn):
-		raise NotImplementedError()
+    @staticmethod
+    def open(conn):
+        raise NotImplementedError()
 
-	@staticmethod
-	def close(conn):
-		raise NotImplementedError()
+    @staticmethod
+    def close(conn):
+        raise NotImplementedError()
 
 # Implementation of different states
 class ClosedConnectionState(ConnectionState):
-	@staticmethod
-	def read(conn):
-		raise RuntimeError('Not open')
-	
-	@staticmethod
-	def write(conn, data):
-		raise RuntimeError('Not open')
-	
-	@staticmethod
-	def open(conn):
-		conn.new_state(OpenConnectionState)
-	
-	@staticmethod
-	def close(conn):
-		raise RuntimeError('Already closed')
+    @staticmethod
+    def read(conn):
+        raise RuntimeError('Not open')
+    
+    @staticmethod
+    def write(conn, data):
+        raise RuntimeError('Not open')
+    
+    @staticmethod
+    def open(conn):
+        conn.new_state(OpenConnectionState)
+    
+    @staticmethod
+    def close(conn):
+        raise RuntimeError('Already closed')
 
 class OpenConnectionState(ConnectionState):
-	@staticmethod
-	def read(conn):
-		print('reading')
-	
-	@staticmethod
-	def write(conn, data):
-		print('writing')
-	
-	@staticmethod
-	def open(conn):
-		raise RuntimeError('Already open')
-	
-	@staticmethod
-	def close(conn):
-		conn.new_state(ClosedConnectionState)
+    @staticmethod
+    def read(conn):
+        print('reading')
+    
+    @staticmethod
+    def write(conn, data):
+        print('writing')
+    
+    @staticmethod
+    def open(conn):
+        raise RuntimeError('Already open')
+    
+    @staticmethod
+    def close(conn):
+        conn.new_state(ClosedConnectionState)
 ``` 
 
 Вот пример использования этих классов:
@@ -12153,11 +12153,11 @@ class OpenConnectionState(ConnectionState):
 <class '__main__.ClosedConnectionState'>
 >>> c.read()
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "example.py", line 10, in read
-		return self._state.read(self)
-	File "example.py", line 43, in read
-		raise RuntimeError('Not open')
+    File "<stdin>", line 1, in <module>
+    File "example.py", line 10, in read
+        return self._state.read(self)
+    File "example.py", line 43, in read
+        raise RuntimeError('Not open')
 RuntimeError: Not open
 >>> c.open()
 >>> c._state
@@ -12180,46 +12180,46 @@ writing
 Альтернативная реализация затрагивает прямое управление атрибутом *__class__* в экземплярах. Рассмотрите такой пример:
 ```python
 class Connection:
-	def __init__(self):
-		self.new_state(ClosedConnection)
+    def __init__(self):
+        self.new_state(ClosedConnection)
 
-	def new_state(self, newstate):
-		self.__class__ = newstate
+    def new_state(self, newstate):
+        self.__class__ = newstate
 
-	def read(self):
-		raise NotImplementedError()
+    def read(self):
+        raise NotImplementedError()
 
-	def write(self, data):
-		raise NotImplementedError()
+    def write(self, data):
+        raise NotImplementedError()
 
-	def open(self):
-		raise NotImplementedError()
+    def open(self):
+        raise NotImplementedError()
 
-	def close(self):
-		raise NotImplementedError()
+    def close(self):
+        raise NotImplementedError()
 
 class ClosedConnection(Connection):
-	def read(self):
-		raise RuntimeError('Not open')
-	
-	def write(self, data):
-		raise RuntimeError('Not open')
-	
-	def open(self):
-		self.new_state(OpenConnection)
-	
-	def close(self):
-		raise RuntimeError('Already closed')
-	
+    def read(self):
+        raise RuntimeError('Not open')
+    
+    def write(self, data):
+        raise RuntimeError('Not open')
+    
+    def open(self):
+        self.new_state(OpenConnection)
+    
+    def close(self):
+        raise RuntimeError('Already closed')
+    
 class OpenConnection(Connection):
-	def read(self):
-		print('reading')
-	def write(self, data):
-		print('writing')
-	def open(self):
-		raise RuntimeError('Already open')
-	def close(self):
-		self.new_state(ClosedConnection)
+    def read(self):
+        print('reading')
+    def write(self, data):
+        print('writing')
+    def open(self):
+        raise RuntimeError('Already open')
+    def close(self):
+        self.new_state(ClosedConnection)
 ```  
 
 Основная фишка этой реализации в том, что она устраняет дополнительный слой «косвенности» (indirection). Вместо создания отдельных классов *Connection* и *ConnectionState* вы сливаете эти классы вместе. Когда меняется состояние, экземпляр изменяет свой тип, как показано тут:
@@ -12229,9 +12229,9 @@ class OpenConnection(Connection):
 <__main__.ClosedConnection object at 0x1006718d0>
 >>> c.read()
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "state.py", line 15, in read
-		raise RuntimeError('Not open')
+    File "<stdin>", line 1, in <module>
+    File "state.py", line 15, in read
+        raise RuntimeError('Not open')
 RuntimeError: Not open
 >>> c.open()
 >>> c
@@ -12250,53 +12250,53 @@ reading
 ```python
 # Original implementation
 class State:
-	def __init__(self):
-		self.state = 'A'
+    def __init__(self):
+        self.state = 'A'
 
-	def action(self, x):
-		if state == 'A':
-			# Action for A
-			...
-			state = 'B'
-		elif state == 'B':
-			# Action for B
-			...
-			state = 'C'
-		elif state == 'C':
-			# Action for C
-			...
-			state = 'A'
+    def action(self, x):
+        if state == 'A':
+            # Action for A
+            ...
+            state = 'B'
+        elif state == 'B':
+            # Action for B
+            ...
+            state = 'C'
+        elif state == 'C':
+            # Action for C
+            ...
+            state = 'A'
 
 # Alternative implementation
 class State:
-	def __init__(self):
-		self.new_state(State_A)
+    def __init__(self):
+        self.new_state(State_A)
 
-	def new_state(self, state):
-		self.__class__ = state
-	
-	def action(self, x):
-		raise NotImplementedError()
+    def new_state(self, state):
+        self.__class__ = state
+    
+    def action(self, x):
+        raise NotImplementedError()
 
 
 class State_A(State):
-	def action(self, x):
-		# Action for A
-		...
-		self.new_state(State_B)
+    def action(self, x):
+        # Action for A
+        ...
+        self.new_state(State_B)
 
 
 class State_B(State):
-	def action(self, x):
-		# Action for B
-		...
-		self.new_state(State_C)
+    def action(self, x):
+        # Action for B
+        ...
+        self.new_state(State_C)
 
 class State_C(State):
-	def action(self, x):
-		# Action for C
-		...
-		self.new_state(State_A)
+    def action(self, x):
+        # Action for C
+        ...
+        self.new_state(State_A)
 ```
 
 Этот рецепт основан на паттерне проектирования состояния из книги «[Приёмы объектно-ориентированного проектирования. Паттерны проектирования](https://ru.wikipedia.org/wiki/Design_Patterns)» Эриха Гаммы, Ричарда Хелма, Ральфа Джонсона и Джона Влиссидеса.
@@ -12312,18 +12312,18 @@ class State_C(State):
 import math
 
 class Point:
-	def __init__(self, x, y):
-		self.x = x
-		self.y = y
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-	def __repr__(self):
-		return 'Point({!r:},{!r:})'.format(self.x, self.y)
+    def __repr__(self):
+        return 'Point({!r:},{!r:})'.format(self.x, self.y)
 
-	def distance(self, x, y):
-		return math.hypot(self.x - x, self.y - y)
+    def distance(self, x, y):
+        return math.hypot(self.x - x, self.y - y)
 
 p = Point(2, 3)
-d = getattr(p, 'distance')(0, 0)	# Calls p.distance(0, 0)
+d = getattr(p, 'distance')(0, 0)    # Calls p.distance(0, 0)
 ```
 
 Альтернативный подход — использование *operator.methodcaller()*. Например:
@@ -12335,12 +12335,12 @@ operator.methodcaller('distance', 0, 0)(p)
 *operator.methodcaller()* может оказаться полезным, если вы хотите искать метод по имени и раз за разом предоставлять одни и те же аргументы. Например, если вам нужно отсортировать целый список точек:
 ```python
 points = [
-	Point(1, 2),
-	Point(3, 0),
-	Point(10, -3),
-	Point(-5, -7),
-	Point(-1, 8),
-	Point(3, 2)
+    Point(1, 2),
+    Point(3, 0),
+    Point(10, -3),
+    Point(-5, -7),
+    Point(-1, 8),
+    Point(3, 2)
 ]
 
 # Sort by distance from origin (0, 0)
@@ -12369,35 +12369,35 @@ operator.methodcaller() создаёт вызываемый объет, а та�
 Задача, которая решается этим рецептом, часто возникает в программах, которые строят структуры данных, состоящие из большого количества разнородных объектов. Чтобы проиллюстрировать это, предположим, что вы пытаетесь написать программу, которая представляет математические выражения. Чтобы сделать это, программа может использовать классы:
 ```python
 class Node:
-	pass
+    pass
 
 class UnaryOperator(Node):
-	def __init__(self, operand):
-		self.operand = operand
+    def __init__(self, operand):
+        self.operand = operand
 
 class BinaryOperator(Node):
-	def __init__(self, left, right):
-		self.left = left
-		self.right = right
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
 
 class Add(BinaryOperator):
-	pass
+    pass
 
 class Sub(BinaryOperator):
-	pass
+    pass
 
 class Mul(BinaryOperator):
-	pass
+    pass
 
 class Div(BinaryOperator):
-	pass
+    pass
 
 class Negate(UnaryOperator):
-	pass
+    pass
 
 class Number(Node):
-	def __init__(self, value):
-		self.value = value
+    def __init__(self, value):
+        self.value = value
 ```
 
 Эти классы могут в дальнейшем использоваться для построения вложенных структур данных:
@@ -12414,37 +12414,37 @@ t4 = Add(Number(1), t3)
 При необходимости подключить обработку общего назначения, обычное решение заключается в реализации паттерна (шаблона проектирования) «посетитель» с использованием вот такого класса:
 ```python
 class NodeVisitor:
-	def visit(self, node):
-		methname = 'visit_' + type(node).__name__
-		meth = getattr(self, methname, None)
-		if meth is None:
-			meth = self.generic_visit
-		return meth(node)
-	
-	def generic_visit(self, node):
-		raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
+    def visit(self, node):
+        methname = 'visit_' + type(node).__name__
+        meth = getattr(self, methname, None)
+        if meth is None:
+            meth = self.generic_visit
+        return meth(node)
+    
+    def generic_visit(self, node):
+        raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
 ``` 
 
 Чтобы использовать этот класс программист наследует от него и реализует различные методы формы *visit_Name()*, где вместо Name подставляется тип узла. Например, если вы хотите выполнить выражение, вы можете написать это так:
 ```python
 class Evaluator(NodeVisitor):
-	def visit_Number(self, node):
-		return node.value
+    def visit_Number(self, node):
+        return node.value
 
-	def visit_Add(self, node):
-		return self.visit(node.left) + self.visit(node.right)
+    def visit_Add(self, node):
+        return self.visit(node.left) + self.visit(node.right)
 
-	def visit_Sub(self, node):
-		return self.visit(node.left) - self.visit(node.right)
+    def visit_Sub(self, node):
+        return self.visit(node.left) - self.visit(node.right)
 
-	def visit_Mul(self, node):
-		return self.visit(node.left) * self.visit(node.right)
+    def visit_Mul(self, node):
+        return self.visit(node.left) * self.visit(node.right)
 
-	def visit_Div(self, node):
-		return self.visit(node.left) / self.visit(node.right)
+    def visit_Div(self, node):
+        return self.visit(node.left) / self.visit(node.right)
 
-	def visit_Negate(self, node):
-		return -node.operand
+    def visit_Negate(self, node):
+        return -node.operand
 ```
 
 Вот пример того, как вы можете использовать этот класс с ранее сгенерированным нами выражением:
@@ -12458,37 +12458,37 @@ class Evaluator(NodeVisitor):
 В качестве совершенно другого примера приведём класс, который транслирует выражение в операции на простой стековой машине:
 ```python
 class StackCode(NodeVisitor):
-	def generate_code(self, node):
-		self.instructions = []
-		self.visit(node)
-		return self.instructions
-	
-	def visit_Number(self, node):
-		self.instructions.append(('PUSH', node.value))
-	
-	def binop(self, node, instruction):
-		self.visit(node.left)
-		self.visit(node.right)
-		self.instructions.append((instruction,))
-	
-	def visit_Add(self, node):
-		self.binop(node, 'ADD')
-	
-	def visit_Sub(self, node):
-		self.binop(node, 'SUB')
-	
-	def visit_Mul(self, node):
-		self.binop(node, 'MUL')
-	
-	def visit_Div(self, node):
-		self.binop(node, 'DIV')
-	
-	def unaryop(self, node, instruction):
-		self.visit(node.operand)
-		self.instructions.append((instruction,))
-		
-	def visit_Negate(self, node):
-		self.unaryop(node, 'NEG')
+    def generate_code(self, node):
+        self.instructions = []
+        self.visit(node)
+        return self.instructions
+    
+    def visit_Number(self, node):
+        self.instructions.append(('PUSH', node.value))
+    
+    def binop(self, node, instruction):
+        self.visit(node.left)
+        self.visit(node.right)
+        self.instructions.append((instruction,))
+    
+    def visit_Add(self, node):
+        self.binop(node, 'ADD')
+    
+    def visit_Sub(self, node):
+        self.binop(node, 'SUB')
+    
+    def visit_Mul(self, node):
+        self.binop(node, 'MUL')
+    
+    def visit_Div(self, node):
+        self.binop(node, 'DIV')
+    
+    def unaryop(self, node, instruction):
+        self.visit(node.operand)
+        self.instructions.append((instruction,))
+        
+    def visit_Negate(self, node):
+        self.unaryop(node, 'NEG')
 ``` 
 
 Вот пример работы этого класса:
@@ -12506,15 +12506,15 @@ class StackCode(NodeVisitor):
 Вторая ключевая идея — реализация класса-посетителя как такового. В посетителе вы хотите переключаться между методами обработки в зависимости от некоторого значения, такого как тип узла. В элементарной реализации вы могли бы склониться к созданию огромного объявления *if*:
 ```python
 class NodeVisitor:
-	def visit(self, node):
-		nodetype = type(node).__name__
-		if nodetype == 'Number':
-			return self.visit_Number(node)
-		elif nodetype == 'Add':
-			return self.visit_Add(node)
-		elif nodetype == 'Sub':
-			return self.visit_Sub(node)
-		...
+    def visit(self, node):
+        nodetype = type(node).__name__
+        if nodetype == 'Number':
+            return self.visit_Number(node)
+        elif nodetype == 'Add':
+            return self.visit_Add(node)
+        elif nodetype == 'Sub':
+            return self.visit_Sub(node)
+        ...
 ```  
 
 Однако быстро станет ясно, что на самом деле вам не стоит выбирать такой подход. Помимо того, что он чрезвычайно многословен, он еще и медленно работает, а также его трудно поддерживать, если вы когда-либо захотите добавить или изменить типы обрабатываемых узлов. Вместо этого лучше исполнить маленький фокус, при котором вы формируете имя метода и получаете его с помощью функции *getattr()*. Метод *generic_visit()* в показанном решении — это запасной вариант, который будет применён, если не будет найден подходящий метод обработки. В этом рецепте он возбуждает исключение, чтобы предупредить программиста о том, что встретился неожиданный тип узла.
@@ -12522,9 +12522,9 @@ class NodeVisitor:
 В каждом классе-посетителе вычисления обычно вызываются рекурсивными вызовами метода *visit()*. Например:
 ```python
 class Evaluator(NodeVisitor):
-	...
-	def visit_Add(self, node):
-		return self.visit(node.left) + self.visit(node.right)
+    ...
+    def visit_Add(self, node):
+        return self.visit(node.left) + self.visit(node.right)
 ```
 
 Рекурсия — это то, что заставляет класс-посетитель обходить всю структуру данных целиком. Вы вызываете *visit()* до тех пор, пока не достигнете некого конечного узла, такого как *Number* в приведённом выше примере. Точный порядо рекурсии и других операций полностью зависит от приложения.
@@ -12532,16 +12532,16 @@ class Evaluator(NodeVisitor):
 Стоит отметить, что в этом конкретном приёме переключение на нужный метод — это также обычный способ эмуляции поведения условного выражения или выражения-переключателя (switch), которые можно встретить в других языках. Например, если вы пишете HTTP-фреймворк, то у вас могут получиться классы, которые выполняют похожее переключение (dispatch):
 ```python
 class HTTPHandler:
-	def handle(self, request):
-		methname = 'do_' + request.request_method
-		getattr(self, methname)(request)
-	
-	def do_GET(self, request):
-		...
-	def do_POST(self, request):
-		...
-	def do_HEAD(self, request):
-		...
+    def handle(self, request):
+        methname = 'do_' + request.request_method
+        getattr(self, methname)(request)
+    
+    def do_GET(self, request):
+        ...
+    def do_POST(self, request):
+        ...
+    def do_HEAD(self, request):
+        ...
 ```  
 
 Слабая сторона шаблона «посетитель» — это привязка к рекурсии. Если вы попытаетесь применить его к глубоко вложенной структуре, есть возможность достигнуть лимита Python на рекурсию (см. *sys.getrecursionlimit()*). Чтобы обойти эту проблему, вы можете делать определённые выборы в ваших структурах данных. Например, вы можете использовать обычные списки Python вместо связанных списков, или попытаться агрегировать больше данных в каждый узел, чтобы сделать структуру менее глубоко вложенной.
@@ -12560,115 +12560,115 @@ class HTTPHandler:
 import types
 
 class Node:
-	pass
+    pass
 
 import types 
 # Вероятно, в книге ошибка — непонятно, зачем повторно импортировать модуль 
 class NodeVisitor:
-	def visit(self, node):
-		stack = [ node ]
-		last_result = None
-		while stack:
-			try:
-				last = stack[-1]
-				if isinstance(last, types.GeneratorType):
-					stack.append(last.send(last_result))
-					last_result = None
-				elif isinstance(last, Node):
-					stack.append(self._visit(stack.pop()))
-				else:
-					last_result = stack.pop()
-			except StopIteration:
-				stack.pop()
-		return last_result
-	
-	def _visit(self, node):
-		methname = 'visit_' + type(node).__name__
-		meth = getattr(self, methname, None)
-		if meth is None:
-			meth = self.generic_visit
-		return meth(node)
-	
-	def generic_visit(self, node):
-		raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
+    def visit(self, node):
+        stack = [ node ]
+        last_result = None
+        while stack:
+            try:
+                last = stack[-1]
+                if isinstance(last, types.GeneratorType):
+                    stack.append(last.send(last_result))
+                    last_result = None
+                elif isinstance(last, Node):
+                    stack.append(self._visit(stack.pop()))
+                else:
+                    last_result = stack.pop()
+            except StopIteration:
+                stack.pop()
+        return last_result
+    
+    def _visit(self, node):
+        methname = 'visit_' + type(node).__name__
+        meth = getattr(self, methname, None)
+        if meth is None:
+            meth = self.generic_visit
+        return meth(node)
+    
+    def generic_visit(self, node):
+        raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
 ``` 
 
 Если вы попробуете поработать с этим классом, то обнаружите, что он по-прежнему работает с существующим кодом, который мог использовать рекурсию. На самом деле вы можете использовать его в качестве прямой замены реализации класса-посетителя в предыдущем рецепте. Рассмотрим, например, такой код с деревьями выражений:
 ```python
 class UnaryOperator(Node):
-	def __init__(self, operand):
-		self.operand = operand
+    def __init__(self, operand):
+        self.operand = operand
 
 class BinaryOperator(Node):
-	def __init__(self, left, right):
-		self.left = left
-		self.right = right
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
 
 class Add(BinaryOperator):
-	pass
+    pass
 
 class Sub(BinaryOperator):
-	pass
+    pass
 
 class Mul(BinaryOperator):
-	pass
+    pass
 
 class Div(BinaryOperator):
-	pass
+    pass
 
 class Negate(UnaryOperator):
-	pass
+    pass
 
 class Number(Node):
-	def __init__(self, value):
-		self.value = value
+    def __init__(self, value):
+        self.value = value
 
 # A sample visitor class that evaluates expressions
 class Evaluator(NodeVisitor):
-	def visit_Number(self, node):
-		return node.value
+    def visit_Number(self, node):
+        return node.value
 
-	def visit_Add(self, node):
-		return self.visit(node.left) + self.visit(node.right)
+    def visit_Add(self, node):
+        return self.visit(node.left) + self.visit(node.right)
 
-	def visit_Sub(self, node):
-		return self.visit(node.left) - self.visit(node.right)
+    def visit_Sub(self, node):
+        return self.visit(node.left) - self.visit(node.right)
 
-	def visit_Mul(self, node):
-		return self.visit(node.left) * self.visit(node.right)
+    def visit_Mul(self, node):
+        return self.visit(node.left) * self.visit(node.right)
 
-	def visit_Div(self, node):
-		return self.visit(node.left) / self.visit(node.right)
+    def visit_Div(self, node):
+        return self.visit(node.left) / self.visit(node.right)
 
-	def visit_Negate(self, node):
-		return -self.visit(node.operand)
+    def visit_Negate(self, node):
+        return -self.visit(node.operand)
 
 if __name__ == '__main__':
-	# 1 + 2*(3-4) / 5
-	t1 = Sub(Number(3), Number(4))
-	t2 = Mul(Number(2), t1)
-	t3 = Div(t2, Number(5))
-	t4 = Add(Number(1), t3)
+    # 1 + 2*(3-4) / 5
+    t1 = Sub(Number(3), Number(4))
+    t2 = Mul(Number(2), t1)
+    t3 = Div(t2, Number(5))
+    t4 = Add(Number(1), t3)
 
-	# Evaluate it
-	e = Evaluator()
-	print(e.visit(t4))	# Outputs 0.6
+    # Evaluate it
+    e = Evaluator()
+    print(e.visit(t4))  # Outputs 0.6
 ``` 
 
 Приведённый код работает для простых выражений. Однако реализация класса *Evaluator* использует рекурсию и может поломаться, если данные будут слишком сильно вложенными. Например:
 ```python
 >>> a = Number(0)
 >>> for n in range(1, 100000):
-...		a = Add(a, Number(n))
+...     a = Add(a, Number(n))
 ...
 >>> e = Evaluator()
 >>> e.visit(a)
 Traceback (most recent call last):
 ...
-	File "visitor.py", line 29, in _visit
-		return meth(node)
-	File "visitor.py", line 67, in visit_Add
-		return self.visit(node.left) + self.visit(node.right)
+    File "visitor.py", line 29, in _visit
+        return meth(node)
+    File "visitor.py", line 67, in visit_Add
+        return self.visit(node.left) + self.visit(node.right)
 RuntimeError: maximum recursion depth exceeded
 >>>
 ```
@@ -12676,30 +12676,30 @@ RuntimeError: maximum recursion depth exceeded
 Давайте немного изменим класс *Evaluator*:
 ```python
 class Evaluator(NodeVisitor):
-	def visit_Number(self, node):
-		return node.value
+    def visit_Number(self, node):
+        return node.value
 
-	def visit_Add(self, node):
-		yield (yield node.left) + (yield node.right)
+    def visit_Add(self, node):
+        yield (yield node.left) + (yield node.right)
 
-	def visit_Sub(self, node):
-		yield (yield node.left) - (yield node.right)
+    def visit_Sub(self, node):
+        yield (yield node.left) - (yield node.right)
 
-	def visit_Mul(self, node):
-		yield (yield node.left) * (yield node.right)
+    def visit_Mul(self, node):
+        yield (yield node.left) * (yield node.right)
 
-	def visit_Div(self, node):
-		yield (yield node.left) / (yield node.right)
+    def visit_Div(self, node):
+        yield (yield node.left) / (yield node.right)
 
-	def visit_Negate(self, node):
-		yield - (yield node.operand)
+    def visit_Negate(self, node):
+        yield - (yield node.operand)
 ```
 
 Если вы попробуете новую реализацию на таком же эксперименте с рекурсией, то обнаружите, что всё работает. Это магия!
 ```python
 >>> a = Number(0)
 >>> for n in range(1,100000):
-...		a = Add(a, Number(n))
+...     a = Add(a, Number(n))
 ...
 >>> e = Evaluator()
 >>> e.visit(a)
@@ -12710,15 +12710,15 @@ class Evaluator(NodeVisitor):
 Если вы захотите добавить собственную обработку в любой из методов, то и это у вас получится. Например:
 ```python
 class Evaluator(NodeVisitor):
-	...
-	def visit_Add(self, node):
-		print('Add:', node)
-		lhs = yield node.left
-		print('left=', lhs)
-		rhs = yield node.right
-		print('right=', rhs)
-		yield lhs + rhs
-	...
+    ...
+    def visit_Add(self, node):
+        print('Add:', node)
+        lhs = yield node.left
+        print('left=', lhs)
+        rhs = yield node.right
+        print('right=', rhs)
+        yield lhs + rhs
+    ...
 ```
 
 Вот пример результата применения:
@@ -12758,16 +12758,16 @@ value = yield node.left
 Все эти аспекты рецепта можно найти в этом фрагменте кода:
 ```python
 try:
-	last = stack[-1]
-	if isinstance(last, types.GeneratorType):
-		stack.append(last.send(last_result))
-		last_result = None
-	elif isinstance(last, Node):
-		stack.append(self._visit(stack.pop()))
-	else:
-		last_result = stack.pop()
+    last = stack[-1]
+    if isinstance(last, types.GeneratorType):
+        stack.append(last.send(last_result))
+        last_result = None
+    elif isinstance(last, Node):
+        stack.append(self._visit(stack.pop()))
+    else:
+        last_result = stack.pop()
 except StopIteration:
-	stack.pop()
+    stack.pop()
 ```
 
 Код просто смотрит на вершину стека и решает, что делать дальше. Если это генератор, тогда вызывается метод *send()* с последним результатом (если он имеется), и результат добавляется на стек для дальнейшей обработки. Значение, которое возвращает *send()*, это то же самое значение, которое было передано в инструкцию *yield*. Поэтому в такой инструкции как *yield node.left* экземпляр класса *Node* *node.left* возвращается *send()* и помещается на вершину стека.
@@ -12779,48 +12779,48 @@ except StopIteration:
 Потенциальная проблема этого рецепта касается различия между выдачей значений-экземпляров *Node* и значений, не являющихся экземпляром *Node*. В этой реализации все экземпляры *Node* обходятся автоматически. Это означает, что вы не можете использовать *Node* как возвращаемое значение, которое будет распространяться дальше. На практике это может и не быть важным. Однако если это всё же важно, вам может потребоваться немного адаптировать алгоритм. Например, можно добавить еще один класс:
 ```python
 class Visit:
-	def __init__(self, node):
-		self.node = node
+    def __init__(self, node):
+        self.node = node
 
 class NodeVisitor:
-	def visit(self, node):
-		stack = [ Visit(node) ]
-		last_result = None
-		while stack:
-			try:
-				last = stack[-1]
-				if isinstance(last, types.GeneratorType):
-					stack.append(last.send(last_result))
-					last_result = None
-				elif isinstance(last, Visit):
-					stack.append(self._visit(stack.pop().node))
-				else:
-					last_result = stack.pop()
-			except StopIteration:
-				stack.pop()
-	return last_result
+    def visit(self, node):
+        stack = [ Visit(node) ]
+        last_result = None
+        while stack:
+            try:
+                last = stack[-1]
+                if isinstance(last, types.GeneratorType):
+                    stack.append(last.send(last_result))
+                    last_result = None
+                elif isinstance(last, Visit):
+                    stack.append(self._visit(stack.pop().node))
+                else:
+                    last_result = stack.pop()
+            except StopIteration:
+                stack.pop()
+    return last_result
 
-	def _visit(self, node):
-		methname = 'visit_' + type(node).__name__
-		meth = getattr(self, methname, None)
-		if meth is None:
-			meth = self.generic_visit
-		return meth(node)
+    def _visit(self, node):
+        methname = 'visit_' + type(node).__name__
+        meth = getattr(self, methname, None)
+        if meth is None:
+            meth = self.generic_visit
+        return meth(node)
 
 def generic_visit(self, node):
-	raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
+    raise RuntimeError('No {} method'.format('visit_' + type(node).__name__))
 ```
 
 При такой реализации различные методы-посетители будут выглядеть вот так:
 ```python
 class Evaluator(NodeVisitor):
-	...
-	def visit_Add(self, node):
-		yield (yield Visit(node.left)) + (yield Visit(node.right))
-	
-	def visit_Sub(self, node):
-		yield (yield Visit(node.left)) - (yield Visit(node.right))
-	...
+    ...
+    def visit_Add(self, node):
+        yield (yield Visit(node.left)) + (yield Visit(node.right))
+    
+    def visit_Sub(self, node):
+        yield (yield Visit(node.left)) - (yield Visit(node.right))
+    ...
 ```
 
 Посмотрев на этот рецепт, вы можете задуматься о том, чтобы поискать решение, не использующее *yield*. Однако это может привести к тому, что у вас получится код, которому придётся разбираться с теми же проблемами, которые мы обсудили здесь. Например, чтобы устранить рекурсию, вам потребуется поддерживать стек. Вы также должны будете реализовать некую схему для управления обходом и вызова различной логики, связанной с посещениями. Без генераторов все это закончится очень сложными манипуляциями со стеком, функциями обратного вызова (коллбэками) и прочими костылями. Собственно, главное преимущество использование *yield* как раз и заключается в том, что вы можете написать код без рекурсии в элегантном стиле, практически идентичном рекурсивной реализации.
@@ -12835,26 +12835,26 @@ class Evaluator(NodeVisitor):
 import weakref
 
 class Node:
-	def __init__(self, value):
-		self.value = value
-		self._parent = None
-		self.children = []
-	
-	def __repr__(self):
-		return 'Node({!r:})'.format(self.value)
-	
-	# property that manages the parent as a weak-reference
-	@property
-	def parent(self):
-		return self._parent if self._parent is None else self._parent()
-	
-	@parent.setter
-	def parent(self, node):
-		self._parent = weakref.ref(node)
-	
-	def add_child(self, child):
-		self.children.append(child)
-		child.parent = self
+    def __init__(self, value):
+        self.value = value
+        self._parent = None
+        self.children = []
+    
+    def __repr__(self):
+        return 'Node({!r:})'.format(self.value)
+    
+    # property that manages the parent as a weak-reference
+    @property
+    def parent(self):
+        return self._parent if self._parent is None else self._parent()
+    
+    @parent.setter
+    def parent(self, node):
+        self._parent = weakref.ref(node)
+    
+    def add_child(self, child):
+        self.children.append(child)
+        child.parent = self
 ```
 
 Эта реализация позволяет удалить родителя без лишнего шума. Например:
@@ -12875,32 +12875,32 @@ None
 ```python
 # Class just to illustrate when deletion occurs
 class Data:
-	def __del__(self):
-		print('Data.__del__')
+    def __del__(self):
+        print('Data.__del__')
 
 # Node class involving a cycle
 class Node:
-	def __init__(self):
-		self.data = Data()
-		self.parent = None
-		self.children = []
-	
-	def add_child(self, child):
-		self.children.append(child)
-		child.parent = self
+    def __init__(self):
+        self.data = Data()
+        self.parent = None
+        self.children = []
+    
+    def add_child(self, child):
+        self.children.append(child)
+        child.parent = self
 ```
 
 Теперь поэкспериментируем с этим кодом, чтобы обнаружить некоторые тонкости работы сборки мусора:
 ```python
 >>> a = Data()
->>> del a 		# Immediately deleted
+>>> del a       # Immediately deleted
 Data.__del__
 >>> a = Node()
->>> del a 		# Immediately deleted
+>>> del a       # Immediately deleted
 Data.__del__
 >>> a = Node()
 >>> a.add_child(Node())
->>> del a 		# Not deleted (no message)
+>>> del a       # Not deleted (no message)
 >>>
 ```
 
@@ -12909,7 +12909,7 @@ Data.__del__
 Чтобы разобраться с циклами, периодически запускается отдельный сборщик мусора. Однако в качестве общего правила стоит учитывать, что вы не знаете, когда именно он запустится. Следовательно, вы не знаете, когда циклические структуры данных будут удалены. При необходимости вы можете принудительно запустить сборку мусора, но это не лучший выход:
 ```python
 >>> import gc
->>> gc.collect() 	# Force collection
+>>> gc.collect()    # Force collection
 Data.__del__
 Data.__del__
 >>>
@@ -12918,35 +12918,35 @@ Data.__del__
 ```python
 # Class just to illustrate when deletion occurs
 class Data:
-	def __del__(self):
-		print('Data.__del__')
+    def __del__(self):
+        print('Data.__del__')
 
 # Node class involving a cycle
 class Node:
-	def __init__(self):
-		self.data = Data()
-		self.parent = None
-		self.children = []
+    def __init__(self):
+        self.data = Data()
+        self.parent = None
+        self.children = []
 
-	# NEVER DEFINE LIKE THIS.
-	# Only here to illustrate pathological behavior
-	def __del__(self):
-		del self.data
-		del.parent
-		del.children
-	
-	def add_child(self, child):
-		self.children.append(child)
-		child.parent = self
+    # NEVER DEFINE LIKE THIS.
+    # Only here to illustrate pathological behavior
+    def __del__(self):
+        del self.data
+        del.parent
+        del.children
+    
+    def add_child(self, child):
+        self.children.append(child)
+        child.parent = self
 ```
 
 В этом случае структура данных никогда не будет удалена сборщиком мусора, и ваша программа вызовет утечку памяти! Если вы попробуете применять этот код, то увидите, что сообщение *Data.__del__* никогда не появляется — даже при принудительном запуске сборки мусора:
 ```python
 >>> a = Node()
 >>> a.add_child(Node()
->>> del a  				# No message (not collected)
+>>> del a               # No message (not collected)
 >>> import gc
->>> gc.collect() 		# No message (not collected)
+>>> gc.collect()        # No message (not collected)
 ```
 
 Слабые ссылки решают эту проблему путем устранения ссылочных циклов. Слабая ссылка — это указатель на объект, который не увеличивает его счётчик ссылок. Создавать слабые ссылки можно с помощью библиотеки *weakref*:
@@ -12986,36 +12986,36 @@ None
 from functools import total_ordering
 
 class Room:
-	def __init__(self, name, length, width):
-		self.name = name
-		self.length = length
-		self.width = width
-		self.square_feet = self.length * self.width
+    def __init__(self, name, length, width):
+        self.name = name
+        self.length = length
+        self.width = width
+        self.square_feet = self.length * self.width
 
 @total_ordering
 class House:
-	def __init__(self, name, style):
-		self.name = name
-		self.style = style
-		self.rooms = list()
-	
-	@property
-	def living_space_footage(self):
-		return sum(r.square_feet for r in self.rooms)
-	
-	def add_room(self, room):
-		self.rooms.append(room)
-	
-	def __str__(self):
-		return '{}: {} square foot {}'.format(self.name,
-											  self.living_space_footage,
-											  self.style)
-	
-	def __eq__(self, other):
-		return self.living_space_footage == other.living_space_footage
-	
-	def __lt__(self, other):
-		return self.living_space_footage < other.living_space_footage
+    def __init__(self, name, style):
+        self.name = name
+        self.style = style
+        self.rooms = list()
+    
+    @property
+    def living_space_footage(self):
+        return sum(r.square_feet for r in self.rooms)
+    
+    def add_room(self, room):
+        self.rooms.append(room)
+    
+    def __str__(self):
+        return '{}: {} square foot {}'.format(self.name,
+                                              self.living_space_footage,
+                                              self.style)
+    
+    def __eq__(self, other):
+        return self.living_space_footage == other.living_space_footage
+    
+    def __lt__(self, other):
+        return self.living_space_footage < other.living_space_footage
 ```
 
 Здесь класс *House* был декорирован с помощью *@total_ordering*. Определения *__eq__()* и *__lt__()* предоставлены для сравнения домов на основе общего метража их комнат. Это минимальное определение — всё, что требуется, чтобы заставить работать другие операции сравнения. Например:
@@ -13051,16 +13051,16 @@ print('Which is smallest?', min(houses)) # Prints 'h2: 846-square-foot Ranch'
 Если вы написали код, который заставляет класс поддерживать все основные операторы сравнения, тогда *total_ordering*, вероятно, уже не кажется вам такой уж магией: он буквально определяет отображение каждого метода поддержки сравнений на все другие, которые потребуются. Так что если вы определили *__lt__()* в вашем классе, как показано в решении, этот метод используется для построения всех других операторов сравнения. Он просто заполняет класс методами:
 ```python
 class House:
-	def __eq__(self, other):
-	...
-	def __lt__(self, other):
-	...
+    def __eq__(self, other):
+    ...
+    def __lt__(self, other):
+    ...
 
-	# Methods created by @total_ordering
-	__le__ = lambda self, other: self < other or self == other
-	__gt__ = lambda self, other: not (self < other or self == other)
-	__ge__ = lambda self, other: not (self < other)
-	__ne__ = lambda self, other: not self == other
+    # Methods created by @total_ordering
+    __le__ = lambda self, other: self < other or self == other
+    __gt__ = lambda self, other: not (self < other or self == other)
+    __ge__ = lambda self, other: not (self < other)
+    __ne__ = lambda self, other: not self == other
 ```
 
 Несложно, конечно, написать такие методы вручную, но *@total_ordering* убирает «угадайку».
@@ -13087,20 +13087,20 @@ True
 ```python
 # The class in question
 class Spam:
-	def __init__(self, name):
-		self.name = name
+    def __init__(self, name):
+        self.name = name
 
 # Caching support
 import weakref
 _spam_cache = weakref.WeakValueDictionary()
 
 def get_spam(name):
-	if name not in _spam_cache:
-		s = Spam(name)
-		_spam_cache[name] = s
-	else:
-		s = _spam_cache[name]
-	return s
+    if name not in _spam_cache:
+        s = Spam(name)
+        _spam_cache[name] = s
+    else:
+        s = _spam_cache[name]
+    return s
 ```
 
 Если вы используете эту реализацию, то обнаружите, что она ведет себя так же, как было показано ранее:
@@ -13123,18 +13123,18 @@ True
 # Note: This code doesn't quite work
 import weakref
 class Spam:
-	_spam_cache = weakref.WeakValueDictionary()
-	def __new__(cls, name):
-		if name in cls._spam_cache:
-			return cls._spam_cache[name]
-		else:
-			self = super().__new__(cls)
-			cls._spam_cache[name] = self
-			return self
-	
-	def __init__(self, name):
-		print('Initializing Spam')
-		self.name = name
+    _spam_cache = weakref.WeakValueDictionary()
+    def __new__(cls, name):
+        if name in cls._spam_cache:
+            return cls._spam_cache[name]
+        else:
+            self = super().__new__(cls)
+            cls._spam_cache[name] = self
+            return self
+    
+    def __init__(self, name):
+        print('Initializing Spam')
+        self.name = name
 ```
 
 На первый взгляд кажется, что этот код может заработать. Однако есть большая проблема: метод *__init__()* вызывается всегда — без оглядки на то, кэширован ли экземпляр. Например:
@@ -13146,7 +13146,7 @@ Initializing Spam
 >>> s is t
 True
 >>>
-```	
+``` 
 
 Такое поведение, вероятно, будет нежелательным. Чтобы решить задачу кэширования без переинициализации, вам нужно попробовать немного другой подход.
 
@@ -13174,26 +13174,26 @@ True
 import weakref
 
 class CachedSpamManager:
-	def __init__(self):
-		self._cache = weakref.WeakValueDictionary()
-	def get_spam(self, name):
-		if name not in self._cache:
-			s = Spam(name)
-			self._cache[name] = s
-		else:
-			s = self._cache[name]
-		return s
+    def __init__(self):
+        self._cache = weakref.WeakValueDictionary()
+    def get_spam(self, name):
+        if name not in self._cache:
+            s = Spam(name)
+            self._cache[name] = s
+        else:
+            s = self._cache[name]
+        return s
 
-	def clear(self):
-		self._cache.clear()
+    def clear(self):
+        self._cache.clear()
 
 class Spam:
-	manager = CachedSpamManager()
-	def __init__(self, name):
-		self.name = name
+    manager = CachedSpamManager()
+    def __init__(self, name):
+        self.name = name
 
-	def get_spam(name):
-		return Spam.manager.get_spam(name)
+    def get_spam(name):
+        return Spam.manager.get_spam(name)
 ```   
 
 Преимущество такого подхода в потенциальной гибкости. Например, могут быть реализованы различные схемы управления (как отдельные классы) и прикреплены к классу *Spam* как замена реализации кэширования по умолчанию. Никакой другой код (например, *get_spam*) не нужно будет менять, чтобы всё продолжило работать.
@@ -13212,14 +13212,14 @@ False
 В качестве альтернативы вы можете дать пользователям ещё более сильный намёк о том, что они не должны создавать экземпляры *Spam*: вы можете заставить метод *__init__()* возбуждать исключение и использовать метод класса в качестве альтернативного конструктора:
 ```python
 class Spam:
-	def __init__(self, *args, **kwargs):
-		raise RuntimeError("Can't instantiate directly")
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError("Can't instantiate directly")
 
 # Alternate constructor
-	@classmethod
-	def _new(cls, name):
-		self = cls.__new__(cls)
-		self.name = name
+    @classmethod
+    def _new(cls, name):
+        self = cls.__new__(cls)
+        self.name = name
 ```
 
 Далее вы меняете кэширующий код, чтобы использовать *Spam._new()* для создания экземпляров вместо обычного вызова *Spam()*. Например:
@@ -13227,15 +13227,15 @@ class Spam:
 import weakref
 
 class CachedSpamManager:
-	def __init__(self):
-		self._cache = weakref.WeakValueDictionary()
-	def get_spam(self, name):
-		if name not in self._cache:
-			s = Spam._new(name)			# Modified creation
-			self._cache[name] = s
-		else:
-			s = self._cache[name]
-		return s
+    def __init__(self):
+        self._cache = weakref.WeakValueDictionary()
+    def get_spam(self, name):
+        if name not in self._cache:
+            s = Spam._new(name)         # Modified creation
+            self._cache[name] = s
+        else:
+            s = self._cache[name]
+        return s
 ``` 
 
 Хотя есть и более экстремальные меры, которые можно предпринять для скрытия класса *Spam*, но, вероятно, лучше не зацикливаться на этой проблеме. Использования нижнего подчёркивания в имени или определения конструктора как метода класса обычно достаточно, чтобы программисты поняли намёк.
@@ -13256,28 +13256,28 @@ import time
 from functools import wraps
 
 def timethis(func):
-	'''
-	Decorator that reports the execution time.
-	'''
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		start = time.time()
-		result = func(*args, **kwargs)
-		end = time.time()
-		print(func.__name__, end-start)
-		return result
-	return wrapper
+    '''
+    Decorator that reports the execution time.
+    '''
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(func.__name__, end-start)
+        return result
+    return wrapper
 ```
 
 Вот пример использования декоратора:
 ```python
 >>> @timethis
 ... def countdown(n):
-...		'''
-...		Counts down
-...		'''
-...		while n > 0:
-...		n -= 1
+...     '''
+...     Counts down
+...     '''
+...     while n > 0:
+...     n -= 1
 ...
 >>> countdown(100000)
 countdown 0.008917808532714844
@@ -13291,27 +13291,27 @@ countdown 0.87188299392912
 ```python
 @timethis
 def countdown(n):
-	...
+    ...
 ```
 ...это равноценно такой последовательности шагов:
 ```python
 def countdown(n):
-	..
+    ..
 countdown = timethis(countdown)
 ```
 
 Встроенные декораторы *@staticmethod*, *@classmethod* и *@property* работают так же. Например, два этих фрагмента эквивалентны:
 ```python
 class A:
-	@classmethod
-	def method(cls):
-		pass
+    @classmethod
+    def method(cls):
+        pass
 
 class B:
-	# Equivalent definition of a class method
-	def method(cls):
-		pass
-	method = classmethod(method)
+    # Equivalent definition of a class method
+    def method(cls):
+        pass
+    method = classmethod(method)
 ```
 
 Код внутри декоратора обычно создаёт новую функцию, которая принимает любые аргументы через \*args и \*\*kwargs, как в функции *wrapper()* в этом рецепте. Внутри этой функции вы помещаете вызов изначальной входящей функции и возвращаете её результат. Однако вы также размещаете дополнительный код по желанию (например, профилирующий). Созданная функция *wrapper* возвращается как результат и занимает место оригинальной функции.
@@ -13331,28 +13331,28 @@ import time
 from functools import wraps
 
 def timethis(func):
-	'''
-	Decorator that reports the execution time.
-	'''
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		start = time.time()
-		result = func(*args, **kwargs)
-		end = time.time()
-		print(func.__name__, end-start)
-		return result
-	return wrapper
+    '''
+    Decorator that reports the execution time.
+    '''
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(func.__name__, end-start)
+        return result
+    return wrapper
 ```
 
 Вот пример использования декоратора и исследования метаданных функции:
 ```python
 >>> @timethis
 ... def countdown(n:int):
-... 	'''
-...		Counts down
-...		'''
-...		while n > 0:
-...			n -= 1
+...     '''
+...     Counts down
+...     '''
+...     while n > 0:
+...         n -= 1
 ...
 >>> countdown(100000)
 countdown 0.008917808532714844
@@ -13401,7 +13401,7 @@ countdown 0.008917808532714844
 ```python
 >>> @somedecorator
 >>> def add(x, y):
-... 	return x + y
+...     return x + y
 ...
 >>> orig_add = add.__wrapped__
 >>> orig_add(3, 4)
@@ -13415,23 +13415,23 @@ countdown 0.008917808532714844
 Если к функции было применено несколько декораторов, поведение при доступе к *__wrapped__* в настоящее время не определено, и таких обращений нужно избегать. В Python 3.3. обращение проходит сквозь все слои. Предположим, например, что у вас есть вот такой код:
 ```python
 def decorator1(func):
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		print('Decorator 1')
-		return func(*args, **kwargs)
-	return wrapper
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print('Decorator 1')
+        return func(*args, **kwargs)
+    return wrapper
 
 def decorator2(func):
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		print('Decorator 2')
-		return func(*args, **kwargs)
-	return wrapper
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print('Decorator 2')
+        return func(*args, **kwargs)
+    return wrapper
 
 @decorator1
 @decorator2
 def add(x, y):
-	return x + y
+    return x + y
 ```
 
 Вот что произойдёт, если вы вызовете декорированную функцию и изначальную функцию через *__wrapped__*:
@@ -13461,32 +13461,32 @@ from functools import wraps
 import logging
 
 def logged(level, name=None, message=None):
-	'''
-	Add logging to a function. level is the logging
-	level, name is the logger name, and message is the
-	log message. If name and message aren't specified,
-	they default to the function's module and name.
-	'''
-	def decorate(func):
-		logname = name if name else func.__module__
-		log = logging.getLogger(logname)
-		logmsg = message if message else func.__name__
-	
-		@wraps(func)
-		def wrapper(*args, **kwargs):
-			log.log(level, logmsg)
-			return func(*args, **kwargs)
-		return wrapper
-	return decorate
+    '''
+    Add logging to a function. level is the logging
+    level, name is the logger name, and message is the
+    log message. If name and message aren't specified,
+    they default to the function's module and name.
+    '''
+    def decorate(func):
+        logname = name if name else func.__module__
+        log = logging.getLogger(logname)
+        logmsg = message if message else func.__name__
+    
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            log.log(level, logmsg)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorate
 
 # Example use
 @logged(logging.DEBUG)
 def add(x, y):
-	return x + y
+    return x + y
 
 @logged(logging.CRITICAL, 'example')
-	def spam():
-		print('Spam!')
+    def spam():
+        print('Spam!')
 ```  
 
 На первый взгляд реализация выглядит нетривиальной, но идея относительно проста. Самая внешняя функция *logged()* принимает желаемые аргументы и просто делает их доступными внутренним функциям декоратора. Внутренняя функция *decorate()* принимает функцию и помещает ее в обёртку обычным образом. Ключевой момент в том, что обёртка может использовать аргументы, переданные в *logged()*.
@@ -13496,13 +13496,13 @@ def add(x, y):
 ```python
 @decorator(x, y, z)
 def func(a, b):
-	pass
+    pass
 ```
 
 ...то процесс декорирования будет идти так:
 ```python
 def func(a, b):
-	pass
+    pass
 
 func = decorator(x, y, z)(func)
 ```
@@ -13521,50 +13521,50 @@ import logging
 
 # Utility decorator to attach a function as an attribute of obj
 def attach_wrapper(obj, func=None):
-	if func is None:
-		return partial(attach_wrapper, obj)
-	setattr(obj, func.__name__, func)
-	return func
+    if func is None:
+        return partial(attach_wrapper, obj)
+    setattr(obj, func.__name__, func)
+    return func
 
 def logged(level, name=None, message=None):
-	'''
-	Add logging to a function. level is the logging
-	level, name is the logger name, and message is the
-	log message. If name and message aren't specified,
-	they default to the function's module and name.
-	'''
-	def decorate(func):
-		logname = name if name else func.__module__
-		log = logging.getLogger(logname)
-		logmsg = message if message else func.__name__
-	
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		log.log(level, logmsg)
-		return func(*args, **kwargs)
-		
-	# Attach setter functions
-	@attach_wrapper(wrapper)
-	def set_level(newlevel):
-		nonlocal level
-		level = newlevel
-	
-	@attach_wrapper(wrapper)
-	def set_message(newmsg):
-		nonlocal logmsg
-		logmsg = newmsg
-	
-	return wrapper
+    '''
+    Add logging to a function. level is the logging
+    level, name is the logger name, and message is the
+    log message. If name and message aren't specified,
+    they default to the function's module and name.
+    '''
+    def decorate(func):
+        logname = name if name else func.__module__
+        log = logging.getLogger(logname)
+        logmsg = message if message else func.__name__
+    
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        log.log(level, logmsg)
+        return func(*args, **kwargs)
+        
+    # Attach setter functions
+    @attach_wrapper(wrapper)
+    def set_level(newlevel):
+        nonlocal level
+        level = newlevel
+    
+    @attach_wrapper(wrapper)
+    def set_message(newmsg):
+        nonlocal logmsg
+        logmsg = newmsg
+    
+    return wrapper
 return decorate
 
 # Example use
 @logged(logging.DEBUG)
 def add(x, y):
-	return x + y
+    return x + y
 
 @logged(logging.CRITICAL, 'example')
 def spam():
-	print('Spam!')
+    print('Spam!')
 ```
 
 Вот интерактивный сеанс, который демонстрирует изменения различных атрибутов после определения:
@@ -13597,8 +13597,8 @@ WARNING:__main__:Add called
 @timethis
 @logged(logging.DEBUG)
 def countdown(n):
-	while n > 0:
-		n -= 1
+    while n > 0:
+        n -= 1
 ``` 
 
 Вы обнаружите, что методы доступа всё еще работают:
@@ -13619,8 +13619,8 @@ countdown 0.8225970268249512
 @logged(logging.DEBUG)
 @timethis
 def countdown(n):
-	while n > 0:
-		n -= 1
+    while n > 0:
+        n -= 1
 ```
 
 Хотя это не показано, функции доступа, возвращающие различные настройки, могут быть легко определены путём добавления вот такого кода:
@@ -13628,7 +13628,7 @@ def countdown(n):
 ...
 @attach_wrapper(wrapper)
 def get_level():
-	return level
+    return level
 
 # Alternative
 wrapper.get_level = lambda: level
@@ -13640,8 +13640,8 @@ wrapper.get_level = lambda: level
 ...
 @wraps(func)
 def wrapper(*args, **kwargs):
-	wrapper.log.log(wrapper.level, wrapper.logmsg)
-	return func(*args, **kwargs)
+    wrapper.log.log(wrapper.level, wrapper.logmsg)
+    return func(*args, **kwargs)
 
 # Attach adjustable attributes
 wrapper.level = level
@@ -13666,29 +13666,29 @@ from functools import wraps, partial
 import logging
 
 def logged(func=None, *, level=logging.DEBUG, name=None, message=None):
-	if func is None:
-		return partial(logged, level=level, name=name, message=message)
-	
-	logname = name if name else func.__module__
-	log = logging.getLogger(logname)
-	logmsg = message if message else func.__name__
-	
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		log.log(level, logmsg)
-		return func(*args, **kwargs)
-	return wrapper
+    if func is None:
+        return partial(logged, level=level, name=name, message=message)
+    
+    logname = name if name else func.__module__
+    log = logging.getLogger(logname)
+    logmsg = message if message else func.__name__
+    
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        log.log(level, logmsg)
+        return func(*args, **kwargs)
+    return wrapper
 
 # Example use
 @logged
 def add(x, y):
-	return x + y
+    return x + y
 
 @logged(level=logging.CRITICAL, name='example')
 def spam():
-	print('Spam!')
+    print('Spam!')
 ```
-	
+    
 Как вы можете видеть в этом примере, декоратор может быть использован как в простой форме (*@logged*), так и с необязательными аргументами (*@logged(level=logging.CRITICAL, name='example')*).
 
 ### Обсуждение
@@ -13696,7 +13696,7 @@ def spam():
 ```python
 @logged()
 def add(x, y):
-	return x+y
+    return x+y
 ```
 
 Однако это не особенно распространено, и может привести к ошибкам, если программисты будут забывать добавлять дополнительные скобки. Рецепт просто заставляет декоратор одинаково работать и с дополнительными скобками, и без.
@@ -13706,13 +13706,13 @@ def add(x, y):
 # Example use
 @logged
 def add(x, y):
-	return x + y
+    return x + y
 ``` 
 
 ...последовательность вызова будет такой:
 ```python
 def add(x, y):
-	return x + y
+    return x + y
 add = logged(add)
 ```
 
@@ -13722,13 +13722,13 @@ add = logged(add)
 ```python
 @logged(level=logging.CRITICAL, name='example')
 def spam():
-	print('Spam!')
+    print('Spam!')
 ```
 
 ...последовательность вызова будет такой:
 ```python
 def spam():
-	print('Spam!')
+    print('Spam!')
 spam = logged(level=logging.CRITICAL, name='example')(spam)
 ```
 
@@ -13744,15 +13744,15 @@ spam = logged(level=logging.CRITICAL, name='example')(spam)
 ```python
 >>> @typeassert(int, int)
 ... def add(x, y):
-...		return x + y
+...     return x + y
 ...
 >>>
 >>> add(2, 3)
 5
 >>> add(2, 'hello')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "contract.py", line 33, in wrapper
+    File "<stdin>", line 1, in <module>
+    File "contract.py", line 33, in wrapper
 TypeError: Argument y must be <class 'int'>
 >>>
 ```
@@ -13763,35 +13763,35 @@ from inspect import signature
 from functools import wraps
 
 def typeassert(*ty_args, **ty_kwargs):
-	def decorate(func):
-		# If in optimized mode, disable type checking
-		if not __debug__:
-			return func
+    def decorate(func):
+        # If in optimized mode, disable type checking
+        if not __debug__:
+            return func
 
-		# Map function argument names to supplied types
-		sig = signature(func)
-		bound_types = sig.bind_partial(*ty_args, **ty_kwargs).arguments
+        # Map function argument names to supplied types
+        sig = signature(func)
+        bound_types = sig.bind_partial(*ty_args, **ty_kwargs).arguments
 
-		@wraps(func)
-		def wrapper(*args, **kwargs):
-			bound_values = sig.bind(*args, **kwargs)
-			# Enforce type assertions across supplied arguments
-			for name, value in bound_values.arguments.items():
-				if name in bound_types:
-					if not isinstance(value, bound_types[name]):
-						raise TypeError(
-							'Argument {} must be {}'.format(name, bound_types[name])
-							)
-			return func(*args, **kwargs)
-		return wrapper
-	return decorate
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            bound_values = sig.bind(*args, **kwargs)
+            # Enforce type assertions across supplied arguments
+            for name, value in bound_values.arguments.items():
+                if name in bound_types:
+                    if not isinstance(value, bound_types[name]):
+                        raise TypeError(
+                            'Argument {} must be {}'.format(name, bound_types[name])
+                            )
+            return func(*args, **kwargs)
+        return wrapper
+    return decorate
 ```
 
 Вы обнаружите, что этот декоратор достаточно гибок и позволяет указать типы для всех (или подмножества) аргументов функции. Более того, типы могут быть указаны позиционно или с помощью именованных аргументов. Вот пример:
 ```python
 >>> @typeassert(int, z=int)
 ... def spam(x, y, z=42):
-...		print(x, y, z)
+...     print(x, y, z)
 ...
 >>> spam(1, 2, 3)
 1 2 3
@@ -13799,8 +13799,8 @@ def typeassert(*ty_args, **ty_kwargs):
 1 hello 3
 >>> spam(1, 'hello', 'world')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "contract.py", line 33, in wrapper
+    File "<stdin>", line 1, in <module>
+    File "contract.py", line 33, in wrapper
 TypeError: Argument z must be <class 'int'>
 >>>
 ```
@@ -13812,17 +13812,17 @@ TypeError: Argument z must be <class 'int'>
 ```python
 ...
 def decorate(func):
-	# If in optimized mode, disable type checking
-	if not __debug__:
-		return func
-	...
+    # If in optimized mode, disable type checking
+    if not __debug__:
+        return func
+    ...
 ```
 
 Следующая тонкость написания декораторов в том, что это подразумевает изучение и работу с аргументной сигнатурой оборачиваемой функции. Оптимальный инструмент для этого — функция *inspect.signature()*. Она позволяет вам извлечь информацию о сигнатуре из вызываемого объекта. Например:
 ```python
 >>> from inspect import signature
 >>> def spam(x, y, z=42):
-...		pass
+...     pass
 ...
 >>> sig = signature(spam)
 >>> print(sig)
@@ -13862,9 +13862,9 @@ OrderedDict([('x', 1), ('y', 2), ('z', 3)])
 Используя это отображение, относительно легко обеспечить требуемые проверки:
 ```python
 >>> for name, value in bound_values.arguments.items():
-...		if name in bound_types.arguments:
-...			if not isinstance(value, bound_types.arguments[name]):
-...				raise TypeError()
+...     if name in bound_types.arguments:
+...         if not isinstance(value, bound_types.arguments[name]):
+...             raise TypeError()
 ...
 >>>
 ``` 
@@ -13873,16 +13873,16 @@ OrderedDict([('x', 1), ('y', 2), ('z', 3)])
 ```python
 >>> @typeassert(int, list)
 ... def bar(x, items=None):
-...		if items is None:
-...			items = []
-...		items.append(x)
-...		return items
+...     if items is None:
+...         items = []
+...     items.append(x)
+...     return items
 >>> bar(2)
 [2]
 >>> bar(2,3)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "contract.py", line 33, in wrapper
+    File "<stdin>", line 1, in <module>
+    File "contract.py", line 33, in wrapper
 TypeError: Argument items must be <class 'list'>
 >>> bar(4, [1, 2, 3])
 [1, 2, 3, 4]
@@ -13893,7 +13893,7 @@ TypeError: Argument items must be <class 'list'>
 ```python
 @typeassert
 def spam(x:int, y, z:int = 42):
-	print(x,y,z)
+    print(x,y,z)
 ```
 
 Возможная причина не использовать аннотации в том, что к каждому аргументу функции можно прикрепить только одну аннотацию. Поэтому если аннотации используются для проверки типов, они уже не могут быть использованы ни для чего другого. Также в этом случае декоратор *@typeassert* не будет работать с функциями, которые используют аннотации для других целей. Путём использования аргументов декоратора, как показано в решении, декоратор получает более «общее назначение» и может быть использовать с любой функцией — даже функции, которые используют аннотации.
@@ -13910,22 +13910,22 @@ def spam(x:int, y, z:int = 42):
 from functools import wraps
 
 class A:
-	# Decorator as an instance method
-	def decorator1(self, func):
-		@wraps(func)
-		def wrapper(*args, **kwargs):
-			print('Decorator 1')
-			return func(*args, **kwargs)
-		return wrapper
+    # Decorator as an instance method
+    def decorator1(self, func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            print('Decorator 1')
+            return func(*args, **kwargs)
+        return wrapper
 
 # Decorator as a class method
 @classmethod
-	def decorator2(cls, func):
-	@wraps(func)
-		def wrapper(*args, **kwargs):
-			print('Decorator 2')
-			return func(*args, **kwargs)
-	return wrapper
+    def decorator2(cls, func):
+    @wraps(func)
+        def wrapper(*args, **kwargs):
+            print('Decorator 2')
+            return func(*args, **kwargs)
+    return wrapper
 ```
 
 Вот пример того, как эти два декоратора будут применяться:
@@ -13935,12 +13935,12 @@ a = A()
 
 @a.decorator1
 def spam():
-	pass
+    pass
 
 # As a class method
 @A.decorator2
 def grok():
-	pass
+    pass
 ```
 
 Если вы посмотрите внимательно, то заметите, как один из них применяется из экземпляра *a*, а другой — из класса *A*.
@@ -13949,19 +13949,19 @@ def grok():
 Определение декораторов в классе на первый вгляд может показаться странным, но примеры такого подхода вы встретите даже в стандартной библиотеке. В частности, встроенный декоратор *@property* на самом деле является классом с методами *getter()*, *setter()* и *deleter()*, каждый из которых действует как декоратор. Например:
 ```python
 class Person:
-	# Create a property instance
-	first_name = property()
-	
-	# Apply decorator methods
-	@first_name.getter
-	def first_name(self):
-		return self._first_name
-	
-	@first_name.setter
-	def first_name(self, value):
-		if not isinstance(value, str):
-			raise TypeError('Expected a string')
-		self._first_name = value
+    # Create a property instance
+    first_name = property()
+    
+    # Apply decorator methods
+    @first_name.getter
+    def first_name(self):
+        return self._first_name
+    
+    @first_name.setter
+    def first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('Expected a string')
+        self._first_name = value
 ```
 
 Главная причина использования такой реализации в том, что разнообразные методы-декораторы управляют состоянием связанного экземпляра *property*. Так что если у вас когда-либо возникнет задача, связанная с необходимостью создать декораторы, которые будут записывать или комбинировать данные «за кулисами», то это будет разумным подходом.
@@ -13973,7 +13973,7 @@ class Person:
 class B(A):
 @A.decorator2
 def bar(self):
-	pass
+    pass
 ``` 
 
 Рассматриваемый декоратор должен быть определён как метод класса, и вы должны явно использовать имя родительского класса *A* при применении. Вы не можете использовать имя типа *@B.decorator2*, потому что во время определения метода класс *B* ещё не был создан.
@@ -13989,31 +13989,31 @@ import types
 from functools import wraps
 
 class Profiled:
-	def __init__(self, func):
-		wraps(func)(self)
-		self.ncalls = 0
+    def __init__(self, func):
+        wraps(func)(self)
+        self.ncalls = 0
 
-	def __call__(self, *args, **kwargs):
-		self.ncalls += 1
-		return self.__wrapped__(*args, **kwargs)
+    def __call__(self, *args, **kwargs):
+        self.ncalls += 1
+        return self.__wrapped__(*args, **kwargs)
 
-	def __get__(self, instance, cls):
-		if instance is None:
-			return self
-		else:
-			return types.MethodType(self, instance)
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            return types.MethodType(self, instance)
 ```
 
 Чтобы использовать этот класс, примените его как обычный декоратор — снаружи или внутри класса:
 ```python
 @Profiled
 def add(x, y):
-	return x + y
+    return x + y
 
 class Spam:
-	@Profiled
-	def bar(self, x):
-		print(self, x)
+    @Profiled
+    def bar(self, x):
+        print(self, x)
 ```
 
 Вот интерактивный сеанс, который показывает, как работают эти функции:
@@ -14053,7 +14053,7 @@ TypeError: spam() missing 1 required positional argument: 'x'
 ```python
 >>> s = Spam()
 >>> def grok(self, x):
-...		pass
+...     pass
 ...
 >>> grok.__get__(s, Spam)
 <bound method Spam.grok of <__main__.Spam object at 0x100671e90>>
@@ -14068,19 +14068,19 @@ import types
 from functools import wraps
 
 def profiled(func):
-	ncalls = 0
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		nonlocal ncalls
-		ncalls += 1
-		return func(*args, **kwargs)
-	wrapper.ncalls = lambda: ncalls
-	return wrapper
+    ncalls = 0
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        nonlocal ncalls
+        ncalls += 1
+        return func(*args, **kwargs)
+    wrapper.ncalls = lambda: ncalls
+    return wrapper
 
 # Example
 @profiled
 def add(x, y):
-	return x + y
+    return x + y
 ```
 
 Этот пример работает практически точно так же — за исключением того, что доступ к *ncalls* теперь предоставляется через функцию, прикреплённую как атрибут функции. Например:
@@ -14106,36 +14106,36 @@ from functools import wraps
 
 # A simple decorator
 def timethis(func):
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		start = time.time()
-		r = func(*args, **kwargs)
-		end = time.time()
-		print(end-start)
-		return r
-	return wrapper
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        r = func(*args, **kwargs)
+        end = time.time()
+        print(end-start)
+        return r
+    return wrapper
 
 # Class illustrating application of the decorator to different kinds of methods
 class Spam:
-	@timethis
-	def instance_method(self, n):
-		print(self, n)
-		while n > 0:
-			n -= 1
-	
-	@classmethod
-	@timethis
-	def class_method(cls, n):
-		print(cls, n)
-		while n > 0:
-			n -= 1
-	
-	@staticmethod
-	@timethis
-	def static_method(n):
-		print(n)
-		while n > 0:
-			n -= 1
+    @timethis
+    def instance_method(self, n):
+        print(self, n)
+        while n > 0:
+            n -= 1
+    
+    @classmethod
+    @timethis
+    def class_method(cls, n):
+        print(cls, n)
+        while n > 0:
+            n -= 1
+    
+    @staticmethod
+    @timethis
+    def static_method(n):
+        print(n)
+        while n > 0:
+            n -= 1
 ```
 
 Получившиеся метод класса и статический метод должны работать как обычно, но с добавлением дополнительной функциональности:
@@ -14157,22 +14157,22 @@ class Spam:
 Если вы перепутаете порядок применения декораторов, то получите ошибку. Например, если вы сделаете так:
 ```python
 class Spam:
-	...
-	@timethis
-	@staticmethod
-	def static_method(n):
-		print(n)
-		while n > 0:
-			n -= 1
+    ...
+    @timethis
+    @staticmethod
+    def static_method(n):
+        print(n)
+        while n > 0:
+            n -= 1
 ```
 
 ...то статический метод вызовет ошибку:
 ```python
 >>> Spam.static_method(1000000)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "timethis.py", line 6, in wrapper
-		start = time.time()
+    File "<stdin>", line 1, in <module>
+    File "timethis.py", line 6, in wrapper
+        start = time.time()
 TypeError: 'staticmethod' object is not callable
 >>>
 ```
@@ -14184,10 +14184,10 @@ TypeError: 'staticmethod' object is not callable
 from abc import ABCMeta, abstractmethod
 
 class A(metaclass=ABCMeta):
-	@classmethod
-	@abstractmethod
-	def method(cls):
-		pass
+    @classmethod
+    @abstractmethod
+    def method(cls):
+        pass
 ```
 
 В этом фрагменте порядок *@classmethod* и *@abstractmethod* имеет значение. Если вы поменяете местами эти декораторы, всё поломается.
@@ -14202,19 +14202,19 @@ class A(metaclass=ABCMeta):
 from functools import wraps
 
 def optional_debug(func):
-	@wraps(func)
-	def wrapper(*args, debug=False, **kwargs):
-		if debug:
-			print('Calling', func.__name__)
-		return func(*args, **kwargs)
-	return wrapper
+    @wraps(func)
+    def wrapper(*args, debug=False, **kwargs):
+        if debug:
+            print('Calling', func.__name__)
+        return func(*args, **kwargs)
+    return wrapper
 ``` 
 
 Вот пример его работы:
 ```python
 >>> @optional_debug
 ... def spam(a,b,c):
-... 	print(a,b,c)
+...     print(a,b,c)
 ...
 >>> spam(1,2,3)
 1 2 3
@@ -14228,34 +14228,34 @@ Calling spam
 Добавление аргументов в сигнатуру обёрнутой функции — не самое распространённое применение декораторов. Однако это может оказаться полезным приёмом для избежания некоторых шаблонов повторения кода. Например, если у вас есть такой код:
 ```python
 def a(x, debug=False):
-	if debug:
-		print('Calling a')
-	...
+    if debug:
+        print('Calling a')
+    ...
 
 def b(x, y, z, debug=False):
-	if debug:
-		print('Calling b')
-	...
+    if debug:
+        print('Calling b')
+    ...
 
 def c(x, y, debug=False):
-	if debug:
-		print('Calling c')
-	...
+    if debug:
+        print('Calling c')
+    ...
 ```
 
 ...то вы можете отрефакторить его вот так:
 ```python
 @optional_debug
 def a(x):
-	...
+    ...
 
 @optional_debug
 def b(x, y, z):
-	...
+    ...
 
 @optional_debug
 def c(x, y):
-	...
+    ...
 ```
 
 Реализация этого рецепта базируется на том факте, что обязательные именованные аргументы легко добавить в функции, которые также принимают параметры \*args и \*\*kwargs. При использовании обязательного именованного аргумента он выделяется в специальный случай и удаляется из последующих вызовов, которые используют только оставшиеся позиционные и именованные аргументы.
@@ -14266,22 +14266,22 @@ from functools import wraps
 import inspect
 
 def optional_debug(func):
-	if 'debug' in inspect.getargspec(func).args:
-		raise TypeError('debug argument already defined')
-	
-	@wraps(func)
-	def wrapper(*args, debug=False, **kwargs):
-		if debug:
-			print('Calling', func.__name__)
-		return func(*args, **kwargs)
-	return wrapper
+    if 'debug' in inspect.getargspec(func).args:
+        raise TypeError('debug argument already defined')
+    
+    @wraps(func)
+    def wrapper(*args, debug=False, **kwargs):
+        if debug:
+            print('Calling', func.__name__)
+        return func(*args, **kwargs)
+    return wrapper
 ``` 
 
 Последнее уточнение касается правильного управления сигнатурами функций. Проницательный программист поймёт, что сигнатура обёрнутых функций будет неправильной. Например:
 ```python
 >>> @optional_debug
 ... def add(x,y):
-...		return x+y
+...     return x+y
 ...
 >>> import inspect
 >>> print(inspect.signature(add))
@@ -14294,29 +14294,29 @@ from functools import wraps
 import inspect
 
 def optional_debug(func):
-	if 'debug' in inspect.getargspec(func).args:
-		raise TypeError('debug argument already defined')
-	
-	@wraps(func)
-	def wrapper(*args, debug=False, **kwargs):
-		if debug:
-			print('Calling', func.__name__)
-		return func(*args, **kwargs)
-	
-	sig = inspect.signature(func)
-	parms = list(sig.parameters.values())
-	parms.append(inspect.Parameter('debug',
-									inspect.Parameter.KEYWORD_ONLY,
-									default=False))
-	wrapper.__signature__ = sig.replace(parameters=parms)
-	return wrapper
+    if 'debug' in inspect.getargspec(func).args:
+        raise TypeError('debug argument already defined')
+    
+    @wraps(func)
+    def wrapper(*args, debug=False, **kwargs):
+        if debug:
+            print('Calling', func.__name__)
+        return func(*args, **kwargs)
+    
+    sig = inspect.signature(func)
+    parms = list(sig.parameters.values())
+    parms.append(inspect.Parameter('debug',
+                                    inspect.Parameter.KEYWORD_ONLY,
+                                    default=False))
+    wrapper.__signature__ = sig.replace(parameters=parms)
+    return wrapper
 ```
 
 Теперь сигнатура обёртки будет правильно отражать присутствие аргумента *debug*. Например:
 ```python
 >>> @optional_debug
 ... def add(x,y):
-... 	return x+y
+...     return x+y
 >>> print(inspect.signature(add))
 (x, y, *, debug=False)
 >>> add(2,3)
@@ -14335,25 +14335,25 @@ def optional_debug(func):
 Здесь очень удобно использовать декоратор класса. Например, вот декоратор класса, который изменяет специальный метод *__getattrubute__*, чтобы выполнить логирование.
 ```python
 def log_getattribute(cls):
-	# Get the original implementation
-	orig_getattribute = cls.__getattribute__
+    # Get the original implementation
+    orig_getattribute = cls.__getattribute__
 
-	# Make a new definition
-	def new_getattribute(self, name):
-		print('getting:', name)
-		return orig_getattribute(self, name)
-	
-	# Attach to the class and return
-	cls.__getattribute__ = new_getattribute
-	return cls
+    # Make a new definition
+    def new_getattribute(self, name):
+        print('getting:', name)
+        return orig_getattribute(self, name)
+    
+    # Attach to the class and return
+    cls.__getattribute__ = new_getattribute
+    return cls
 
 # Example use
 @log_getattribute
 class A:
-	def __init__(self,x):
-		self.x = x
-	def spam(self):
-	pass
+    def __init__(self,x):
+        self.x = x
+    def spam(self):
+    pass
 ```
 
 Вот как это работает:
@@ -14371,16 +14371,16 @@ getting: spam
 Декораторы классов часто могут быть использованы как простая альтернатива более продвинутым приёмам типа миксинов (примесей) и метаклассов. Например, альтернативная реализация вышеприведённого решения может быть создана на базе наследования:
 ```python
 class LoggedGetattribute:
-	def __getattribute__(self, name):
-		print('getting:', name)
-		return super().__getattribute__(name)
+    def __getattribute__(self, name):
+        print('getting:', name)
+        return super().__getattribute__(name)
 
 # Example:
 class A(LoggedGetattribute):
-	def __init__(self,x):
-		self.x = x
-	def spam(self):
-		pass
+    def __init__(self,x):
+        self.x = x
+    def spam(self):
+        pass
 ```
 
 Это работает, но чтобы понять такой код, нужно уделить внимание порядку разрешения методов, функции *super()* и прочим аспектам наследования, описанным в рецепте **8.7.** В каком-то смысле решение с использованием декоратора класса работает намного более прямолинейно и не вводит новых зависимостей в иерархию наследования. Как оказывается, такая реализация и работает немного быстрее, поскольку не полагается на функцию *super()*.
@@ -14398,22 +14398,22 @@ class A(LoggedGetattribute):
 ```python
 class Spam:
 def __init__(self, name):
-	self.name = name
-	a = Spam('Guido')
-	b = Spam('Diana')
+    self.name = name
+    a = Spam('Guido')
+    b = Spam('Diana')
 ```
 
 Если вы хотите кастомизировать этот шаг, то вы можете определить метакласс и нужным образом заново реализовать его метод *__call__()*. Чтобы проиллюстрировать это, предположим, что вы не хотите никому позволять создавать экземпляры:
 ```python
 class NoInstances(type):
-	def __call__(self, *args, **kwargs):
-		raise TypeError("Can't instantiate directly")
-	
+    def __call__(self, *args, **kwargs):
+        raise TypeError("Can't instantiate directly")
+    
 # Example
 class Spam(metaclass=NoInstances):
-	@staticmethod
-	def grok(x):
-		print('Spam.grok')
+    @staticmethod
+    def grok(x):
+        print('Spam.grok')
 ```
 
 В этом случае пользователи могут вызвать определённый статический метод, но создать экземпляр обычным путём невозможно. Например:
@@ -14422,9 +14422,9 @@ class Spam(metaclass=NoInstances):
 Spam.grok
 >>> s = Spam()
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "example1.py", line 7, in __call__
-		raise TypeError("Can't instantiate directly")
+    File "<stdin>", line 1, in <module>
+    File "example1.py", line 7, in __call__
+        raise TypeError("Can't instantiate directly")
 TypeError: Can't instantiate directly
 >>>
 ```
@@ -14432,21 +14432,21 @@ TypeError: Can't instantiate directly
 А теперь предположим, что вы хотите реализовать синглтон (шаблон проектирования «Одиночка») — класс, из которого можно создать только один экземпляр. Это делается относительно прямолинейно:
 ```python
 class Singleton(type):
-	def __init__(self, *args, **kwargs):
-		self.__instance = None
-		super().__init__(*args, **kwargs)
-	
-	def __call__(self, *args, **kwargs):
-		if self.__instance is None:
-			self.__instance = super().__call__(*args, **kwargs)
-			return self.__instance
-		else:
-			return self.__instance
+    def __init__(self, *args, **kwargs):
+        self.__instance = None
+        super().__init__(*args, **kwargs)
+    
+    def __call__(self, *args, **kwargs):
+        if self.__instance is None:
+            self.__instance = super().__call__(*args, **kwargs)
+            return self.__instance
+        else:
+            return self.__instance
 
 # Example
 class Spam(metaclass=Singleton):
-	def __init__(self):
-		print('Creating Spam')
+    def __init__(self):
+        print('Creating Spam')
 ``` 
 
 В этом случае будет возможно создание только одного экземпляра. Например:
@@ -14467,23 +14467,23 @@ True
 import weakref
 
 class Cached(type):
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		self.__cache = weakref.WeakValueDictionary()
-	
-	def __call__(self, *args):
-		if args in self.__cache:
-			return self.__cache[args]
-		else:
-			obj = super().__call__(*args)
-			self.__cache[args] = obj
-			return obj
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__cache = weakref.WeakValueDictionary()
+    
+    def __call__(self, *args):
+        if args in self.__cache:
+            return self.__cache[args]
+        else:
+            obj = super().__call__(*args)
+            self.__cache[args] = obj
+            return obj
 
 # Example
 class Spam(metaclass=Cached):
-	def __init__(self, name):
-		print('Creating Spam({!r})'.format(name))
-		self.name = name
+    def __init__(self, name):
+        print('Creating Spam({!r})'.format(name))
+        self.name = name
 ```
 
 Вот как это работает:
@@ -14492,10 +14492,10 @@ class Spam(metaclass=Cached):
 Creating Spam('Guido')
 >>> b = Spam('Diana')
 Creating Spam('Diana')
->>> c = Spam('Guido') 	# Cached
+>>> c = Spam('Guido')   # Cached
 >>> a is b
 False
->>> a is c 				# Cached value returned
+>>> a is c              # Cached value returned
 True
 >>>
 ```
@@ -14503,17 +14503,17 @@ True
 Использование метаклассов для реализации различных паттернов создания экземпляров часто может оказаться более элегантным решением, нежели другие подходы, не использующие метаклассы. Если, например, вы не используете метакласс, то вам может оказаться необходимо спрятать классы за какой-то дополнительной фабричной функцией. Чтобы создать синглтон, вам потребуется такой хак:
 ```python
 class _Spam:
-	def __init__(self):
-		print('Creating Spam')
-	
-	_spam_instance = None
-	def Spam():
-		global _spam_instance
-		if _spam_instance is not None:
-			return _spam_instance
-		else:
-			_spam_instance = _Spam()
-			return _spam_instance
+    def __init__(self):
+        print('Creating Spam')
+    
+    _spam_instance = None
+    def Spam():
+        global _spam_instance
+        if _spam_instance is not None:
+            return _spam_instance
+        else:
+            _spam_instance = _Spam()
+            return _spam_instance
 ``` 
 
 Хотя решение с метаклассами использует намного более продвинутую концепцию, получающийся код будет чище и менее «хакнутым».
@@ -14531,56 +14531,56 @@ from collections import OrderedDict
 
 # A set of descriptors for various types
 class Typed:
-	_expected_type = type(None)
-	def __init__(self, name=None):
-		self._name = name
-	
-	def __set__(self, instance, value):
-		if not isinstance(value, self._expected_type):
-			raise TypeError('Expected ' + str(self._expected_type))
-		instance.__dict__[self._name] = value
-	
+    _expected_type = type(None)
+    def __init__(self, name=None):
+        self._name = name
+    
+    def __set__(self, instance, value):
+        if not isinstance(value, self._expected_type):
+            raise TypeError('Expected ' + str(self._expected_type))
+        instance.__dict__[self._name] = value
+    
 class Integer(Typed):
-	_expected_type = int
+    _expected_type = int
 
 class Float(Typed):
-	_expected_type = float
+    _expected_type = float
 
 class String(Typed):
-	_expected_type = str
+    _expected_type = str
 
 # Metaclass that uses an OrderedDict for class body
 class OrderedMeta(type):
-	def __new__(cls, clsname, bases, clsdict):
-		d = dict(clsdict)
-		order = []
-		for name, value in clsdict.items():
-			if isinstance(value, Typed):
-				value._name = name
-				order.append(name)
-		d['_order'] = order
-		return type.__new__(cls, clsname, bases, d)
+    def __new__(cls, clsname, bases, clsdict):
+        d = dict(clsdict)
+        order = []
+        for name, value in clsdict.items():
+            if isinstance(value, Typed):
+                value._name = name
+                order.append(name)
+        d['_order'] = order
+        return type.__new__(cls, clsname, bases, d)
 
-	@classmethod
-	def __prepare__(cls, clsname, bases):
-		return OrderedDict()
+    @classmethod
+    def __prepare__(cls, clsname, bases):
+        return OrderedDict()
 ``` 
 
 В этом метаклассе порядок определения дескрипторов захватывается путём использования *OrderedDict* при выполнении тела класса. Получившийся порядок имён затем извлекается из словаря и сохраняется в атрибуте класса *_order*. Далее он может быть использован методами класса самыми разнообразными способами. Например, вот простой класс, который использует эту информацию о порядке для реализации метода для сериализации данных экземпляра в строчки CSV-данных:
 ```python
 class Structure(metaclass=OrderedMeta):
-	def as_csv(self):
-		return ','.join(str(getattr(self,name)) for name in self._order)
+    def as_csv(self):
+        return ','.join(str(getattr(self,name)) for name in self._order)
 
 # Example use
 class Stock(Structure):
-	name = String()
-	shares = Integer()
-	price = Float()
-	def __init__(self, name, shares, price):
-		self.name = name
-		self.shares = shares
-		self.price = price
+    name = String()
+    shares = Integer()
+    price = Float()
+    def __init__(self, name, shares, price):
+        self.name = name
+        self.shares = shares
+        self.price = price
 ```
 
 Вот как работает этот класс *Stock*:
@@ -14592,8 +14592,8 @@ class Stock(Structure):
 'GOOG,100,490.1'
 >>> t = Stock('AAPL','a lot', 610.23)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "dupmethod.py", line 34, in __init__
+    File "<stdin>", line 1, in <module>
+    File "dupmethod.py", line 34, in __init__
 TypeError: shares expects <class 'int'>
 >>>
 ``` 
@@ -14606,23 +14606,23 @@ TypeError: shares expects <class 'int'>
 from collections import OrderedDict
 
 class NoDupOrderedDict(OrderedDict):
-	def __init__(self, clsname):
-		self.clsname = clsname
-		super().__init__()
-	def __setitem__(self, name, value):
-		if name in self:
-			raise TypeError('{} already defined in {}'.format(name, self.clsname))
-		super().__setitem__(name, value)
+    def __init__(self, clsname):
+        self.clsname = clsname
+        super().__init__()
+    def __setitem__(self, name, value):
+        if name in self:
+            raise TypeError('{} already defined in {}'.format(name, self.clsname))
+        super().__setitem__(name, value)
 
 class OrderedMeta(type):
-	def __new__(cls, clsname, bases, clsdict):
-		d = dict(clsdict)
-		d['_order'] = [name for name in clsdict if name[0] != '_']
-		return type.__new__(cls, clsname, bases, d)
-	
-	@classmethod
-	def __prepare__(cls, clsname, bases):
-		return NoDupOrderedDict(clsname)
+    def __new__(cls, clsname, bases, clsdict):
+        d = dict(clsdict)
+        d['_order'] = [name for name in clsdict if name[0] != '_']
+        return type.__new__(cls, clsname, bases, d)
+    
+    @classmethod
+    def __prepare__(cls, clsname, bases):
+        return NoDupOrderedDict(clsname)
 ``` 
 
 Вот что произойдет, если вы используете этот метакласс и создадите класс с дублирующимися записями:
@@ -14638,10 +14638,10 @@ def spam(self):
 pass
 ...
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "<stdin>", line 4, in A
-	File "dupmethod2.py", line 25, in __setitem__
-		(name, self.clsname))
+    File "<stdin>", line 1, in <module>
+    File "<stdin>", line 4, in A
+    File "dupmethod2.py", line 25, in __setitem__
+        (name, self.clsname))
 TypeError: spam already defined in A
 >>>
 ```
@@ -14651,9 +14651,9 @@ TypeError: spam already defined in A
 Возможность захвата порядка определения — тонкость, которая весьма важна для некоторых приложений. Например, в реализации объектно-реляционного отображения классы могут быть написаны в стиле, который похож на показанный в примере:
 ```python
 class Stock(Model):
-	name = String()
-	shares = Integer()
-	price = Float()
+    name = String()
+    shares = Integer()
+    price = Float()
 ```
 
 Под капотом код может пожелать захватить порядок определения, чтобы отобразить объекты на кортежи или строки в таблице базы данных (похожим образом работает метод *as_csv()* в примере). Показанное решение весьма бесхитростно и чаще будет проще альтернатив (обычно это поддержание скрытых счётчиков в классах-дескрипторах).
@@ -14668,42 +14668,42 @@ class Stock(Model):
 from abc import ABCMeta, abstractmethod
 
 class IStream(metaclass=ABCMeta):
-	@abstractmethod
-	def read(self, maxsize=None):
-		pass
+    @abstractmethod
+    def read(self, maxsize=None):
+        pass
 
-	@abstractmethod
-	def write(self, data):
-		pass
+    @abstractmethod
+    def write(self, data):
+        pass
 ```
 
 Однако в ваших собственных метаклассах могут быть предоставлены дополнительные именованные аргументы:
 ```python
 class Spam(metaclass=MyMeta, debug=True, synchronize=True):
-	...
+    ...
 ```
 
 Для поддержки таких именованных аргументов в метаклассе вам нужно убедиться, что вы определили их в методах *__prepare__()*, *__new__()* и *__init__()*, используя обязательные именованные аргументы:
 ```python
 class MyMeta(type):
-	# Optional
-	@classmethod
-	def __prepare__(cls, name, bases, *, debug=False, synchronize=False):
-		# Custom processing
-		...
-		return super().__prepare__(name, bases)
+    # Optional
+    @classmethod
+    def __prepare__(cls, name, bases, *, debug=False, synchronize=False):
+        # Custom processing
+        ...
+        return super().__prepare__(name, bases)
 
-	# Required
-	def __new__(cls, name, bases, ns, *, debug=False, synchronize=False):
-		# Custom processing
-		...
-		return super().__new__(cls, name, bases, ns)
-	
-	# Required
-	def __init__(self, name, bases, ns, *, debug=False, synchronize=False):
-		# Custom processing
-		...
-		super().__init__(name, bases, ns)
+    # Required
+    def __new__(cls, name, bases, ns, *, debug=False, synchronize=False):
+        # Custom processing
+        ...
+        return super().__new__(cls, name, bases, ns)
+    
+    # Required
+    def __init__(self, name, bases, ns, *, debug=False, synchronize=False):
+        # Custom processing
+        ...
+        super().__init__(name, bases, ns)
 ```
 
 ### Обсуждение
@@ -14716,9 +14716,9 @@ class MyMeta(type):
 Использование именованных аргументов для конфигурации метакласса может быть рассмотрена как альтернатива использованию переменных класса для решения той же задачи. Например:
 ```python
 class Spam(metaclass=MyMeta):
-	debug = True
-	synchronize = True
-	...
+    debug = True
+    synchronize = True
+    ...
 ```
 
 Преимущество предоставления таких параметров как аргументов в том, что они не загрязняют пространство имён класса дополнительнымии именами, которые имеют отношение только к созданию класса, а не к последующему выполнению инструкций в классе. Также они доступны методу *__prepare__()*, который запускается до начала обработки любой инструкции в теле класса. Переменные класса, с другой стороны, будут доступны только в методах метакласса *__new__()* и *__init__()*.
@@ -14734,8 +14734,8 @@ class Spam(metaclass=MyMeta):
 >>> from inspect import Signature, Parameter
 >>> # Make a signature for a func(x, y=42, *, z=None)
 >>> parms = [ Parameter('x', Parameter.POSITIONAL_OR_KEYWORD),
-... 		  Parameter('y', Parameter.POSITIONAL_OR_KEYWORD, default=42),
-... 		  Parameter('z', Parameter.KEYWORD_ONLY, default=None) ]
+...           Parameter('y', Parameter.POSITIONAL_OR_KEYWORD, default=42),
+...           Parameter('z', Parameter.KEYWORD_ONLY, default=None) ]
 >>> sig = Signature(parms)
 >>> print(sig)
 y=42, *, z=None)
@@ -14745,9 +14745,9 @@ y=42, *, z=None)
 Когда вы получаете объект сигнатуры, вы легко можете связать его с \*args и \*\*kwargs, используя метод сигнатур *bind()*, как показано в этом простом примере:
 ```python
 >>> def func(*args, **kwargs):
-...		bound_values = sig.bind(*args, **kwargs)
-...		for name, value in bound_values.arguments.items():
-...			print(name,value)
+...     bound_values = sig.bind(*args, **kwargs)
+...     for name, value in bound_values.arguments.items():
+...         print(name,value)
 ...
 >>> # Try various examples
 >>> func(1, 2, z=3)
@@ -14765,20 +14765,20 @@ y 2
 >>> func(1, 2, 3, 4)
 Traceback (most recent call last):
 ...
-	File "/usr/local/lib/python3.3/inspect.py", line 1972, in _bind
-		raise TypeError('too many positional arguments')
+    File "/usr/local/lib/python3.3/inspect.py", line 1972, in _bind
+        raise TypeError('too many positional arguments')
 TypeError: too many positional arguments
 >>> func(y=2)
 Traceback (most recent call last):
 ...
-	File "/usr/local/lib/python3.3/inspect.py", line 1961, in _bind
-		raise TypeError(msg) from None
+    File "/usr/local/lib/python3.3/inspect.py", line 1961, in _bind
+        raise TypeError(msg) from None
 TypeError: 'x' parameter lacking default value
 >>> func(1, y=2, x=3)
 Traceback (most recent call last):
 ...
-	File "/usr/local/lib/python3.3/inspect.py", line 1985, in _bind
-		'{arg!r}'.format(arg=param.name))
+    File "/usr/local/lib/python3.3/inspect.py", line 1985, in _bind
+        '{arg!r}'.format(arg=param.name))
 TypeError: multiple values for argument 'x'
 >>>
 ```
@@ -14790,23 +14790,23 @@ TypeError: multiple values for argument 'x'
 from inspect import Signature, Parameter
 
 def make_sig(*names):
-	parms = [Parameter(name, Parameter.POSITIONAL_OR_KEYWORD)
-			 for name in names]
-	return Signature(parms)
+    parms = [Parameter(name, Parameter.POSITIONAL_OR_KEYWORD)
+             for name in names]
+    return Signature(parms)
 
 class Structure:
-	__signature__ = make_sig()
-	def __init__(self, *args, **kwargs):
-		bound_values = self.__signature__.bind(*args, **kwargs)
-		for name, value in bound_values.arguments.items():
-			setattr(self, name, value)
+    __signature__ = make_sig()
+    def __init__(self, *args, **kwargs):
+        bound_values = self.__signature__.bind(*args, **kwargs)
+        for name, value in bound_values.arguments.items():
+            setattr(self, name, value)
 
 # Example use
 class Stock(Structure):
-	__signature__ = make_sig('name', 'shares', 'price')
+    __signature__ = make_sig('name', 'shares', 'price')
 
 class Point(Structure):
-	__signature__ = make_sig('x', 'y')
+    __signature__ = make_sig('x', 'y')
 
 ``` 
 
@@ -14835,28 +14835,28 @@ TypeError: multiple values for argument 'shares'
 from inspect import Signature, Parameter
 
 def make_sig(*names):
-	parms = [Parameter(name, Parameter.POSITIONAL_OR_KEYWORD)
-			 for name in names]
-	return Signature(parms)
+    parms = [Parameter(name, Parameter.POSITIONAL_OR_KEYWORD)
+             for name in names]
+    return Signature(parms)
 
 class StructureMeta(type):
-	def __new__(cls, clsname, bases, clsdict):
-		clsdict['__signature__'] = make_sig(*clsdict.get('_fields',[]))
-		return super().__new__(cls, clsname, bases, clsdict)
+    def __new__(cls, clsname, bases, clsdict):
+        clsdict['__signature__'] = make_sig(*clsdict.get('_fields',[]))
+        return super().__new__(cls, clsname, bases, clsdict)
 
 class Structure(metaclass=StructureMeta):
-	_fields = []
-	def __init__(self, *args, **kwargs):
-		bound_values = self.__signature__.bind(*args, **kwargs)
-		for name, value in bound_values.arguments.items():
-			setattr(self, name, value)
+    _fields = []
+    def __init__(self, *args, **kwargs):
+        bound_values = self.__signature__.bind(*args, **kwargs)
+        for name, value in bound_values.arguments.items():
+            setattr(self, name, value)
 
 # Example
 class Stock(Structure):
-	_fields = ['name', 'shares', 'price']
+    _fields = ['name', 'shares', 'price']
 
 class Point(Structure):
-	_fields = ['x', 'y']
+    _fields = ['x', 'y']
 ```
 
 При определении собственных сигнатур часто бывает полезно сохранить сигнатуру в специальном атрибуте *__signature__*, как показано выше. Если вы сделаете это, то код, использующий модуль *inspect* для интроспекции, увидит сигнатуру и сообщит о ней как об условии вызова. Например:
@@ -14877,33 +14877,33 @@ class Point(Structure):
 Если вы хотите отслеживать определение классов, вы часто можете сделать это путём определения метакласса. Базовый метакласс обычно определяется путём наследования от *type* и переопределения метода *__new__()* или *__init__()*. Например:
 ```python
 class MyMeta(type):
-	def __new__(self, clsname, bases, clsdict):
-		# clsname is name of class being defined
-		# bases is tuple of base classes
-		# clsdict is class dictionary
-		return super().__new__(cls, clsname, bases, clsdict)
+    def __new__(self, clsname, bases, clsdict):
+        # clsname is name of class being defined
+        # bases is tuple of base classes
+        # clsdict is class dictionary
+        return super().__new__(cls, clsname, bases, clsdict)
 ```
 
 Альтернативное решение, если определён *__init__()*:
 ```python
 class MyMeta(type):
-	def __init__(self, clsname, bases, clsdict):
-		super().__init__(clsname, bases, clsdict)
-		# clsname is name of class being defined
-		# bases is tuple of base classes
-		# clsdict is class dictionary
+    def __init__(self, clsname, bases, clsdict):
+        super().__init__(clsname, bases, clsdict)
+        # clsname is name of class being defined
+        # bases is tuple of base classes
+        # clsdict is class dictionary
 ```
 
 Чтобы использовать метакласс, в общем случае вы могли бы внедрить его в базовый класс высшего уровня, который наследуют прочие объекты. Например:
 ```python
 class Root(metaclass=MyMeta):
-	pass
+    pass
 
 class A(Root):
-	pass
+    pass
 
 class B(Root):
-	pass
+    pass
 ``` 
 
 Ключевая возможность метакласса в том, что он позволяет вам исследовать содержимое класса во время определения. Внутри переопределённого метода *__init__()* вы можете свободно инспектировать словарь класса, базовые классы и так далее. Более того, после того, как для класса определён метакласс, он наследуется всеми подклассами. С помощью этого ловкий создатель фреймворка может указать метакласс для одного из классов высшего уровня в обширной иерархии и отлавливать определение всех подклассов.
@@ -14911,22 +14911,22 @@ class B(Root):
 В качестве конкретного, хотя и вычурного примера приведём метакласс, который отвергает любые определения классов, содержащие методы с названиями, написанными в смешанном регистре (например, чтобы позлить Java-программистов):
 ```python
 class NoMixedCaseMeta(type):
-	def __new__(cls, clsname, bases, clsdict):
-		for name in clsdict:
-			if name.lower() != name:
-				raise TypeError('Bad attribute name: ' + name)
-		return super().__new__(cls, clsname, bases, clsdict)
+    def __new__(cls, clsname, bases, clsdict):
+        for name in clsdict:
+            if name.lower() != name:
+                raise TypeError('Bad attribute name: ' + name)
+        return super().__new__(cls, clsname, bases, clsdict)
 
 class Root(metaclass=NoMixedCaseMeta):
-	pass
+    pass
 
 class A(Root):
-	def foo_bar(self):	 # Ok
-		pass 
+    def foo_bar(self):   # Ok
+        pass 
 
 class B(Root):
-	def fooBar(self):	 # TypeError
-		pass
+    def fooBar(self):    # TypeError
+        pass
 ```
 
 В качестве более продвинутого и полезного примера приведём метакласс, который проверяет определение переопределённых методов, чтобы убедиться, что они имеют такую же сигнатуру вызова, как и изначальный метод суперкласса.
@@ -14935,39 +14935,39 @@ from inspect import signature
 import logging
 
 class MatchSignaturesMeta(type):
-	def __init__(self, clsname, bases, clsdict):
-		super().__init__(clsname, bases, clsdict)
-		sup = super(self, self)
-		for name, value in clsdict.items():
-			if name.startswith('_') or not callable(value):
-				continue
-			# Get the previous definition (if any) and compare the signatures
-			prev_dfn = getattr(sup,name,None)
-			if prev_dfn:
-				prev_sig = signature(prev_dfn)
-				val_sig = signature(value)
-				if prev_sig != val_sig:
-					logging.warning('Signature mismatch in %s. %s != %s',
-								value.__qualname__, prev_sig, val_sig)
+    def __init__(self, clsname, bases, clsdict):
+        super().__init__(clsname, bases, clsdict)
+        sup = super(self, self)
+        for name, value in clsdict.items():
+            if name.startswith('_') or not callable(value):
+                continue
+            # Get the previous definition (if any) and compare the signatures
+            prev_dfn = getattr(sup,name,None)
+            if prev_dfn:
+                prev_sig = signature(prev_dfn)
+                val_sig = signature(value)
+                if prev_sig != val_sig:
+                    logging.warning('Signature mismatch in %s. %s != %s',
+                                value.__qualname__, prev_sig, val_sig)
 
 # Example
 class Root(metaclass=MatchSignaturesMeta):
-	pass
+    pass
 
 class A(Root):
-	def foo(self, x, y):
-		pass
+    def foo(self, x, y):
+        pass
 
-	def spam(self, x, *, z):
-		pass
+    def spam(self, x, *, z):
+        pass
 
 # Class with redefined methods, but slightly different signatures
 class B(A):
-	def foo(self, a, b):
-		pass
+    def foo(self, a, b):
+        pass
 
-	def spam(self,x,z):
-		pass
+    def spam(self,x,z):
+        pass
 ```
 
 Если вы запустите этот код, вы получите такой вывод:
@@ -15001,12 +15001,12 @@ WARNING:root:Signature mismatch in B.foo. (self, x, y) != (self, a, b)
 
 # Methods
 def __init__(self, name, shares, price):
-	self.name = name
-	self.shares = shares
-	self.price = price
+    self.name = name
+    self.shares = shares
+    self.price = price
 
 def cost(self):
-	return self.shares * self.price
+    return self.shares * self.price
 
 cls_dict = {
 '__init__' : __init__,
@@ -15036,7 +15036,7 @@ Stock.__module__ = __name__
 ```python
 >>> import abc
 >>> Stock = types.new_class('Stock', (), {'metaclass': abc.ABCMeta},
-...							 lambda ns: ns.update(cls_dict))
+...                          lambda ns: ns.update(cls_dict))
 ...
 >>> Stock.__module__ = __name__
 >>> Stock
@@ -15049,14 +15049,14 @@ Stock.__module__ = __name__
 Третий аргумент также может содержать другие именованные аргументы. Например, такое определение класса:
 ```python
 class Spam(Base, debug=True, typecheck=False):
-	...
+    ...
 ```
 
 ...аналогично такому вызову *new_class()*:
 ```python
 Spam = types.new_class('Spam', (Base,),
-					  {'debug': True, 'typecheck': False},
-			    	  lambda ns: ns.update(cls_dict))
+                      {'debug': True, 'typecheck': False},
+                      lambda ns: ns.update(cls_dict))
 ```
 
 Четвёртый аргумент *new_class()* — самый загадочный. Это функция, которая принимает на вход объект отображения, который используется для хранения пространства имён класса. Обычно это словарь, но на самом деле это объект, который возвращается методом *__prepare__()*, как описано в **рецепте 9.14.** Эта функция должна добавить новые записи к пространству имён, используя метод *update()* (как показано) или другие операции над объектами отображений.
@@ -15077,25 +15077,25 @@ import types
 import sys
 
 def named_tuple(classname, fieldnames):
-	# Populate a dictionary of field property accessors
-	cls_dict = { name: property(operator.itemgetter(n))
-				 for n, name in enumerate(fieldnames) }
+    # Populate a dictionary of field property accessors
+    cls_dict = { name: property(operator.itemgetter(n))
+                 for n, name in enumerate(fieldnames) }
 
-	# Make a __new__ function and add to the class dict
-	def __new__(cls, *args):
-		if len(args) != len(fieldnames):
-			raise TypeError('Expected {} arguments'.format(len(fieldnames)))
-		return tuple.__new__(cls, args)
-	
-	cls_dict['__new__'] = __new__
-	
-	# Make the class
-	cls = types.new_class(classname, (tuple,), {},
-						  lambda ns: ns.update(cls_dict))
-	
-	# Set the module to that of the caller
-	cls.__module__ = sys._getframe(1).f_globals['__name__']
-	return cls
+    # Make a __new__ function and add to the class dict
+    def __new__(cls, *args):
+        if len(args) != len(fieldnames):
+            raise TypeError('Expected {} arguments'.format(len(fieldnames)))
+        return tuple.__new__(cls, args)
+    
+    cls_dict['__new__'] = __new__
+    
+    # Make the class
+    cls = types.new_class(classname, (tuple,), {},
+                          lambda ns: ns.update(cls_dict))
+    
+    # Set the module to that of the caller
+    cls.__module__ = sys._getframe(1).f_globals['__name__']
+    return cls
 ```
 
 В последней части этого кода используется так называемый «фреймхак», который применяет *sys._getframe()* для получения имени модуля вызывавшего. Ещё один пример фреймхака показан в **рецепте 2.15.**
@@ -15114,7 +15114,7 @@ def named_tuple(classname, fieldnames):
 5
 >>> p.x = 2
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 AttributeError: can't set attribute
 >>> print('%s %s' % p)
 4 5
@@ -15152,26 +15152,26 @@ metaclass, kwargs, ns = types.prepare_class('Stock', (), {'metaclass': type})
 import operator
 
 class StructTupleMeta(type):
-	def __init__(cls, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		for n, name in enumerate(cls._fields):
-			setattr(cls, name, property(operator.itemgetter(n)))
+    def __init__(cls, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for n, name in enumerate(cls._fields):
+            setattr(cls, name, property(operator.itemgetter(n)))
 
 class StructTuple(tuple, metaclass=StructTupleMeta):
-	_fields = []
-	def __new__(cls, *args):
-		if len(args) != len(cls._fields):
-			raise ValueError('{} arguments required'.format(len(cls._fields)))
-		return super().__new__(cls,args)
+    _fields = []
+    def __new__(cls, *args):
+        if len(args) != len(cls._fields):
+            raise ValueError('{} arguments required'.format(len(cls._fields)))
+        return super().__new__(cls,args)
 ``` 
 
 Этот код позволяет определять простые структуры на основе кортежей:
 ```python
 class Stock(StructTuple):
-	_fields = ['name', 'shares', 'price']
+    _fields = ['name', 'shares', 'price']
 
 class Point(StructTuple):
-	_fields = ['x', 'y']
+    _fields = ['x', 'y']
 ```  
 
 Вот как они работают:
@@ -15187,7 +15187,7 @@ class Point(StructTuple):
 4555.0
 >>> s.shares = 23
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 AttributeError: can't set attribute
 >>>
 ```
@@ -15199,8 +15199,8 @@ AttributeError: can't set attribute
 
 Класс *StructTuple* служит общим базовым классом для пользователей, которые его наследуют. Метод *__new__()* в этом классе отвечает за создание новых экземпляров. Использование *__new__()* здесь несколько необычное, поскольку частично связано с тем фактором, что мы модифицируем сигнатуру вызова кортежей, чтобы получить возможность создавать экземпляры с помощью обычно выглядящих вызовов:
 ```python
-s = Stock('ACME', 50, 91.1) 		# ОК
-s = Stock(('ACME', 50, 91.1)) 		# Error
+s = Stock('ACME', 50, 91.1)         # ОК
+s = Stock(('ACME', 50, 91.1))       # Error
 ```
 
 В отличие от *__init__()*, метод *__new__()* вызывается до того, как экземпляр создан. Поскольку кортежи неизменяемы, невозможно внести какие-либо изменения в них после создания. Функция *__init__()* запускается в процессе инициализации слишком поздно, чтобы выполнить эту задачу. Именно поэтому был определён метод *__new__()*.
@@ -15217,14 +15217,14 @@ s = Stock(('ACME', 50, 91.1)) 		# Error
 Этот рецепт базируется на простом наблюдении — поскольку Python позволяет аннотировать аргументы, то можно написать такой код:
 ```python
 class Spam:
-	def bar(self, x:int, y:int):
-		print('Bar 1:', x, y)
-	def bar(self, s:str, n:int = 0):
-		print('Bar 2:', s, n)
+    def bar(self, x:int, y:int):
+        print('Bar 1:', x, y)
+    def bar(self, s:str, n:int = 0):
+        print('Bar 2:', s, n)
 
 s = Spam()
-s.bar(2, 3) 		# Prints Bar 1: 2 3
-s.bar('hello')		# Prints Bar 2: hello 0
+s.bar(2, 3)         # Prints Bar 1: 2 3
+s.bar('hello')      # Prints Bar 2: hello 0
 ```
 
 Вот начало решения, которое делает то же самое, но с использованием комбинации метакласов и дескрипторов:
@@ -15234,106 +15234,106 @@ import inspect
 import types
 
 class MultiMethod:
-	'''
-	Represents a single multimethod.
-	'''
-	def __init__(self, name):
-	self._methods = {}
-	self.__name__ = name
+    '''
+    Represents a single multimethod.
+    '''
+    def __init__(self, name):
+    self._methods = {}
+    self.__name__ = name
 
-	def register(self, meth):
-		'''
-		Register a new method as a multimethod
-		'''
-		sig = inspect.signature(meth)
+    def register(self, meth):
+        '''
+        Register a new method as a multimethod
+        '''
+        sig = inspect.signature(meth)
 
-		# Build a type signature from the method's annotations
-		types = []
-		for name, parm in sig.parameters.items():
-			if name == 'self':
-				continue
-			if parm.annotation is inspect.Parameter.empty:
-				raise TypeError(
-					'Argument {} must be annotated with a type'.format(name)
-				)
-			if not isinstance(parm.annotation, type):
-				raise TypeError(
-						'Argument {} annotation must be a type'.format(name)
-				)
-			if parm.default is not inspect.Parameter.empty:
-				self._methods[tuple(types)] = meth
-			types.append(parm.annotation)
-		
-		self._methods[tuple(types)] = meth
-	
-	def __call__(self, *args):
-		'''
-		Call a method based on type signature of the arguments
-		'''
-		types = tuple(type(arg) for arg in args[1:])
-		meth = self._methods.get(types, None)
-		if meth:
-			return meth(*args)
-		else:
-			raise TypeError('No matching method for types {}'.format(types))
-		
-	def __get__(self, instance, cls):
-		'''
-		Descriptor method needed to make calls work in a class
-		'''
-		if instance is not None:
-			return types.MethodType(self, instance)
-		else:
-			return self
+        # Build a type signature from the method's annotations
+        types = []
+        for name, parm in sig.parameters.items():
+            if name == 'self':
+                continue
+            if parm.annotation is inspect.Parameter.empty:
+                raise TypeError(
+                    'Argument {} must be annotated with a type'.format(name)
+                )
+            if not isinstance(parm.annotation, type):
+                raise TypeError(
+                        'Argument {} annotation must be a type'.format(name)
+                )
+            if parm.default is not inspect.Parameter.empty:
+                self._methods[tuple(types)] = meth
+            types.append(parm.annotation)
+        
+        self._methods[tuple(types)] = meth
+    
+    def __call__(self, *args):
+        '''
+        Call a method based on type signature of the arguments
+        '''
+        types = tuple(type(arg) for arg in args[1:])
+        meth = self._methods.get(types, None)
+        if meth:
+            return meth(*args)
+        else:
+            raise TypeError('No matching method for types {}'.format(types))
+        
+    def __get__(self, instance, cls):
+        '''
+        Descriptor method needed to make calls work in a class
+        '''
+        if instance is not None:
+            return types.MethodType(self, instance)
+        else:
+            return self
 
 class MultiDict(dict):
-	'''
-	Special dictionary to build multimethods in a metaclass
-	'''
-	def __setitem__(self, key, value):
-		if key in self:
-			# If key already exists, it must be a multimethod or callable
-			current_value = self[key]
-			if isinstance(current_value, MultiMethod):
-				current_value.register(value)
-			else:
-				mvalue = MultiMethod(key)
-				mvalue.register(current_value)
-				mvalue.register(value)
-				super().__setitem__(key, mvalue)
-		else:
-			super().__setitem__(key, value)
+    '''
+    Special dictionary to build multimethods in a metaclass
+    '''
+    def __setitem__(self, key, value):
+        if key in self:
+            # If key already exists, it must be a multimethod or callable
+            current_value = self[key]
+            if isinstance(current_value, MultiMethod):
+                current_value.register(value)
+            else:
+                mvalue = MultiMethod(key)
+                mvalue.register(current_value)
+                mvalue.register(value)
+                super().__setitem__(key, mvalue)
+        else:
+            super().__setitem__(key, value)
 
 class MultipleMeta(type):
-	'''
-	Metaclass that allows multiple dispatch of methods
-	'''
-	def __new__(cls, clsname, bases, clsdict):
-		return type.__new__(cls, clsname, bases, dict(clsdict))
+    '''
+    Metaclass that allows multiple dispatch of methods
+    '''
+    def __new__(cls, clsname, bases, clsdict):
+        return type.__new__(cls, clsname, bases, dict(clsdict))
 
-	@classmethod
-	def __prepare__(cls, clsname, bases):
-		return MultiDict()
+    @classmethod
+    def __prepare__(cls, clsname, bases):
+        return MultiDict()
 ```
 
 Чтобы использовать этот класс, напишите такой код:
 ```python
 class Spam(metaclass=MultipleMeta):
-	def bar(self, x:int, y:int):
-		print('Bar 1:', x, y)
-	def bar(self, s:str, n:int = 0):
-		print('Bar 2:', s, n)
+    def bar(self, x:int, y:int):
+        print('Bar 1:', x, y)
+    def bar(self, s:str, n:int = 0):
+        print('Bar 2:', s, n)
 
 # Example: overloaded __init__
 import time
 class Date(metaclass=MultipleMeta):
-	def __init__(self, year: int, month:int, day:int):
-		self.year = year
-		self.month = month
-		self.day = day
-	def __init__(self):
-		t = time.localtime()
-		self.__init__(t.tm_year, t.tm_mon, t.tm_mday)
+    def __init__(self, year: int, month:int, day:int):
+        self.year = year
+        self.month = month
+        self.day = day
+    def __init__(self):
+        t = time.localtime()
+        self.__init__(t.tm_year, t.tm_mon, t.tm_mday)
 ```
 
 Вот интерактивный сеанс, в котором мы проверяем, что всё работает:
@@ -15347,9 +15347,9 @@ Bar 2: hello 0
 Bar 2: hello 5
 >>> s.bar(2, 'hello')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "multiple.py", line 42, in __call__
-		raise TypeError('No matching method for types {}'.format(types))
+    File "<stdin>", line 1, in <module>
+    File "multiple.py", line 42, in __call__
+        raise TypeError('No matching method for types {}'.format(types))
 TypeError: No matching method for types (<class 'int'>, <class 'str'>)
 >>> # Overloaded __init__
 >>> d = Date(2012, 12, 21)
@@ -15391,11 +15391,11 @@ Bar 2: hello 0
 ```python
 >>> s.bar(x=2, y=3)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: __call__() got an unexpected keyword argument 'y'
 >>> s.bar(s='hello')
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: __call__() got an unexpected keyword argument 's'
 >>>
 ```
@@ -15405,19 +15405,19 @@ TypeError: __call__() got an unexpected keyword argument 's'
 Этот рецепт также серьёзно ограничен в том, что касается поддержки наследования. Например, что-то такое работать не будет:
 ```python
 class A:
-	pass
+    pass
 
 class B(A):
-	pass
+    pass
 
 class C:
-	pass
+    pass
 
 class Spam(metaclass=MultipleMeta):
-	def foo(self, x:A):
-		print('Foo 1:', x)
-	def foo(self, x:C):
-		print('Foo 2:', x)
+    def foo(self, x:A):
+        print('Foo 1:', x)
+    def foo(self, x:C):
+        print('Foo 2:', x)
 ```
 
 Причина, по которой всё ломается, такова: аннотация *x:A* не совпадает с экземплярами, которые являются подклассами (такими как экземпляры B). Например:
@@ -15432,9 +15432,9 @@ Foo 2: <__main__.C object at 0x1007a1910>
 >>> b = B()
 >>> s.foo(b)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "multiple.py", line 44, in __call__
-		raise TypeError('No matching method for types {}'.format(types))
+    File "<stdin>", line 1, in <module>
+    File "multiple.py", line 44, in __call__
+        raise TypeError('No matching method for types {}'.format(types))
 TypeError: No matching method for types (<class '__main__.B'>,)
 >>>
 ```
@@ -15444,49 +15444,49 @@ TypeError: No matching method for types (<class '__main__.B'>,)
 import types
 
 class multimethod:
-	def __init__(self, func):
-		self._methods = {}
-		self.__name__ = func.__name__
-		self._default = func
+    def __init__(self, func):
+        self._methods = {}
+        self.__name__ = func.__name__
+        self._default = func
 
-	def match(self, *types):
-		def register(func):
-			ndefaults = len(func.__defaults__) if func.__defaults__ else 0
-			for n in range(ndefaults+1):
-				self._methods[types[:len(types) - n]] = func
-			return self
-		return register
+    def match(self, *types):
+        def register(func):
+            ndefaults = len(func.__defaults__) if func.__defaults__ else 0
+            for n in range(ndefaults+1):
+                self._methods[types[:len(types) - n]] = func
+            return self
+        return register
 
-	def __call__(self, *args):
-		types = tuple(type(arg) for arg in args[1:])
-		meth = self._methods.get(types, None)
-		if meth:
-			return meth(*args)
-		else:
-			return self._default(*args)
+    def __call__(self, *args):
+        types = tuple(type(arg) for arg in args[1:])
+        meth = self._methods.get(types, None)
+        if meth:
+            return meth(*args)
+        else:
+            return self._default(*args)
 
-	def __get__(self, instance, cls):
-		if instance is not None:
-			return types.MethodType(self, instance)
-		else:
-			return self
+    def __get__(self, instance, cls):
+        if instance is not None:
+            return types.MethodType(self, instance)
+        else:
+            return self
 ```
 
 Чтобы использовать версию на базе декораторов, напишите такой код:
 ```python
 class Spam:
-	@multimethod
-	def bar(self, *args):
-		# Default method called if no match
-		raise TypeError('No matching method for bar')
-	
-	@bar.match(int, int)
-	def bar(self, x, y):
-		print('Bar 1:', x, y)
-	
-	@bar.match(str, int)
-	def bar(self, s, n = 0):
-		print('Bar 2:', s, n)
+    @multimethod
+    def bar(self, *args):
+        # Default method called if no match
+        raise TypeError('No matching method for bar')
+    
+    @bar.match(int, int)
+    def bar(self, x, y):
+        print('Bar 1:', x, y)
+    
+    @bar.match(str, int)
+    def bar(self, s, n = 0):
+        print('Bar 2:', s, n)
 ```
 
 Решение на базе декораторов страдает от тех же ограничений, что и предыдущая реализация (от отсутствия поддержки именованных аргументов и поломанного наследования).
@@ -15503,54 +15503,54 @@ class Spam:
 Рассмотрите простой класс, в котором атрибуты обёрнуты методами-свойствами:
 ```python
 class Person:
-	def __init__(self, name ,age):
-		self.name = name
-		self.age = age
-	
-	@property
-	def name(self):
-		return self._name
-	
-	@name.setter
-	def name(self, value):
-		if not isinstance(value, str):
-			raise TypeError('name must be a string')
-		self._name = value
-	
-	@property
-	def age(self):
-		return self._age
-	
-	@age.setter
-	def age(self, value):
-		if not isinstance(value, int):
-			raise TypeError('age must be an int')
-		self._age = value
+    def __init__(self, name ,age):
+        self.name = name
+        self.age = age
+    
+    @property
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, value):
+        if not isinstance(value, str):
+            raise TypeError('name must be a string')
+        self._name = value
+    
+    @property
+    def age(self):
+        return self._age
+    
+    @age.setter
+    def age(self, value):
+        if not isinstance(value, int):
+            raise TypeError('age must be an int')
+        self._age = value
 ```
 
 Как вы можете видеть, куча кода написана просто для того, чтобы внедрить принудительную проверку типов значений атрибутов. Всякий раз, когда вы видите такой код, вы должны поискать пути упрощения. Возможный подход — создать функцию, которая просто определяет для вас свойство и возвращает его. Например:
 ```python
 def typed_property(name, expected_type):
-	storage_name = '_' + name
+    storage_name = '_' + name
 
-	@property
-	def prop(self):
-		return getattr(self, storage_name)
+    @property
+    def prop(self):
+        return getattr(self, storage_name)
 
-	@prop.setter
-	def prop(self, value):
-		if not isinstance(value, expected_type):
-			raise TypeError('{} must be a {}'.format(name, expected_type))
-		setattr(self, storage_name, value)
-	return prop
+    @prop.setter
+    def prop(self, value):
+        if not isinstance(value, expected_type):
+            raise TypeError('{} must be a {}'.format(name, expected_type))
+        setattr(self, storage_name, value)
+    return prop
 
 # Example use
 class Person:
-	name = typed_property('name', str)
-	age = typed_property('age', int)
-	def __init__(self, name, age):
-		self.name = name
-		self.age = age
+    name = typed_property('name', str)
+    age = typed_property('age', int)
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
 ```  
 
 ### Обсуждение
@@ -15565,11 +15565,11 @@ Integer = partial(typed_property, expected_type=int)
 
 # Example:
 class Person:
-	name = String('name')
-	age = Integer('age')
-	def __init__(self, name, age):
-		self.name = name
-		self.age = age
+    name = String('name')
+    age = Integer('age')
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
 ```   
 
 Тут код начинает походить на дескриптор системы типов, показанный в **рецепте 8.13.** 
@@ -15586,18 +15586,18 @@ from contextlib import contextmanager
 
 @contextmanager
 def timethis(label):
-	start = time.time()
-	try:
-		yield
-	finally:
-		end = time.time()
-		print('{}: {}'.format(label, end - start))
+    start = time.time()
+    try:
+        yield
+    finally:
+        end = time.time()
+        print('{}: {}'.format(label, end - start))
 
 # Example use
 with timethis('counting'):
-	n = 10000000
-	while n > 0:
-		n -= 1
+    n = 10000000
+    while n > 0:
+        n -= 1
 ``` 
 
 В функции *timethis()* весь код перед *yield* выполняется как метод *__enter__()* менеджера контекста. Весь код после *yield* выполняется как метод *__exit__()*. Если имеет место исключение, оно возбужадается в инструкции yield.
@@ -15606,27 +15606,27 @@ with timethis('counting'):
 ```python
 @contextmanager
 def list_transaction(orig_list):
-	working = list(orig_list)
-	yield working
-	orig_list[:] = working
+    working = list(orig_list)
+    yield working
+    orig_list[:] = working
 ```
 
 Идея в том, что изменения вносятся в список только в том случае, если при выполнении всего блока кода не возбуждаются исключения. Вот пример:
 ```python
 >>> items = [1, 2, 3]
 >>> with list_transaction(items) as working:
-...		working.append(4)
-...		working.append(5)
+...     working.append(4)
+...     working.append(5)
 ...
 >>> items
 [1, 2, 3, 4, 5]
 >>> with list_transaction(items) as working:
 ... working.append(6)
-...	working.append(7)
-...	raise RuntimeError('oops')
+... working.append(7)
+... raise RuntimeError('oops')
 ...
 Traceback (most recent call last):
-	File "<stdin>", line 4, in <module>
+    File "<stdin>", line 4, in <module>
 RuntimeError: oops
 >>> items
 [1, 2, 3, 4, 5]
@@ -15639,13 +15639,13 @@ RuntimeError: oops
 import time
 
 class timethis:
-	def __init__(self, label):
-		self.label = label
-	def __enter__(self):
-		self.start = time.time()
-	def __exit__(self, exc_ty, exc_val, exc_tb):
-		end = time.time()
-		print('{}: {}'.format(self.label, end - self.start))
+    def __init__(self, label):
+        self.label = label
+    def __enter__(self):
+        self.start = time.time()
+    def __exit__(self, exc_ty, exc_val, exc_tb):
+        end = time.time()
+        print('{}: {}'.format(self.label, end - self.start))
 ```
 
 Хотя это несложно, но все же более утомительно, чем писать простые функции с декоратором *@contextmanager*. 
@@ -15670,14 +15670,14 @@ class timethis:
 А теперь попробуем сделать то же самое внутри функции:
 ```python
 >>> def test():
-...		a = 13
-...		exec('b = a + 1')
-...		print(b)
+...     a = 13
+...     exec('b = a + 1')
+...     print(b)
 ...
 >>> test()
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	ile "<stdin>", line 4, in test
+    File "<stdin>", line 1, in <module>
+    ile "<stdin>", line 4, in test
 NameError: global name 'b' is not defined
 >>>
 ```
@@ -15687,11 +15687,11 @@ NameError: global name 'b' is not defined
 Чтобы исправить проблемы такого типа, вам нужна функция *locals()*. Она позволяет получить словарь локальных переменных перед вызовом *exec()*. Сразу после вы можете извлечь изменённые значения из этого словаря. Например:
 ```python
 >>> def test():
-...		a = 13
-...		loc = locals()
-...		exec('b = a + 1')
-...		b = loc['b']
-...		print(b)
+...     a = 13
+...     loc = locals()
+...     exec('b = a + 1')
+...     b = loc['b']
+...     print(b)
 ...
 >>> test()
 14
@@ -15704,9 +15704,9 @@ NameError: global name 'b' is not defined
 Однако если вы должны использовать именно *exec()*, этот рецепт подчёркивает некоторые тонкие аспекты того, как делать это правильно. По умолчанию *exec()* выполняет код в локальной и глобальной области видимости вызывающего. Однако внутри функций локальная область видимости передаётся в *exec()* как словарь, который является копией настоящих локальных переменных. Так что если код, который выполняется в *exec()*, вносит какие-либо изменения, эти изменения никогда не отражаются на настоящих локальных переменных. Вот ещё один пример, который демонстрирует этот эффект:
 ```python
 >>> def test1():
-... 	x = 0
-...		exec('x += 1')
-...		print(x)
+...     x = 0
+...     exec('x += 1')
+...     print(x)
 ...
 >>> test1()
 0
@@ -15716,12 +15716,12 @@ NameError: global name 'b' is not defined
 Когда вы вызываете *locals()*, чтобы получить локальные переменные, как показано в решении, вы получаете копию, которая передана в *exec()*. Путём инспектирования значений словаря после выполнения вы можете получить изменённые значения. Вот эксперимент, который это демонстрирует:
 ```python
 >>> def test2():
-...		x = 0
-...		loc = locals()
-...		print('before:', loc)
-...		exec('x += 1')
-...		print('after:', loc)
-...		print('x =', x)
+...     x = 0
+...     loc = locals()
+...     print('before:', loc)
+...     exec('x += 1')
+...     print('after:', loc)
+...     print('x =', x)
 ...
 >>> test2()
 before: {'x': 0}
@@ -15735,13 +15735,13 @@ x = 0
 При любом использовании *locals()* вам нужно быть следить за порядком выполнения операций. Каждый раз, когда locals() вызывается, она берёт текущие значения локальных переменных и переписывает соответствующие записи в словаре. Понаблюдайте за этим экспериментом:
 ```python
 >>> def test3():
-...		x = 0
-...		loc = locals()
-...		print(loc)
-...		exec('x += 1')
-...		print(loc)
-...		locals()
-...		print(loc)
+...     x = 0
+...     loc = locals()
+...     print(loc)
+...     exec('x += 1')
+...     print(loc)
+...     locals()
+...     print(loc)
 ...
 >>> test3()
 {'x': 0}
@@ -15755,12 +15755,12 @@ x = 0
 В качестве альтернативы использованию *locals()*, вы можете создать собственный словарь и передать его в *exec()*. Например:
 ```python
 >>> def test4():
-...		a = 13
-...		loc = { 'a' : a }
-...		glb = { }
-...		exec('b = a + 1', glb, loc)
-...		b = loc['b']
-...		print(b)
+...     a = 13
+...     loc = { 'a' : a }
+...     glb = { }
+...     exec('b = a + 1', glb, loc)
+...     b = loc['b']
+...     print(b)
 ...
 >>> test4()
 14
@@ -15825,35 +15825,35 @@ kwargs=None))], orelse=[])])"
 import ast
 
 class CodeAnalyzer(ast.NodeVisitor):
-	def __init__(self):
-		self.loaded = set()
-		self.stored = set()
-		self.deleted = set()
-	def visit_Name(self, node):
-		if isinstance(node.ctx, ast.Load):
-			self.loaded.add(node.id)
-		elif isinstance(node.ctx, ast.Store):
-			self.stored.add(node.id)
-		elif isinstance(node.ctx, ast.Del):
-			self.deleted.add(node.id)
+    def __init__(self):
+        self.loaded = set()
+        self.stored = set()
+        self.deleted = set()
+    def visit_Name(self, node):
+        if isinstance(node.ctx, ast.Load):
+            self.loaded.add(node.id)
+        elif isinstance(node.ctx, ast.Store):
+            self.stored.add(node.id)
+        elif isinstance(node.ctx, ast.Del):
+            self.deleted.add(node.id)
 
 # Sample usage
 if __name__ == '__main__':
-	# Some Python code
-	code = '''
+    # Some Python code
+    code = '''
 for i in range(10):
-	print(i)
+    print(i)
 del i
 '''
-	# Parse into an AST
-	top = ast.parse(code, mode='exec')
+    # Parse into an AST
+    top = ast.parse(code, mode='exec')
 
-	# Feed the AST to analyze name usage
-	c = CodeAnalyzer()
-	c.visit(top)
-	print('Loaded:', c.loaded)
-	print('Stored:', c.stored)
-	print('Deleted:', c.deleted)
+    # Feed the AST to analyze name usage
+    c = CodeAnalyzer()
+    c.visit(top)
+    print('Loaded:', c.loaded)
+    print('Stored:', c.stored)
+    print('Deleted:', c.deleted)
 ```
 
 Если вы запустите эту программу, то получите такой вывод:
@@ -15890,50 +15890,50 @@ import inspect
 # Node visitor that lowers globally accessed names into
 # the function body as local variables.
 class NameLower(ast.NodeVisitor):
-	def __init__(self, lowered_names):
-		self.lowered_names = lowered_names
-	
-	def visit_FunctionDef(self, node):
-	# Compile some assignments to lower the constants
-		code = '__globals = globals()\n'
-		code += '\n'.join("{0} = __globals['{0}']".format(name)
-					 	  for name in self.lowered_names)
-	 
-	code_ast = ast.parse(code, mode='exec')
-	
-	# Inject new statements into the function body
-	node.body[:0] = code_ast.body
-	
-	# Save the function object
-	self.func = node
+    def __init__(self, lowered_names):
+        self.lowered_names = lowered_names
+    
+    def visit_FunctionDef(self, node):
+    # Compile some assignments to lower the constants
+        code = '__globals = globals()\n'
+        code += '\n'.join("{0} = __globals['{0}']".format(name)
+                          for name in self.lowered_names)
+     
+    code_ast = ast.parse(code, mode='exec')
+    
+    # Inject new statements into the function body
+    node.body[:0] = code_ast.body
+    
+    # Save the function object
+    self.func = node
 
 # Decorator that turns global names into locals
 def lower_names(*namelist):
-	def lower(func):
-		srclines = inspect.getsource(func).splitlines()
-		# Skip source lines prior to the @lower_names decorator
-		for n, line in enumerate(srclines):
-			if '@lower_names' in line:
-				break
-	
-		src = '\n'.join(srclines[n+1:])
-		# Hack to deal with indented code
-		if src.startswith((' ','\t')):
-			src = 'if 1:\n' + src
-		top = ast.parse(src, mode='exec')
-		
-		# Transform the AST
-		cl = NameLower(namelist)
-		cl.visit(top)
-		
-		# Execute the modified AST
-		temp = {}
-		exec(compile(top,'','exec'), temp, temp)
-		
-		# Pull out the modified code object
-		func.__code__ = temp[func.__name__].__code__
-		return func
-	return lower
+    def lower(func):
+        srclines = inspect.getsource(func).splitlines()
+        # Skip source lines prior to the @lower_names decorator
+        for n, line in enumerate(srclines):
+            if '@lower_names' in line:
+                break
+    
+        src = '\n'.join(srclines[n+1:])
+        # Hack to deal with indented code
+        if src.startswith((' ','\t')):
+            src = 'if 1:\n' + src
+        top = ast.parse(src, mode='exec')
+        
+        # Transform the AST
+        cl = NameLower(namelist)
+        cl.visit(top)
+        
+        # Execute the modified AST
+        temp = {}
+        exec(compile(top,'','exec'), temp, temp)
+        
+        # Pull out the modified code object
+        func.__code__ = temp[func.__name__].__code__
+        return func
+    return lower
 ```
 
 Чтобы использовать этот код, вы могли бы написать что-то такое:
@@ -15942,17 +15942,17 @@ INCR = 1
 
 @lower_names('INCR')
 def countdown(n):
-	while n > 0:
-		n -= INCR
+    while n > 0:
+        n -= INCR
 ```
 
 Декоратор переписывает исходный функции *countdown()*, чтобы она выглядела так:
 ```python
 def countdown(n):
-	__globals = globals()
-	INCR = __globals['INCR']
-	while n > 0:
-		n -= INCR
+    __globals = globals()
+    INCR = __globals['INCR']
+    while n > 0:
+        n -= INCR
 ```
 
 В тесте производительности выяснилось, что это заставило функцию работать на 20% быстрее. 
@@ -15970,37 +15970,37 @@ def countdown(n):
 ```python
 >>> def countdown(n):
 ... while n > 0:
-... 	print('T-minus', n)
-...		n -= 1
-...	print('Blastoff!')
+...     print('T-minus', n)
+...     n -= 1
+... print('Blastoff!')
 ...
 >>> import dis
 >>> dis.dis(countdown)
-2		0 SETUP_LOOP				39 (to 42)
-	>>	3 LOAD_FAST					0 (n)
-		6 LOAD_CONST   				1 (0)
-		9 COMPARE_OP				4 (>)
-		12 POP_JUMP_IF_FALSE	   41
+2       0 SETUP_LOOP                39 (to 42)
+    >>  3 LOAD_FAST                 0 (n)
+        6 LOAD_CONST                1 (0)
+        9 COMPARE_OP                4 (>)
+        12 POP_JUMP_IF_FALSE       41
 
-3		15 LOAD_GLOBAL				0 (print)
-		18 LOAD_CONST				2 ('T-minus')
-		21 LOAD_FAST				0 (n)
-		24 CALL_FUNCTION			2 (2 positional, 0 keyword pair)
-		27 POP_TOP	
+3       15 LOAD_GLOBAL              0 (print)
+        18 LOAD_CONST               2 ('T-minus')
+        21 LOAD_FAST                0 (n)
+        24 CALL_FUNCTION            2 (2 positional, 0 keyword pair)
+        27 POP_TOP  
 
-4 		28 LOAD_FAST				0 (n)
-		31 LOAD_CONST				3 (1)
-		34 INPLACE_SUBTRACT			
-		35 STORE_FAST				0 (n)
-		38 JUMP_ABSOLUTE			3
-	>>	41 POP_BLOCK
+4       28 LOAD_FAST                0 (n)
+        31 LOAD_CONST               3 (1)
+        34 INPLACE_SUBTRACT         
+        35 STORE_FAST               0 (n)
+        38 JUMP_ABSOLUTE            3
+    >>  41 POP_BLOCK
 
-5	>>	LOAD_GLOBAL 				0 (print)
-		LOAD_CONST					4 ('Blastoff!')
-		CALL_FUNCTION				1 (1 positional, 0 keyword pair)
-		POP_TOP
-		LOAD_CONST					0 (None)
-		RETURN_VALUE
+5   >>  LOAD_GLOBAL                 0 (print)
+        LOAD_CONST                  4 ('Blastoff!')
+        CALL_FUNCTION               1 (1 positional, 0 keyword pair)
+        POP_TOP
+        LOAD_CONST                  0 (None)
+        RETURN_VALUE
 >>>
 ``` 
 
@@ -16033,28 +16033,28 @@ b"x'\x00|\x00\x00d\x01\x00k\x04\x00r)\x00t\x00\x00d\x02\x00|\x00\x00\x83
 import opcode
 
 def generate_opcodes(codebytes):
-	extended_arg = 0
-	i = 0
-	n = len(codebytes)
-	while i < n:
-		op = codebytes[i]
-		i += 1
-		if op >= opcode.HAVE_ARGUMENT:
-			oparg = codebytes[i] + codebytes[i+1]*256 + extended_arg
-			extended_arg = 0
-			i += 2
-			if op == opcode.EXTENDED_ARG:
-				extended_arg = oparg * 65536
-				continue
-		else:
-			oparg = None
-	yield (op, oparg)
+    extended_arg = 0
+    i = 0
+    n = len(codebytes)
+    while i < n:
+        op = codebytes[i]
+        i += 1
+        if op >= opcode.HAVE_ARGUMENT:
+            oparg = codebytes[i] + codebytes[i+1]*256 + extended_arg
+            extended_arg = 0
+            i += 2
+            if op == opcode.EXTENDED_ARG:
+                extended_arg = oparg * 65536
+                continue
+        else:
+            oparg = None
+    yield (op, oparg)
 ```
 
 Чтобы использовать эту функцию, напишите такой код:
 ```python
 >>> for op, oparg in generate_opcodes(countdown.__code__.co_code):
-...		print(op, opcode.opname[op], oparg)
+...     print(op, opcode.opname[op], oparg)
 ...
 120 SETUP_LOOP 39
 124 LOAD_FAST 0
@@ -16084,7 +16084,7 @@ def generate_opcodes(codebytes):
 Это малоизвестный факт, но вы можете заменить сырой байт-код любой функции, какой пожелаете. Это требует некоторых усилий, но вот пример того, как это работает:
 ```python
 >>> def add(x, y):
-...		return x + y
+...     return x + y
 ...
 >>> c = add.__code__
 >>> c
@@ -16096,9 +16096,9 @@ b'|\x00\x00|\x01\x00\x17S'
 >>> import types
 >>> newbytecode = b'xxxxxxx'
 >>> nc = types.CodeType(c.co_argcount, c.co_kwonlyargcount,
-...		c.co_nlocals, c.co_stacksize, c.co_flags, newbytecode, c.co_consts,
-...		c.co_names, c.co_varnames, c.co_filename, c.co_name,
-...		c.co_firstlineno, c.co_lnotab)
+...     c.co_nlocals, c.co_stacksize, c.co_flags, newbytecode, c.co_consts,
+...     c.co_names, c.co_varnames, c.co_filename, c.co_name,
+...     c.co_firstlineno, c.co_lnotab)
 >>> nc
 <code object add at 0x10069fe40, file "<stdin>", line 1>
 >>> add.__code__ = nc
@@ -16120,16 +16120,16 @@ Segmentation fault
 Создать структуру пакета очень просто. Просто организуйте ваш код в структуре каталогов и убедитесь, что каждый каталог содержит файл *__init__.py*. Например:
 ```
 graphics/
-	__init__.py
-	primitive/
-		__init__.py
-		line.py
-		fill.py
-		text.py
-	formats/
-		__init__.py
-		png.py
-		jpg.py
+    __init__.py
+    primitive/
+        __init__.py
+        line.py
+        fill.py
+        text.py
+    formats/
+        __init__.py
+        png.py
+        jpg.py
 ``` 
 
 Сразу после этого вы сможете выполнять различные инструкции *import*, такие как:
@@ -16166,10 +16166,10 @@ from . import png
 ```python
 # somemodule.py
 def spam():
-	pass
+    pass
 
 def grok():
-	pass
+    pass
 
 blah = 42
 
@@ -16190,15 +16190,15 @@ __all__ = ['spam', 'grok']
 Чтобы импортировать модули пакета из других модулей в том же пакете, используйте импортирование относительно пакета. Предположим, например, что у вас есть пакет *mypackage*, который организован следующим образом:
 ```
 mypackage/
-	__init__.py
+    __init__.py
 A/
-	__init__.py
-	spam.py
-	grok.py
+    __init__.py
+    spam.py
+    grok.py
 В/
-	__init__.py
-	bar.py
-```	
+    __init__.py
+    bar.py
+``` 
 
 Если модуль *mypackage.A.spam* пожелает импортировать модуль *grok*, размещённый в том же каталоге, он должен будет обзавестись такой инструкцией:
 ```python
@@ -16220,17 +16220,17 @@ from ..B import bar
 Внутри пакетов импортирование, задействующее модули того же пакета, может использовать либо полные абсолютные имена, либо относительное импортирование через показанный выше синтаксис. Например:
 ```python
 # mypackage/A/spam.py
-from mypackage.A import grok 	# ОК
-from . import grok 				# OK
-import grok 					# Error (not found)
+from mypackage.A import grok    # ОК
+from . import grok              # OK
+import grok                     # Error (not found)
 ``` 
 
 Недостаток использования абсолютного имени, такого как *mypackage.A*, заключается в том, что оно «хардкодит» имя пакета высшего уровня в исходный код. Это, в свою очередь, делает ваш код более хрупким и затрудняет работу по реорганизации. Например, если вы когда-либо захотите поменять имя пакета, вам придется пройтись по всем файлам и поправить исходный код. Похожим образом жестко прописанные имена затрудняют перемещение кода. Например, если кто-то захочет установить две разных версии пакета под различными именами, то при использовании относительного импортирования всё будет работать хорошо, но абсолютные имена не позволят этого сделать.
 
 Синтаксис инструкции *import* . и .. может показаться забавным, но предлагаем вам думать о нём как об определении имени каталога. . значит «ищи в текущем каталоге», а .. — «ищи в каталоге /B». Этот синтаксис работает только с формой *from*. Например:
 ```python
-from . import grok 		# OK
-import .grok 			# ERROR
+from . import grok      # OK
+import .grok            # ERROR
 ``` 
 
 Хотя это выглядит так, будто вы можете перемещаться по файловой системе через относительное импортирование, но на самом деле это не позволит вам выйти из каталога, в котором определён пакет. Это означает, что комбинирование имён с точками, которое заставляет производить импортирование из-за пределов пакета, вызовет ошибку. 
@@ -16240,20 +16240,20 @@ import .grok 			# ERROR
 # mymodule.py
 
 class A:
-	def spam(self):
-		print('A.spam')
+    def spam(self):
+        print('A.spam')
 
 class B(A):
-	def bar(self):
-		print('B.bar')
+    def bar(self):
+        print('B.bar')
 ```
 
 Предположим, что вы хотите разделить *mymodule.py* на два файла, по одному на каждое опеределение класса. Чтобы это сделать, начните с замены файла *mymodule.py* на каталог с именем *mymodule*. В этом каталоге создайте следующие файлы:
 ```
 mymodule/
-	__init__.py
-	a.py
-	b.py
+    __init__.py
+    a.py
+    b.py
 ```
 
 В файл *a.py* поместите этот код:
@@ -16261,8 +16261,8 @@ mymodule/
 # a.py
 
 class A:
-	def spam(self):
-		print('A.spam')
+    def spam(self):
+        print('A.spam')
 ``` 
 
 В файл *b.py* поместите этот код:
@@ -16272,8 +16272,8 @@ class A:
 from .a import A
 
 class B(A):
-	def bar(self):
-		print('B.bar')
+    def bar(self):
+        print('B.bar')
 ``` 
 
 И, наконец, склейте в файле *__init__.py* оба эти файла:
@@ -16320,12 +16320,12 @@ from mymodule import A, B
 # __init__.py
 
 def A():
-	from .a import A
-	return A()
+    from .a import A
+    return A()
 
 def B():
-	from .b import B
-	return B()
+    from .b import B
+    return B()
 ``` 
 
 В этой версии классы *A* и *B* заменены функциями, которые загружают нужные классы при первом доступе к ним. С точки зрения пользователя это не слишком большое отличие. Например:
@@ -16339,10 +16339,10 @@ A.spam
 
 Главный недостаток ленивой загрузки в том, что могут поломаться наследования и проверка типов. Например, вы могли бы немного изменить код:
 ```python
-if isinstance(x, mymodule.A):		# Error
-	...
-if isinstance(x, mymodule.a.A): 	# Ok
-	...
+if isinstance(x, mymodule.A):       # Error
+    ...
+if isinstance(x, mymodule.a.A):     # Ok
+    ...
 ```
 
 Если вам нужен пример ленивой загрузки из реального мира, посмотрите на исходный код *multiprocessing/__init__.py* в стандартной библиотеке.
@@ -16357,12 +16357,12 @@ if isinstance(x, mymodule.a.A): 	# Ok
 Чтобы объединить отдельные каталоги под общим пространством имён, вы должны организовать код так же, как и в обычном пакете Python, но опустить файлы *__init__.py* в каталогах, где компоненты будут объединяться. Предположим, у вас есть два различных каталога с кодом Python:
 ```
 foo-package/
-	spam/
-		blah.py
+    spam/
+        blah.py
 
 bar-package/
-	spam/
-		grok.py
+    spam/
+        grok.py
 ```
 
 В этих каталогах имя *spam* используется как общее пространство имён. Обратите внимание, что файл *__init__.py* отсутствует в обоих каталогах.
@@ -16395,8 +16395,8 @@ _NamespacePath(['foo-package/spam', 'bar-package/spam'])
 Важная возможность пакетов пространств имён заключается в том, что кто угодно может расширить пространство имён своим собственным кодом. Например, предположим, что вы создали собственный каталог с кодом:
 ```
 my-package/
-	spam/
-		custom.py
+    spam/
+        custom.py
 ``` 
 
 Если вы добавите ваш каталог в *sys.path* вместе с другими пакетами, он бесшовно сольется с другими каталогами пакета *spam*:
@@ -16411,7 +16411,7 @@ my-package/
 ```python
 >>> spam.__file__
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 AttributeError: 'module' object has no attribute '__file__'
 >>> spam
 <module 'spam' (namespace)>
@@ -16444,10 +16444,10 @@ AttributeError: 'module' object has no attribute '__file__'
 # spam.py
 
 def bar():
-	print('bar')
+    print('bar')
 
 def grok():
-	print('grok')
+    print('grok')
 ```
 
 Теперь начнём интерактивный сеанс:
@@ -16464,7 +16464,7 @@ grok
 Не покидая Python, отредактируйте исходный код *spam.py* так, чтобы функция *grok()* стала такой:
 ```python
 def grok():
-	print('New grok')
+    print('New grok')
 ```
 
 Теперь вернитесь к интерактивному сеансу, выполните перезагрузку и попробуйте провести такой эксперимент:
@@ -16474,9 +16474,9 @@ def grok():
 <module 'spam' from './spam.py'>
 >>> spam.bar()
 bar
->>> grok() 			# Notice old output
+>>> grok()          # Notice old output
 grok
->>> spam.grok()		# Notice new output
+>>> spam.grok()     # Notice new output
 New grok
 >>>
 ```
@@ -16493,10 +16493,10 @@ New grok
 Если ваше приложение выросло в набор из множества файлов, вы можете поместить его в собственный каталог и добавить в него файл *__main__.py*. Например, вы можете создать такой каталог:
 ```
 myapplication/
-	spam.py
-	bar.py
-	grok.py
-	__main__.py
+    spam.py
+    bar.py
+    grok.py
+    __main__.py
 ```
 
 Если файл *__main__.py* присутствует, вы просто запускаете интерпретатор Python в каталоге высшего уровня:
@@ -16534,9 +16534,9 @@ bash % python3 myapp.zip
 Предположим, что у вас есть пакет с такой организацией файлов:
 ```
 mypackage/
-	__init__.py
-	somedata.dat
-	spam.py
+    __init__.py
+    somedata.dat
+    spam.py
 ```
 
 Теперь предположим, что файл *spam.py* хочет прочитать содержимое файла *somedata.dat*. Чтобы это сделать, используйте такой код:
@@ -16652,11 +16652,11 @@ b = importlib.import_module('.b', __package__)
 В сердце этого рецепта лежит желание расширить функциональность инструкции *import*. Есть несколько подходов к тому, как можно это сделать, но для наглядности начнём с создания такого каталога с кодом Python:
 ```
 testcode/
-	spam.py
-	fib.py
-	grok/
-		__init__.py
-		blah.py
+    spam.py
+    fib.py
+    grok/
+        __init__.py
+        blah.py
 ```  
 
 Содержимое этих файлов не имеет значения, но поместим в каждый из них несколько простых инструкций и функций, чтобы вы могли их потестировать и посмотреть на получающийся при импортировании вывод. Например:
@@ -16665,16 +16665,16 @@ testcode/
 print("I'm spam")
 
 def hello(name):
-	print('Hello %s' % name)
+    print('Hello %s' % name)
 
 # fib.py
 print("I'm fib")
 
 def fib(n):
-	if n < 2:
-		return 1
-	else:
-		return fib(n-1) + fib(n-2)
+    if n < 2:
+        return 1
+    else:
+        return fib(n-1) + fib(n-2)
 
 # grok/__init__.py
 print("I'm grok.__init__")
@@ -16699,10 +16699,10 @@ Serving HTTP on 0.0.0.0 port 15000 ...
 print("I'm fib")
 
 def fib(n):
-	if n < 2:
-		return 1
-	else:
-		return fib(n-1) + fib(n-2)
+    if n < 2:
+        return 1
+    else:
+        return fib(n-1) + fib(n-2)
 >>>
 ```
 
@@ -16715,14 +16715,14 @@ import urllib.request
 import sys
 
 def load_module(url):
-	u = urllib.request.urlopen(url)
-	source = u.read().decode('utf-8')
-	mod = sys.modules.setdefault(url, imp.new_module(url))
-	code = compile(source, url, 'exec')
-	mod.__file__ = url
-	mod.__package__ = ''
-	exec(code, mod.__dict__)
-	return mod
+    u = urllib.request.urlopen(url)
+    source = u.read().decode('utf-8')
+    mod = sys.modules.setdefault(url, imp.new_module(url))
+    code = compile(source, url, 'exec')
+    mod.__file__ = url
+    mod.__package__ = ''
+    exec(code, mod.__dict__)
+    return mod
 ```
 
 Эта функция просто загружает исходный код, компилирует его в объект кода, используя *compile()*, а затем выполняет словарь созданного объекта модуля. Вот как вы могли бы использовать эту функцию:
@@ -16761,152 +16761,152 @@ log = logging.getLogger(__name__)
 
 # Get links from a given URL
 def _get_links(url):
-	class LinkParser(HTMLParser):
-		def handle_starttag(self, tag, attrs):	
-			if tag == 'a':
-				attrs = dict(attrs)
-				links.add(attrs.get('href').rstrip('/'))
-	links = set()
-	try:
-		log.debug('Getting links from %s' % url)
-		u = urlopen(url)
-		parser = LinkParser()
-		parser.feed(u.read().decode('utf-8'))
-	except Exception as e:
-		log.debug('Could not get links. %s', e)
-	log.debug('links: %r', links)
-	return links
+    class LinkParser(HTMLParser):
+        def handle_starttag(self, tag, attrs):  
+            if tag == 'a':
+                attrs = dict(attrs)
+                links.add(attrs.get('href').rstrip('/'))
+    links = set()
+    try:
+        log.debug('Getting links from %s' % url)
+        u = urlopen(url)
+        parser = LinkParser()
+        parser.feed(u.read().decode('utf-8'))
+    except Exception as e:
+        log.debug('Could not get links. %s', e)
+    log.debug('links: %r', links)
+    return links
 
 
 class UrlMetaFinder(importlib.abc.MetaPathFinder):
-	def __init__(self, baseurl):
-		self._baseurl = baseurl
-		self._links	= { }
-		self._loaders = { baseurl : UrlModuleLoader(baseurl) }
+    def __init__(self, baseurl):
+        self._baseurl = baseurl
+        self._links = { }
+        self._loaders = { baseurl : UrlModuleLoader(baseurl) }
 
-	def find_module(self, fullname, path=None):
-		log.debug('find_module: fullname=%r, path=%r', fullname, path)
-		if path is None:
-			baseurl = self._baseurl
-		else:
-			if not path[0].startswith(self._baseurl):
-				return None
-			baseurl = path[0]
-		
-		parts = fullname.split('.')
-		basename = parts[-1]
-		log.debug('find_module: baseurl=%r, basename=%r', baseurl, basename)
-		
-		# Check link cache
-		if basename not in self._links:
-			self._links[baseurl] = _get_links(baseurl)
-		
-		# Check if it's a package
-		if basename in self._links[baseurl]:
-			log.debug('find_module: trying package %r', fullname)
-			fullurl = self._baseurl + '/' + basename
-			# Attempt to load the package (which accesses __init__.py)
-			loader = UrlPackageLoader(fullurl)
-			try:
-				loader.load_module(fullname)
-				self._links[fullurl] = _get_links(fullurl)
-				self._loaders[fullurl] = UrlModuleLoader(fullurl)
-				log.debug('find_module: package %r loaded', fullname)
-			except ImportError as e:
-				log.debug('find_module: package failed. %s', e)
-				loader = None
-			return loader
-	
-		# A normal module
-		filename = basename + '.py'
-		if filename in self._links[baseurl]:
-			log.debug('find_module: module %r found', fullname)
-			return self._loaders[baseurl]
-		else:
-			log.debug('find_module: module %r not found', fullname)
-			return None
-	
-	def invalidate_caches(self):
-		log.debug('invalidating link cache')
-		self._links.clear()
+    def find_module(self, fullname, path=None):
+        log.debug('find_module: fullname=%r, path=%r', fullname, path)
+        if path is None:
+            baseurl = self._baseurl
+        else:
+            if not path[0].startswith(self._baseurl):
+                return None
+            baseurl = path[0]
+        
+        parts = fullname.split('.')
+        basename = parts[-1]
+        log.debug('find_module: baseurl=%r, basename=%r', baseurl, basename)
+        
+        # Check link cache
+        if basename not in self._links:
+            self._links[baseurl] = _get_links(baseurl)
+        
+        # Check if it's a package
+        if basename in self._links[baseurl]:
+            log.debug('find_module: trying package %r', fullname)
+            fullurl = self._baseurl + '/' + basename
+            # Attempt to load the package (which accesses __init__.py)
+            loader = UrlPackageLoader(fullurl)
+            try:
+                loader.load_module(fullname)
+                self._links[fullurl] = _get_links(fullurl)
+                self._loaders[fullurl] = UrlModuleLoader(fullurl)
+                log.debug('find_module: package %r loaded', fullname)
+            except ImportError as e:
+                log.debug('find_module: package failed. %s', e)
+                loader = None
+            return loader
+    
+        # A normal module
+        filename = basename + '.py'
+        if filename in self._links[baseurl]:
+            log.debug('find_module: module %r found', fullname)
+            return self._loaders[baseurl]
+        else:
+            log.debug('find_module: module %r not found', fullname)
+            return None
+    
+    def invalidate_caches(self):
+        log.debug('invalidating link cache')
+        self._links.clear()
 
 
 # Module Loader for a URL
 class UrlModuleLoader(importlib.abc.SourceLoader):
-	def __init__(self, baseurl):
-		self._baseurl = baseurl
-		self._source_cache = {}
-	
-	def module_repr(self, module):
-		return '<urlmodule %r from %r>' % (module.__name__, module.__file__)
+    def __init__(self, baseurl):
+        self._baseurl = baseurl
+        self._source_cache = {}
+    
+    def module_repr(self, module):
+        return '<urlmodule %r from %r>' % (module.__name__, module.__file__)
 
-	# Required method
-	def load_module(self, fullname):
-		code = self.get_code(fullname)
-		mod = sys.modules.setdefault(fullname, imp.new_module(fullname))
-		mod.__file__ = self.get_filename(fullname)
-		mod.__loader__ = self
-		mod.__package__ = fullname.rpartition('.')[0]
-		exec(code, mod.__dict__)
-		return mod
+    # Required method
+    def load_module(self, fullname):
+        code = self.get_code(fullname)
+        mod = sys.modules.setdefault(fullname, imp.new_module(fullname))
+        mod.__file__ = self.get_filename(fullname)
+        mod.__loader__ = self
+        mod.__package__ = fullname.rpartition('.')[0]
+        exec(code, mod.__dict__)
+        return mod
 
-	# Optional extensions
-	def get_code(self, fullname):
-		src = self.get_source(fullname)
-		return compile(src, self.get_filename(fullname), 'exec')
-	
-	def get_data(self, path):
-		pass
-	
-	def get_filename(self, fullname):
-		return self._baseurl + '/' + fullname.split('.')[-1] + '.py'
-	
-	def get_source(self, fullname):
-		filename = self.get_filename(fullname)
-		log.debug('loader: reading %r', filename)
-		if filename in self._source_cache:
-			log.debug('loader: cached %r', filename)
-			return self._source_cache[filename]
-		try:
-			u = urlopen(filename)
-			source = u.read().decode('utf-8')
-			log.debug('loader: %r loaded', filename)
-			self._source_cache[filename] = source
-			return source
-		except (HTTPError, URLError) as e:
-			log.debug('loader: %r failed. %s', filename, e)
-			raise ImportError("Can't load %s" % filename)	
-		
-	def is_package(self, fullname):
-		return False
+    # Optional extensions
+    def get_code(self, fullname):
+        src = self.get_source(fullname)
+        return compile(src, self.get_filename(fullname), 'exec')
+    
+    def get_data(self, path):
+        pass
+    
+    def get_filename(self, fullname):
+        return self._baseurl + '/' + fullname.split('.')[-1] + '.py'
+    
+    def get_source(self, fullname):
+        filename = self.get_filename(fullname)
+        log.debug('loader: reading %r', filename)
+        if filename in self._source_cache:
+            log.debug('loader: cached %r', filename)
+            return self._source_cache[filename]
+        try:
+            u = urlopen(filename)
+            source = u.read().decode('utf-8')
+            log.debug('loader: %r loaded', filename)
+            self._source_cache[filename] = source
+            return source
+        except (HTTPError, URLError) as e:
+            log.debug('loader: %r failed. %s', filename, e)
+            raise ImportError("Can't load %s" % filename)   
+        
+    def is_package(self, fullname):
+        return False
 
 # Package loader for a URL
 class UrlPackageLoader(UrlModuleLoader):
-	def load_module(self, fullname):
-		mod = super().load_module(fullname)
-		mod.__path__ = [ self._baseurl ]
-		mod.__package__ = fullname
-	
-	def get_filename(self, fullname):
-		return self._baseurl + '/' + '__init__.py'
-	
-	def is_package(self, fullname):
-		return True
+    def load_module(self, fullname):
+        mod = super().load_module(fullname)
+        mod.__path__ = [ self._baseurl ]
+        mod.__package__ = fullname
+    
+    def get_filename(self, fullname):
+        return self._baseurl + '/' + '__init__.py'
+    
+    def is_package(self, fullname):
+        return True
 
 # Utility functions for installing/uninstalling the loader
 _installed_meta_cache = { }
 def install_meta(address):
-	if address not in _installed_meta_cache:
-		finder = UrlMetaFinder(address)
-		_installed_meta_cache[address] = finder
-		sys.meta_path.append(finder)
-		log.debug('%r installed on sys.meta_path', finder)
+    if address not in _installed_meta_cache:
+        finder = UrlMetaFinder(address)
+        _installed_meta_cache[address] = finder
+        sys.meta_path.append(finder)
+        log.debug('%r installed on sys.meta_path', finder)
 
 def remove_meta(address):
-	if address in _installed_meta_cache:
-		finder = _installed_meta_cache.pop(address)
-		sys.meta_path.remove(finder)
-		log.debug('%r removed from sys.meta_path', finder)
+    if address in _installed_meta_cache:
+        finder = _installed_meta_cache.pop(address)
+        sys.meta_path.remove(finder)
+        log.debug('%r removed from sys.meta_path', finder)
 ```  
 
 Вот пример интерактивной сессии, показывающей, как использовать приведённый выше код:
@@ -16914,7 +16914,7 @@ def remove_meta(address):
 >>> # importing currently fails
 >>> import fib
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 
 >>> # Load the importer and retry (it works)
@@ -16944,70 +16944,70 @@ I'm grok.blah
 
 # Path finder class for a URL
 class UrlPathFinder(importlib.abc.PathEntryFinder):
-	def __init__(self, baseurl):
-		self._links = None
-		self._loader = UrlModuleLoader(baseurl)
-		self._baseurl = baseurl
-		
-	def find_loader(self, fullname):
-		log.debug('find_loader: %r', fullname)
-		parts = fullname.split('.')
-		basename = parts[-1]
-		# Check link cache
-		if self._links is None:
-			self._links = [] 		# See discussion
-			self._links = _get_links(self._baseurl)
-		
-		# Check if it's a package
-		if basename in self._links:
-			log.debug('find_loader: trying package %r', fullname)
-			fullurl = self._baseurl + '/' + basename
-			# Attempt to load the package (which accesses __init__.py)
-			loader = UrlPackageLoader(fullurl)
-			try:
-				loader.load_module(fullname)
-				log.debug('find_loader: package %r loaded', fullname)
-			except ImportError as e:
-				log.debug('find_loader: %r is a namespace package', fullname)
-				loader = None
-			return (loader, [fullurl])
-	
-		# A normal module
-		filename = basename + '.py'
-		if filename in self._links:
-			log.debug('find_loader: module %r found', fullname)
-			return (self._loader, [])
-		else:
-			log.debug('find_loader: module %r not found', fullname)
-			return (None, [])
+    def __init__(self, baseurl):
+        self._links = None
+        self._loader = UrlModuleLoader(baseurl)
+        self._baseurl = baseurl
+        
+    def find_loader(self, fullname):
+        log.debug('find_loader: %r', fullname)
+        parts = fullname.split('.')
+        basename = parts[-1]
+        # Check link cache
+        if self._links is None:
+            self._links = []        # See discussion
+            self._links = _get_links(self._baseurl)
+        
+        # Check if it's a package
+        if basename in self._links:
+            log.debug('find_loader: trying package %r', fullname)
+            fullurl = self._baseurl + '/' + basename
+            # Attempt to load the package (which accesses __init__.py)
+            loader = UrlPackageLoader(fullurl)
+            try:
+                loader.load_module(fullname)
+                log.debug('find_loader: package %r loaded', fullname)
+            except ImportError as e:
+                log.debug('find_loader: %r is a namespace package', fullname)
+                loader = None
+            return (loader, [fullurl])
+    
+        # A normal module
+        filename = basename + '.py'
+        if filename in self._links:
+            log.debug('find_loader: module %r found', fullname)
+            return (self._loader, [])
+        else:
+            log.debug('find_loader: module %r not found', fullname)
+            return (None, [])
 
-	def invalidate_caches(self):
-		log.debug('invalidating link cache')
-		self._links = None
+    def invalidate_caches(self):
+        log.debug('invalidating link cache')
+        self._links = None
 
 # Check path to see if it looks like a URL
 _url_path_cache = {}
 def handle_url(path):
-	if path.startswith(('http://', 'https://')):
-		log.debug('Handle path? %s. [Yes]', path)
-		if path in _url_path_cache:
-			finder = _url_path_cache[path]
-		else:
-			finder = UrlPathFinder(path)
-			_url_path_cache[path] = finder
-		return finder
-	else:
-		log.debug('Handle path? %s. [No]', path)
+    if path.startswith(('http://', 'https://')):
+        log.debug('Handle path? %s. [Yes]', path)
+        if path in _url_path_cache:
+            finder = _url_path_cache[path]
+        else:
+            finder = UrlPathFinder(path)
+            _url_path_cache[path] = finder
+        return finder
+    else:
+        log.debug('Handle path? %s. [No]', path)
 
 def install_path_hook():
-	sys.path_hooks.append(handle_url)
-	sys.path_importer_cache.clear()
-	log.debug('Installing handle_url')
+    sys.path_hooks.append(handle_url)
+    sys.path_importer_cache.clear()
+    log.debug('Installing handle_url')
 
 def remove_path_hook():
-	sys.path_hooks.remove(handle_url)
-	sys.path_importer_cache.clear()
-	log.debug('Removing handle_url')
+    sys.path_hooks.remove(handle_url)
+    sys.path_importer_cache.clear()
+    log.debug('Removing handle_url')
 ```
 
 Чтобы использовать этот основанный на пути поисковик, просто добавьте URLы в *sys.path*. Например:
@@ -17015,7 +17015,7 @@ def remove_path_hook():
 >>> # Initial import fails
 >>> import fib
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 
 >>> # Install the path hook
@@ -17025,7 +17025,7 @@ ImportError: No module named 'fib'
 >>> # Imports still fail (not on path)
 >>> import fib
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 
 >>> # Add an entry to sys.path and watch it work
@@ -17057,10 +17057,10 @@ I'm grok.blah
 print("I'm fib")
 
 def fib(n):
-	if n < 2:
-		return 1
-	else:
-		return fib(n-1) + fib(n-2)
+    if n < 2:
+        return 1
+    else:
+        return fib(n-1) + fib(n-2)
 >>>
 ```
 
@@ -17118,9 +17118,9 @@ def fib(n):
 При выполнении инструкции типа *import fib*, интерпретатор проходит по объектам-поисковикам из *sys.meta_path* и вызывает их метод *find_module()*, чтобы найти подходящий загрузчик модуля. Определите нижеприведённый класс и попробуйте поэкспериментировать с ними, чтобы разобраться в том, как это работает:
 ```python
 >>> class Finder:
-... 	def find_module(self, fullname, path):
-... 		print('Looking for', fullname, path)
-...			return None
+...     def find_module(self, fullname, path):
+...         print('Looking for', fullname, path)
+...         return None
 ...
 >>> import sys
 >>> sys.meta_path.insert(0, Finder()) # Insert as first entry
@@ -17167,12 +17167,12 @@ Looking for ElementC14N None
 >>> import fib
 Looking for fib None
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 >>> import xml.superfast
 Looking for xml.superfast ['/usr/local/lib/python3.3/xml']
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ImportError: No module named 'xml.superfast'
 >>>
 ```
@@ -17215,9 +17215,9 @@ ImportError: No module named 'xml.superfast'
 Чтобы выполнить *import fib*, каталоги в *sys.path* проверяются по порядку. Для каждого каталога имя *fib* представляется ассоциированному поисковику, найденному в *sys.path_importer_cache*. Вам стоит исследовать этот аспект путём создания собственного поисковика и помещения записи в кэш. Попробуйте провести такой эксперимент:
 ```python
 >>> class Finder:
-...		def find_loader(self, name):
-...			print('Looking for', name)
-...			return (None, [])
+...     def find_loader(self, name):
+...         print('Looking for', name)
+...         return (None, [])
 ...
 >>> import sys
 >>> # Add a "debug" entry to the importer cache
@@ -17240,8 +17240,8 @@ Looking for token
 ```python
 >>> sys.path_importer_cache.clear()
 >>> def check_path(path):
-... 	print('Checking', path)
-... 	raise ImportError()
+...     print('Checking', path)
+...     raise ImportError()
 ...
 >>> sys.path_hooks.insert(0, check_path)
 >>> import fib
@@ -17255,7 +17255,7 @@ Checking /Users/beazley/.local/lib/python3.3/site-packages
 Checking /usr/local/lib/python3.3/site-packages
 Looking for fib
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 >>>
 ```
@@ -17265,10 +17265,10 @@ ImportError: No module named 'fib'
 Используя свои знания о том, как обрабатывается *sys.path*, вы можете инсталлировать кастомную функцию проверки пути, которая ищет шаблоны имён файлов, такие как URLы. Например:
 ```python
 >>> def check_url(path):
-...		if path.startswith('http://'):
-...			return Finder()
-...		else:
-...			raise ImportError()
+...     if path.startswith('http://'):
+...         return Finder()
+...     else:
+...         raise ImportError()
 ...
 >>> sys.path.append('http://localhost:15000')
 >>> sys.path_hooks[0] = check_url
@@ -17276,7 +17276,7 @@ ImportError: No module named 'fib'
 Looking for fib
 # Finder output!
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 
 >>> # Notice installation of Finder in sys.path_importer_cache
@@ -17309,8 +17309,8 @@ ImportError: No module named 'fib'
 ```python
 # Check link cache
 if self._links is None:
-	self._links = []			# See discussion
-	self._links = _get_links(self._baseurl)
+    self._links = []            # See discussion
+    self._links = _get_links(self._baseurl)
 ``` 
 
 Эта проверка может и не понадобиться вам в других реализациях, но для этого примера, использующего URLы, она необходима.
@@ -17329,7 +17329,7 @@ DEBUG:urlimport:Installing handle_url
 >>> import fib
 DEBUG:urlimport:Handle path? /usr/local/lib/python33.zip. [No]
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 >>> import sys
 >>> sys.path.append('http://localhost:15000')
@@ -17365,35 +17365,35 @@ from collections import defaultdict
 _post_import_hooks = defaultdict(list)
 
 class PostImportFinder:
-	def __init__(self):
-		self._skip = set()
-	
-	def find_module(self, fullname, path=None):
-		if fullname in self._skip:
-			return None
-		self._skip.add(fullname)
-		return PostImportLoader(self)
+    def __init__(self):
+        self._skip = set()
+    
+    def find_module(self, fullname, path=None):
+        if fullname in self._skip:
+            return None
+        self._skip.add(fullname)
+        return PostImportLoader(self)
 
 class PostImportLoader:
-	def __init__(self, finder):
-		self._finder = finder
-	
-	def load_module(self, fullname):
-		importlib.import_module(fullname)
-		module = sys.modules[fullname]
-		for func in _post_import_hooks[fullname]:
-			func(module)
-		self._finder._skip.remove(fullname)
-		return module
+    def __init__(self, finder):
+        self._finder = finder
+    
+    def load_module(self, fullname):
+        importlib.import_module(fullname)
+        module = sys.modules[fullname]
+        for func in _post_import_hooks[fullname]:
+            func(module)
+        self._finder._skip.remove(fullname)
+        return module
 
 def when_imported(fullname):
-	def decorate(func):
-		if fullname in sys.modules:
-			func(sys.modules[fullname])
-		else:
-			_post_import_hooks[fullname].append(func)
-		return func
-	return decorate
+    def decorate(func):
+        if fullname in sys.modules:
+            func(sys.modules[fullname])
+        else:
+            _post_import_hooks[fullname].append(func)
+        return func
+    return decorate
 
 sys.meta_path.insert(0, PostImportFinder())
 ``` 
@@ -17403,7 +17403,7 @@ sys.meta_path.insert(0, PostImportFinder())
 >>> from postimport import when_imported
 >>> @when_imported('threading')
 ... def warn_threads(mod):
-...		print('Threads? Are you crazy?')
+...     print('Threads? Are you crazy?')
 ...
 >>>
 >>> import threading
@@ -17417,17 +17417,17 @@ from functools import wraps
 from postimport import when_imported
 
 def logged(func):
-	@wraps(func)
-	def wrapper(*args, **kwargs):
-		print('Calling', func.__name__, args, kwargs)
-		return func(*args, **kwargs)
-	return wrapper
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print('Calling', func.__name__, args, kwargs)
+        return func(*args, **kwargs)
+    return wrapper
 
 # Example
 @when_imported('math')
 def add_logging(mod):
-	mod.cos = logged(mod.cos)
-	mod.sin = logged(mod.sin)
+    mod.cos = logged(mod.cos)
+    mod.sin = logged(mod.sin)
 ```
 
 ### Обсуждение
@@ -17486,7 +17486,7 @@ bash %
 ```
 bash % cd Spam
 bash % ls
-bin 	include 	lib 	pyvenv.cfg
+bin     include     lib     pyvenv.cfg
 bash %
 ``` 
 
@@ -17533,20 +17533,20 @@ bash %
 Если вы хотите начать распространение своего кода, первым делом вам нужно присвоить ему уникальное имя и подчистить структуру каталогов. Например, типичный пакет может выглядеть так:
 ```
 projectname/
-	README.txt
-	Doc/
-		documentation.txt
-	projectname/
-		__init__.py
-		foo.py
-		bar.py
-	utils/
-		__init__.py
-		spam.py
-		grok.py
-	examples/
-		helloworld.py
-		...
+    README.txt
+    Doc/
+        documentation.txt
+    projectname/
+        __init__.py
+        foo.py
+        bar.py
+    utils/
+        __init__.py
+        spam.py
+        grok.py
+    examples/
+        helloworld.py
+        ...
 ```
 
 Чтобы превратить пакет в нечто пригодное для распространения, сначала напишите файл *setup.py*, который выглядит так:
@@ -17555,11 +17555,11 @@ projectname/
 from distutils.core import setup
 
 setup(name='projectname',
-	  version='1.0',
+      version='1.0',
       author='Your Name',
-	  author_email='you@youraddress.com',
-	  url='http://www.you.com/projectname',
-	  packages=['projectname', 'projectname.utils'],
+      author_email='you@youraddress.com',
+      url='http://www.you.com/projectname',
+      packages=['projectname', 'projectname.utils'],
 )
 ```
 
@@ -17603,8 +17603,8 @@ url = 'http://httpbin.org/get'
 
 # Dictionary of query parameters (if any)
 parms = {
-	'name1' : 'value1',
-	'name2' : 'value2'
+    'name1' : 'value1',
+    'name2' : 'value2'
 }
 
 # Encode the query string
@@ -17624,8 +17624,8 @@ url = 'http://httpbin.org/post'
 
 # Dictionary of query parameters (if any)
 parms = {
-	'name1' : 'value1',
-	'name2' : 'value2'
+    'name1' : 'value1',
+    'name2' : 'value2'
 }
 
 # Encode the query string
@@ -17643,8 +17643,8 @@ from urllib import request, parse
 
 # Extra headers
 headers = {
-	'User-agent' : 'none/ofyourbusiness',
-	'Spam' : 'Eggs'
+    'User-agent' : 'none/ofyourbusiness',
+    'Spam' : 'Eggs'
 }
 
 req = request.Request(url, querystring.encode('ascii'), headers=headers)
@@ -17663,14 +17663,14 @@ url = 'http://httpbin.org/post'
 
 # Dictionary of query parameters (if any)
 parms = {
-	'name1' : 'value1',
-	'name2' : 'value2'
+    'name1' : 'value1',
+    'name2' : 'value2'
 }
 
 # Extra headers
 headers = {
-	'User-agent' : 'none/ofyourbusiness',
-	'Spam' : 'Eggs'
+    'User-agent' : 'none/ofyourbusiness',
+    'Spam' : 'Eggs'
 }
 
 resp = requests.post(url, data=parms, headers=headers)
@@ -17697,7 +17697,7 @@ content_length = resp.headers['content-length']
 ```python
 import requests
 resp = requests.get('http://pypi.python.org/pypi?:action=login',
-					 auth=('user','password'))
+                     auth=('user','password'))
 ```
 
 Вот пример передачи HTTP-куки из одного запроса следующему:
@@ -17735,7 +17735,7 @@ resp = c.getresponse()
 
 print('Status', resp.status)
 for name, value in resp.getheaders():
-	print(name, value)
+    print(name, value)
 ``` 
 
 А если вам нужно написать код, использующий прокси, аутентификацию, куки и другие подобные моменты, использовать *urllib* неудобно, а код получится многословным. Например, вот пример кода, который производит авторизацию в Python Package Index:
@@ -17760,7 +17760,7 @@ resp = u.read()
 ```python
 >>> import requests
 >>> r = requests.get('http://httpbin.org/get?name=Dave&n=37',
-...		headers = { 'User-agent': 'goaway/1.0' })
+...     headers = { 'User-agent': 'goaway/1.0' })
 >>> resp = r.json
 >>> resp['headers']
 {'User-Agent': 'goaway/1.0', 'Content-Length': '', 'Content-Type': '',
@@ -17786,17 +17786,17 @@ resp = u.read()
 from socketserver import BaseRequestHandler, TCPServer
 
 class EchoHandler(BaseRequestHandler):
-	def handle(self):
-		print('Got connection from', self.client_address)
-		while True:
-			msg = self.request.recv(8192)
-			if not msg:
-				break
-			self.request.send(msg)
+    def handle(self):
+        print('Got connection from', self.client_address)
+        while True:
+            msg = self.request.recv(8192)
+            if not msg:
+                break
+            self.request.send(msg)
 
 if __name__ == '__main__':
-	serv = TCPServer(('', 20000), EchoHandler)
-	serv.serve_forever()
+    serv = TCPServer(('', 20000), EchoHandler)
+    serv.serve_forever()
 ```
 
 Здесь вы определяете специальный класс-обработчик, который реализует метод *handle()* для обслуживания соединений с клиентами. Атрибут *request* — это клиентский сокет, а *client_address* содержит адрес клиента.
@@ -17818,16 +17818,16 @@ b'Hello'
 from socketserver import StreamRequestHandler, TCPServer
 
 class EchoHandler(StreamRequestHandler):
-	def handle(self):
-		print('Got connection from', self.client_address)
-		# self.rfile is a file-like object for reading
-		for line in self.rfile:
-			# self.wfile is a file-like object for writing
-			self.wfile.write(line)
+    def handle(self):
+        print('Got connection from', self.client_address)
+        # self.rfile is a file-like object for reading
+        for line in self.rfile:
+            # self.wfile is a file-like object for writing
+            self.wfile.write(line)
 
 if __name__ == '__main__':
-	serv = TCPServer(('', 20000), EchoHandler)
-	serv.serve_forever()
+    serv = TCPServer(('', 20000), EchoHandler)
+    serv.serve_forever()
 ```
 
 ### Обсуждение
@@ -17837,8 +17837,8 @@ from socketserver import ThreadingTCPServer
 ...
 
 if __name__ == '__main__':
-	serv = ThreadingTCPServer(('', 20000), EchoHandler)
-	serv.serve_forever()
+    serv = ThreadingTCPServer(('', 20000), EchoHandler)
+    serv.serve_forever()
 ```
 
 Проблема с создающими новые процессы или потоки серверами в том, что они создают новый процесс или поток на каждое соединение с клиентом. Поскольку ограничения на разрешенное количество соединений нет, злонамеренный хакер может запустить большое количество одновременных соединений и вызвать сбои в работе вашего сервера.
@@ -17847,35 +17847,35 @@ if __name__ == '__main__':
 ```python
 ...
 if __name__ == '__main__':
-	from threading import Thread
-	NWORKERS = 16
-	serv = TCPServer(('', 20000), EchoHandler)
-	for n in range(NWORKERS):
-		t = Thread(target=serv.serve_forever)
-		t.daemon = True
-		t.start()
-	serv.serve_forever()
+    from threading import Thread
+    NWORKERS = 16
+    serv = TCPServer(('', 20000), EchoHandler)
+    for n in range(NWORKERS):
+        t = Thread(target=serv.serve_forever)
+        t.daemon = True
+        t.start()
+    serv.serve_forever()
 ```
 
 Обычно *TCPServer* связывается с сокетом и активирует его во время создания экземпляра. Однако иногда вы можете пожелать настроить сокет путём установки опций. Чтобы это сделать, предоставьте аргумент *bind_and_activate=False*:
 ```python
 if __name__ == '__main__':
-	serv = TCPServer(('', 20000), EchoHandler, bind_and_activate=False)
-	# Set up various socket options
-	serv.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-	# Bind and activate
-	serv.server_bind()
-	serv.server_activate()
-	serv.serve_forever()
+    serv = TCPServer(('', 20000), EchoHandler, bind_and_activate=False)
+    # Set up various socket options
+    serv.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+    # Bind and activate
+    serv.server_bind()
+    serv.server_activate()
+    serv.serve_forever()
 ```   
 
 Показанная выше опция настройки сокета очень распространена: она позволяет серверу перепривязаться к ранее использованному номеру порта. Это настолько стандартная штука, что стала переменной класса, которая может быть настроена в *TCPServer*. Установите её на нужное значение перед созданием экземпляра сервера, как показано в этом примере:
 ```python
 ...
 if __name__ == '__main__':
-	TCPServer.allow_reuse_address = True
-	serv = TCPServer(('', 20000), EchoHandler)
-	serv.serve_forever()
+    TCPServer.allow_reuse_address = True
+    serv = TCPServer(('', 20000), EchoHandler)
+    serv.serve_forever()
 ``` 
 
 В этом решении показаны два разных базовых класса-обработчика (*BaseRequestHandler* и *StreamRequestHandler*). Класс *StreamRequestHandler* на самом деле является более гибким и поддерживает некоторые возможности, которые могут быть включены через указание дополнительных переменных класса. Например:
@@ -17883,19 +17883,19 @@ if __name__ == '__main__':
 import socket
 
 class EchoHandler(StreamRequestHandler):
-	# Optional settings (defaults shown)
-	timeout = 5							# Timeout on all socket operations
-	rbufsize = -1						# Read buffer size
-	wbufsize = 0						# Write buffer size
-	disable_nagle_algorithm = False 	# Sets TCP_NODELAY socket option
-	def handle(self):
-		print('Got connection from', self.client_address)
-		try:
-			for line in self.rfile:
-				# self.wfile is a file-like object for writing
-				self.wfile.write(line)
-		except socket.timeout:
-			print('Timed out!')
+    # Optional settings (defaults shown)
+    timeout = 5                         # Timeout on all socket operations
+    rbufsize = -1                       # Read buffer size
+    wbufsize = 0                        # Write buffer size
+    disable_nagle_algorithm = False     # Sets TCP_NODELAY socket option
+    def handle(self):
+        print('Got connection from', self.client_address)
+        try:
+            for line in self.rfile:
+                # self.wfile is a file-like object for writing
+                self.wfile.write(line)
+        except socket.timeout:
+            print('Timed out!')
 ```
 
 И, наконец, стоит отметить, что большинство высокоуровневых сетевых модулей Python (HTTP, XML-RPC и т.п.) построены на основе функциональности *socketserver*. Тем не менее, несложно реализовывать серверы напрямую, используя библиотеку *socket*. Вот простой пример прямого написания сервера с помощью сокетов:
@@ -17903,24 +17903,24 @@ class EchoHandler(StreamRequestHandler):
 from socket import socket, AF_INET, SOCK_STREAM
 
 def echo_handler(address, client_sock):
-	print('Got connection from {}'.format(address))
-	while True:
-		msg = client_sock.recv(8192)
-		if not msg:
-			break
-		client_sock.sendall(msg)
-	client_sock.close()
+    print('Got connection from {}'.format(address))
+    while True:
+        msg = client_sock.recv(8192)
+        if not msg:
+            break
+        client_sock.sendall(msg)
+    client_sock.close()
 
 def echo_server(address, backlog=5):
-	sock = socket(AF_INET, SOCK_STREAM)
-	sock.bind(address)
-	sock.listen(backlog)
-	while True:
-		client_sock, client_addr = sock.accept()
-		echo_handler(client_addr, client_sock)
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.bind(address)
+    sock.listen(backlog)
+    while True:
+        client_sock, client_addr = sock.accept()
+        echo_handler(client_addr, client_sock)
 
 if __name__ == '__main__':
-	echo_server(('', 20000))
+    echo_server(('', 20000))
 ```
 
 ## 11.3. Создание UDP-сервера
@@ -17935,15 +17935,15 @@ import time
 
 class TimeHandler(BaseRequestHandler):
 def handle(self):
-	print('Got connection from', self.client_address)
-	# Get message and client socket
-	msg, sock = self.request
-	resp = time.ctime()
-	sock.sendto(resp.encode('ascii'), self.client_address)
+    print('Got connection from', self.client_address)
+    # Get message and client socket
+    msg, sock = self.request
+    resp = time.ctime()
+    sock.sendto(resp.encode('ascii'), self.client_address)
 
 if __name__ == '__main__':
-	serv = UDPServer(('', 20000), TimeHandler)
-	serv.serve_forever()
+    serv = UDPServer(('', 20000), TimeHandler)
+    serv.serve_forever()
 ```
 
 Как и ранее, вы определяете специальный класс-обработчик, в котором реализован метод *handle()*, предназначенный для обслуживания соединений с клиентами. Атрибут *request* — это кортеж, который содержит входящую датаграмму и объект сокета для сервера. *client_address* содержит адрес клиента. 
@@ -17970,8 +17970,8 @@ if __name__ == '__main__':
 from socketserver import ThreadingUDPServer
 ...
 if __name__ == '__main__':
-	serv = ThreadingUDPServer(('',20000), TimeHandler)
-	serv.serve_forever()
+    serv = ThreadingUDPServer(('',20000), TimeHandler)
+    serv.serve_forever()
 ```
 
 Реализовать UDP-сервер напрямую, через сокеты, тоже несложно. Вот пример:
@@ -17980,16 +17980,16 @@ from socket import socket, AF_INET, SOCK_DGRAM
 import time
 
 def time_server(address):
-	sock = socket(AF_INET, SOCK_DGRAM)
-	sock.bind(address)
-	while True:
-		msg, addr = sock.recvfrom(8192)
-		print('Got message from', addr)
-		resp = time.ctime()
-		sock.sendto(resp.encode('ascii'), addr)
+    sock = socket(AF_INET, SOCK_DGRAM)
+    sock.bind(address)
+    while True:
+        msg, addr = sock.recvfrom(8192)
+        print('Got message from', addr)
+        resp = time.ctime()
+        sock.sendto(resp.encode('ascii'), addr)
 
 if __name__ == '__main__':
-	time_server(('', 20000))
+    time_server(('', 20000))
 ```
 
 ## 11.4. Генерация диапазона IP-адресов из CIDR-адреса
@@ -18004,7 +18004,7 @@ if __name__ == '__main__':
 >>> net
 IPv4Network('123.45.67.64/27')
 >>> for a in net:
-...		print(a)
+...     print(a)
 ...
 123.45.67.64
 123.45.67.65
@@ -18079,7 +18079,7 @@ IPv4Address('123.45.67.73')
 >>> s = socket(AF_INET, SOCK_STREAM)
 >>> s.connect((a, 8080))
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
+    File "<stdin>", line 1, in <module>
 TypeError: Can't convert 'IPv4Address' object to str implicitly
 >>> s.connect((str(a), 8080))
 >>>
@@ -18100,25 +18100,25 @@ TypeError: Can't convert 'IPv4Address' object to str implicitly
 import cgi
 
 def notfound_404(environ, start_response):
-	start_response('404 Not Found', [ ('Content-type', 'text/plain') ])
-	return [b'Not Found']
+    start_response('404 Not Found', [ ('Content-type', 'text/plain') ])
+    return [b'Not Found']
 
 class PathDispatcher:
-	def __init__(self):
-		self.pathmap = { }
+    def __init__(self):
+        self.pathmap = { }
 
-	def __call__(self, environ, start_response):
-		path = environ['PATH_INFO']
-		params = cgi.FieldStorage(environ['wsgi.input'],
-								  environ=environ)
-		method = environ['REQUEST_METHOD'].lower()
-		environ['params'] = { key: params.getvalue(key) for key in params }
-		handler = self.pathmap.get((method,path), notfound_404)
-		return handler(environ, start_response)
+    def __call__(self, environ, start_response):
+        path = environ['PATH_INFO']
+        params = cgi.FieldStorage(environ['wsgi.input'],
+                                  environ=environ)
+        method = environ['REQUEST_METHOD'].lower()
+        environ['params'] = { key: params.getvalue(key) for key in params }
+        handler = self.pathmap.get((method,path), notfound_404)
+        return handler(environ, start_response)
 
-	def register(self, method, path, function):
-		self.pathmap[method.lower(), path] = function
-		return function
+    def register(self, method, path, function):
+        self.pathmap[method.lower(), path] = function
+        return function
 ```
 
 Чтобы использовать этот диспетчер, вы просто пишете разные обработчики:
@@ -18126,49 +18126,49 @@ class PathDispatcher:
 import time
 _hello_resp = '''\
 <html>
-	<head>
-		<title>Hello {name}</title>
-	</head>
-	<body>
-		<h1>Hello {name}!</h1>
-	</body>
+    <head>
+        <title>Hello {name}</title>
+    </head>
+    <body>
+        <h1>Hello {name}!</h1>
+    </body>
 </html>'''
 
 def hello_world(environ, start_response):
-	start_response('200 OK', [ ('Content-type','text/html')])
-	params = environ['params']
-	resp = _hello_resp.format(name=params.get('name'))
-	yield resp.encode('utf-8')
+    start_response('200 OK', [ ('Content-type','text/html')])
+    params = environ['params']
+    resp = _hello_resp.format(name=params.get('name'))
+    yield resp.encode('utf-8')
 
 _localtime_resp = '''\
 <?xml version="1.0"?>
 <time>
-	<year>{t.tm_year}</year>
-	<month>{t.tm_mon}</month>
-	<day>{t.tm_mday}</day>
-	<hour>{t.tm_hour}</hour>
-	<minute>{t.tm_min}</minute>
-	<second>{t.tm_sec}</second>
+    <year>{t.tm_year}</year>
+    <month>{t.tm_mon}</month>
+    <day>{t.tm_mday}</day>
+    <hour>{t.tm_hour}</hour>
+    <minute>{t.tm_min}</minute>
+    <second>{t.tm_sec}</second>
 </time>'''
 
 def localtime(environ, start_response):
-	start_response('200 OK', [ ('Content-type', 'application/xml') ])
-	resp = _localtime_resp.format(t=time.localtime())
-	yield resp.encode('utf-8')
+    start_response('200 OK', [ ('Content-type', 'application/xml') ])
+    resp = _localtime_resp.format(t=time.localtime())
+    yield resp.encode('utf-8')
 
 if __name__ == '__main__':
-	from resty import PathDispatcher
-	from wsgiref.simple_server import make_server
+    from resty import PathDispatcher
+    from wsgiref.simple_server import make_server
 
-	# Create the dispatcher and register functions
-	dispatcher = PathDispatcher()
-	dispatcher.register('GET', '/hello', hello_world)
-	dispatcher.register('GET', '/localtime', localtime)
+    # Create the dispatcher and register functions
+    dispatcher = PathDispatcher()
+    dispatcher.register('GET', '/hello', hello_world)
+    dispatcher.register('GET', '/localtime', localtime)
 
-	# Launch a basic server
-	httpd = make_server('', 8080, dispatcher)
-	print('Serving on port 8080...')
-	httpd.serve_forever()
+    # Launch a basic server
+    httpd = make_server('', 8080, dispatcher)
+    print('Serving on port 8080...')
+    httpd.serve_forever()
 ```
 
 Чтобы протестировать этот сервер, вы можете обратиться к нему через браузер или *urllib*. Например:
@@ -18176,23 +18176,23 @@ if __name__ == '__main__':
 >>> u = urlopen('http://localhost:8080/hello?name=Guido')
 >>> print(u.read().decode('utf-8'))
 <html>
-	<head>
-		<title>Hello Guido</title>
-	</head>
-	<body>
-		<h1>Hello Guido!</h1>
-	</body>
+    <head>
+        <title>Hello Guido</title>
+    </head>
+    <body>
+        <h1>Hello Guido!</h1>
+    </body>
 </html>
 >>> u = urlopen('http://localhost:8080/localtime')
 >>> print(u.read().decode('utf-8'))
 <?xml version="1.0"?>
 <time>
-	<year>2012</year>
-	<month>11</month>
-	<day>24</day>
-	<hour>14</hour>
-	<minute>49</minute>
-	<second>17</second>
+    <year>2012</year>
+    <month>11</month>
+    <day>24</day>
+    <hour>14</hour>
+    <minute>49</minute>
+    <second>17</second>
 </time>
 >>>
 ```
@@ -18209,17 +18209,17 @@ REST-интерфейсы обычно применяются в програм�
 import cgi
 
 def wsgi_app(environ, start_response):
-	...
+    ...
 ```
 
 Аргумент *environ* — это словарь, который содержит значения, которые были вдохновлены интерфейсом CGI, который предоставляется различными веб-серверами, такими как Apache (см. [Internet RFC 3875](http://tools.ietf.org/html/rfc3875)). Чтобы извлекать различные поля, вы должны написать такой код:
 ```python
 def wsgi_app(environ, start_response):
-	method = environ['REQUEST_METHOD']
-	path = environ['PATH_INFO']
-	# Parse the query parameters
-	params = cgi.FieldStorage(environ['wsgi.input'], environ=environ)
-	...
+    method = environ['REQUEST_METHOD']
+    path = environ['PATH_INFO']
+    # Parse the query parameters
+    params = cgi.FieldStorage(environ['wsgi.input'], environ=environ)
+    ...
 ```
 
 Здесь показано несколько распространённых значений. *environ['REQUEST_METHOD']* — это тип запроса (т.е., GET, POST, HEAD и т.п.) *environ['PATH_INFO']* — это запрашиваемый путь или ресурс. Вызов *cgi.FieldStorage()* извлекает предоставленны параметры запроса из запроса и помещает их в словареподобный объект для дальнейшего использования.
@@ -18227,28 +18227,28 @@ def wsgi_app(environ, start_response):
 Аргумент *start_response* — это функция, которая должны быть вызвана, чтобы инициировать ответ. Первый аргумент — это получившийся HTTP-статус. Второй аргумент — это список кортежей *(name, value)*, которые составляют HTTP-заголовки ответа. Например:
 ```python
 def wsgi_app(environ, start_response):
-	...
-	start_response('200 OK', [('Content-type', 'text/plain')])
+    ...
+    start_response('200 OK', [('Content-type', 'text/plain')])
 ```
 
 Чтобы вернуть данные, WSGI-приложение должно вернуть последовательность байтовых строк. Это может быть сделано с использованием списка:
 ```python
 def wsgi_app(environ, start_response):
-	...
-	start_response('200 OK', [('Content-type', 'text/plain')])
-	resp = []
-	resp.append(b'Hello World\n')
-	resp.append(b'Goodbye!\n')
-	return resp
+    ...
+    start_response('200 OK', [('Content-type', 'text/plain')])
+    resp = []
+    resp.append(b'Hello World\n')
+    resp.append(b'Goodbye!\n')
+    return resp
 ```
 
 Или же вы можете использовать *yield*:
 ```python
 def wsgi_app(environ, start_response):
-	...
-	start_response('200 OK', [('Content-type', 'text/plain')])
-	yield b'Hello World\n'
-	yield b'Goodbye!\n'
+    ...
+    start_response('200 OK', [('Content-type', 'text/plain')])
+    yield b'Hello World\n'
+    yield b'Goodbye!\n'
 ```
 
 Важно подчеркнуть, что эти байтовые строки должны быть использованы в результате. Если ответ состоит из текста, его нужно будет сначала закодировать в байты. Конечно, нет такого требования, чтобы возвращаемое значение было текстом — вы можете легко написать приложение, которое создает картинки. 
@@ -18256,10 +18256,10 @@ def wsgi_app(environ, start_response):
 Хотя WSGI-приложения часто определяются как функция, но может быть использован и экземпляр, если в нём реализован подходящий метод *__call__()*. Например:
 ```python
 class WSGIApplication:
-	def __init__(self):
-	...
-	def __call__(self, environ, start_response)
-	...
+    def __init__(self):
+    ...
+    def __call__(self, environ, start_response)
+    ...
 ``` 
 
 Этот приём был использован для создания класса *PathDispatcher* в этом рецепте. Диспетчер ничего не делает, кроме как управляет отображением пар словаря *(method, path)* в функции-обработчики. Когда приходит запрос, метод и путь извлекаются и используются для диспетчеризации на обработчик. Также любые переменные запроса парсятся и помещаются в словарь, который сохраняется как *environ['params']* (этот последний шаг настолько распространён, что имеет смысл просто делать это в диспетчере, чтобы избежать дублирования кода).
@@ -18271,15 +18271,15 @@ class WSGIApplication:
 Наконец, важный момент использования WSGI заключается в том, что ничто в этой реализации не специфично для конкретного веб-сервера. Это и есть главная идея — поскольку стандарт нейтрален по отношению к серверам и фреймворкам, вы сможете прикрутить ваше приложение к практически любому серверу. В рецепте для проверки используется такой код:
 ```python
 if __name__ == '__main__':
-	from wsgiref.simple_server import make_server
-	# Create the dispatcher and register functions
-	dispatcher = PathDispatcher()
-	...
+    from wsgiref.simple_server import make_server
+    # Create the dispatcher and register functions
+    dispatcher = PathDispatcher()
+    ...
 
-	# Launch a basic server
-	httpd = make_server('', 8080, dispatcher)
-	print('Serving on port 8080...')
-	httpd.serve_forever()
+    # Launch a basic server
+    httpd = make_server('', 8080, dispatcher)
+    print('Serving on port 8080...')
+    httpd.serve_forever()
 ``` 
 
 Это создаёт простой сервер, который вы можете использовать, чтобы проверить, работает ли ваша реализация. Позже, когда вы будете готовы к масштабированию, вы измените этот код, чтобы он работал с конкретным сервером. 
@@ -18296,35 +18296,35 @@ WSGI — это спецификация, которая намеренно сд
 from xmlrpc.server import SimpleXMLRPCServer
 
 class KeyValueServer:
-	_rpc_methods_ = ['get', 'set', 'delete', 'exists', 'keys']
-	def __init__(self, address):
-		self._data = {}
-		self._serv = SimpleXMLRPCServer(address, allow_none=True)
-		for name in self._rpc_methods_:
-			self._serv.register_function(getattr(self, name))
-		
-	def get(self, name):
-		return self._data[name]
-	
-	def set(self, name, value):
-		self._data[name] = value
-	
-	def delete(self, name):
-		del self._data[name]
-	
-	def exists(self, name):
-		return name in self._data
-	
-	def keys(self):
-		return list(self._data)
-	
-	def serve_forever(self):
-		self._serv.serve_forever()
+    _rpc_methods_ = ['get', 'set', 'delete', 'exists', 'keys']
+    def __init__(self, address):
+        self._data = {}
+        self._serv = SimpleXMLRPCServer(address, allow_none=True)
+        for name in self._rpc_methods_:
+            self._serv.register_function(getattr(self, name))
+        
+    def get(self, name):
+        return self._data[name]
+    
+    def set(self, name, value):
+        self._data[name] = value
+    
+    def delete(self, name):
+        del self._data[name]
+    
+    def exists(self, name):
+        return name in self._data
+    
+    def keys(self):
+        return list(self._data)
+    
+    def serve_forever(self):
+        self._serv.serve_forever()
 
 # Example
 if __name__ == '__main__':
-	kvserv = KeyValueServer(('', 15000))
-	kvserv.serve_forever()
+    kvserv = KeyValueServer(('', 15000))
+    kvserv.serve_forever()
 ```
 
 Вот как вы можете обращаться к серверу удалённо из клиента:
@@ -18350,7 +18350,7 @@ XML-RPC может быть чрезвычайно простым способо
 ```python
 from xmlrpc.server import SimpleXMLRPCServer
 def add(x,y):
-	return x+y
+    return x+y
 
 serv = SimpleXMLRPCServer(('', 15000))
 serv.register_function(add)
@@ -18360,9 +18360,9 @@ serv.serve_forever()
 Функции, которые показываются наружу через XML-RPC работают только с некоторыми типами данных, такими как строки, числа, списки и словари. Для всего остального нужно будет поизучать тему. Например, если вы передадите экземпляр через XML-RPC, то будет обработан только словарь экземпляра:
 ```python
 >>> class Point:
-... 	def __init__(self, x, y):
-...			self.x = x
-...			self.y = y
+...     def __init__(self, x, y):
+...         self.x = x
+...         self.y = y
 ...
 >>> p = Point(2, 3)
 >>> s.set('foo', p)
@@ -18398,21 +18398,21 @@ from multiprocessing.connection import Listener
 import traceback
 
 def echo_client(conn):
-	try:
-		while True:
-			msg = conn.recv()
-			conn.send(msg)
-	except EOFError:
-		print('Connection closed')
+    try:
+        while True:
+            msg = conn.recv()
+            conn.send(msg)
+    except EOFError:
+        print('Connection closed')
 
 def echo_server(address, authkey):
-	serv = Listener(address, authkey=authkey)
-	while True:
-		try:
-			client = serv.accept()
-			echo_client(client)
-		except Exception:
-			traceback.print_exc()
+    serv = Listener(address, authkey=authkey)
+    while True:
+        try:
+            client = serv.accept()
+            echo_client(client)
+        except Exception:
+            traceback.print_exc()
 
 echo_server(('', 25000), authkey=b'peekaboo')
 ```
@@ -18464,25 +18464,25 @@ RPC легко реализовать путём упаковки с помощ�
 import pickle
 
 class RPCHandler:
-	def __init__(self):
-		self._functions = { }
-	
-	def register_function(self, func):
-		self._functions[func.__name__] = func
-	
-	def handle_connection(self, connection):
-		try:
-			while True:
-				# Receive a message
-				func_name, args, kwargs = pickle.loads(connection.recv())
-				# Run the RPC and send a response
-				try:
-					r = self._functions[func_name](*args,**kwargs)
-					connection.send(pickle.dumps(r))
-				except Exception as e:
-					connection.send(pickle.dumps(e))
-		except EOFError:
-			pass
+    def __init__(self):
+        self._functions = { }
+    
+    def register_function(self, func):
+        self._functions[func.__name__] = func
+    
+    def handle_connection(self, connection):
+        try:
+            while True:
+                # Receive a message
+                func_name, args, kwargs = pickle.loads(connection.recv())
+                # Run the RPC and send a response
+                try:
+                    r = self._functions[func_name](*args,**kwargs)
+                    connection.send(pickle.dumps(r))
+                except Exception as e:
+                    connection.send(pickle.dumps(e))
+        except EOFError:
+            pass
 ``` 
 
 Чтобы использовать этот обработчик, вам нужно добавить его в сервер сообщений. Есть много возможных выборов, но библиотека *multiprocessing* — один из самых простых вариантов. Вот пример RPC-сервера:
@@ -18491,19 +18491,19 @@ from multiprocessing.connection import Listener
 from threading import Thread
 
 def rpc_server(handler, address, authkey):
-	sock = Listener(address, authkey=authkey)
-	while True:
-		client = sock.accept()
-		t = Thread(target=handler.handle_connection, args=(client,))
-		t.daemon = True
-		t.start()
+    sock = Listener(address, authkey=authkey)
+    while True:
+        client = sock.accept()
+        t = Thread(target=handler.handle_connection, args=(client,))
+        t.daemon = True
+        t.start()
 
 # Some remote functions
 def add(x, y):
-	return x + y
+    return x + y
 
 def sub(x, y):
-	return x - y
+    return x - y
 
 # Register with a handler
 handler = RPCHandler()
@@ -18520,17 +18520,17 @@ rpc_server(handler, ('localhost', 17000), authkey=b'peekaboo')
 import pickle
 
 class RPCProxy:
-	def __init__(self, connection):
-		self._connection = connection
-	
-	def __getattr__(self, name):
-		def do_rpc(*args, **kwargs):
-			self._connection.send(pickle.dumps((name, args, kwargs)))
-			result = pickle.loads(self._connection.recv())
-			if isinstance(result, Exception):
-				raise result
-			return result
-		return do_rpc
+    def __init__(self, connection):
+        self._connection = connection
+    
+    def __getattr__(self, name):
+        def do_rpc(*args, **kwargs):
+            self._connection.send(pickle.dumps((name, args, kwargs)))
+            result = pickle.loads(self._connection.recv())
+            if isinstance(result, Exception):
+                raise result
+            return result
+        return do_rpc
 ```
 
 Чтобы использовать прокси, оберните его вокруг соединения с сервером. Например:
@@ -18544,9 +18544,9 @@ class RPCProxy:
 -1
 >>> proxy.sub([1, 2], 4)
 Traceback (most recent call last):
-	File "<stdin>", line 1, in <module>
-	File "rpcserver.py", line 37, in do_rpc
-		raise result
+    File "<stdin>", line 1, in <module>
+    File "rpcserver.py", line 37, in do_rpc
+        raise result
 TypeError: unsupported operand type(s) for -: 'list' and 'int'
 >>>
 ```
@@ -18566,38 +18566,38 @@ TypeError: unsupported operand type(s) for -: 'list' and 'int'
 import json
 
 class RPCHandler:
-	def __init__(self):
-		self._functions = { }
-	
-	def register_function(self, func):
-		self._functions[func.__name__] = func
-	
-	def handle_connection(self, connection):
-		try:
-			while True:
-				# Receive a message
-				func_name, args, kwargs = json.loads(connection.recv())
-				# Run the RPC and send a response
-				try:
-					r = self._functions[func_name](*args,**kwargs)
-					connection.send(json.dumps(r))
-				except Exception as e:
-					connection.send(json.dumps(str(e)))
-		except EOFError:
-			pass
+    def __init__(self):
+        self._functions = { }
+    
+    def register_function(self, func):
+        self._functions[func.__name__] = func
+    
+    def handle_connection(self, connection):
+        try:
+            while True:
+                # Receive a message
+                func_name, args, kwargs = json.loads(connection.recv())
+                # Run the RPC and send a response
+                try:
+                    r = self._functions[func_name](*args,**kwargs)
+                    connection.send(json.dumps(r))
+                except Exception as e:
+                    connection.send(json.dumps(str(e)))
+        except EOFError:
+            pass
 
 # jsonrpcclient.py
 import json
 
 class RPCProxy:
-	def __init__(self, connection):
-		self._connection = connection
-	def __getattr__(self, name):
-		def do_rpc(*args, **kwargs):
-			self._connection.send(json.dumps((name, args, kwargs)))
-			result = json.loads(self._connection.recv())
-			return result
-		return do_rpc
+    def __init__(self, connection):
+        self._connection = connection
+    def __getattr__(self, name):
+        def do_rpc(*args, **kwargs):
+            self._connection.send(json.dumps((name, args, kwargs)))
+            result = json.loads(self._connection.recv())
+            return result
+        return do_rpc
  ```
 
 Сложный момент в реализации RPC — обработка исключений. По крайней мере, сервер не должен падать, если метод возбуждает исключение. Однако средства отправки сообщений об исключениях обратно клиенту требуют изучения. Если вы используете *pickle*, экземпляры исключений часто сериализуются и заново возбуждаются уже на клиенте. Если вы используете какой-либо другой протокол, вам, вероятно, придётся подумать об альтернативном подходе. Как минимум, вы, вероятно, захотите возвращать строку с исключением в ответе. Это подход, которому мы следователи в примере с JSON. 
@@ -18615,26 +18615,26 @@ import hmac
 import os
 
 def client_authenticate(connection, secret_key):
-	'''
-	Authenticate client to a remote service.
-	connection represents a network connection.
-	secret_key is a key known only to both client/server.
-	'''
-	message = connection.recv(32)
-	hash = hmac.new(secret_key, message)
-	digest = hash.digest()
-	connection.send(digest)
+    '''
+    Authenticate client to a remote service.
+    connection represents a network connection.
+    secret_key is a key known only to both client/server.
+    '''
+    message = connection.recv(32)
+    hash = hmac.new(secret_key, message)
+    digest = hash.digest()
+    connection.send(digest)
 
 def server_authenticate(connection, secret_key):
-	'''
-	Request client authentication.
-	'''
-	message = os.urandom(32)
-	connection.send(message)
-	hash = hmac.new(secret_key, message)
-	digest = hash.digest()
-	response = connection.recv(len(digest))
-	return hmac.compare_digest(digest,response)
+    '''
+    Request client authentication.
+    '''
+    message = os.urandom(32)
+    connection.send(message)
+    hash = hmac.new(secret_key, message)
+    digest = hash.digest()
+    response = connection.recv(len(digest))
+    return hmac.compare_digest(digest,response)
 ```    
 
 Основная идея в том, что до установки соединения сервер предоставляет клиенту сообщение, состоящее из случайных байтов (в данном случае они генерируются *os.random()*). И клиент, и сервер вычисляют криптографический хэш этих случайных данных, используя *hmac* и секретный ключ, известный только обеим сторонам. Клиент посылает вычисленный дайджест обратно на сервер, где они сравниваются, после чего принимается решение — принимать соединение или нет. 
@@ -18647,22 +18647,22 @@ from socket import socket, AF_INET, SOCK_STREAM
 
 secret_key = b'peekaboo'
 def echo_handler(client_sock):
-	if not server_authenticate(client_sock, secret_key):
-		client_sock.close()
-		return
-	while True:
-		msg = client_sock.recv(8192)
-		if not msg:
-			break
-		client_sock.sendall(msg)
+    if not server_authenticate(client_sock, secret_key):
+        client_sock.close()
+        return
+    while True:
+        msg = client_sock.recv(8192)
+        if not msg:
+            break
+        client_sock.sendall(msg)
 
 def echo_server(address):
-	s = socket(AF_INET, SOCK_STREAM)
-	s.bind(address)
-	s.listen(5)
-	while True:
-		c,a = s.accept()
-		echo_handler(c)
+    s = socket(AF_INET, SOCK_STREAM)
+    s.bind(address)
+    s.listen(5)
+    while True:
+        c,a = s.accept()
+        echo_handler(c)
 
 echo_server(('', 18000))
 ```
@@ -18698,37 +18698,37 @@ resp = s.recv(1024)
 from socket import socket, AF_INET, SOCK_STREAM
 import ssl
 
-KEYFILE = 'server_key.pem' 		# Private key of the server
-CERTFILE = 'server_cert.pem' 	# Server certificate (given to client)
+KEYFILE = 'server_key.pem'      # Private key of the server
+CERTFILE = 'server_cert.pem'    # Server certificate (given to client)
 
 def echo_client(s):
-	while True:
-		data = s.recv(8192)
-		if data == b'':
-			break
-		s.send(data)
-	s.close()
-	print('Connection closed')
+    while True:
+        data = s.recv(8192)
+        if data == b'':
+            break
+        s.send(data)
+    s.close()
+    print('Connection closed')
 
 def echo_server(address):
-	s = socket(AF_INET, SOCK_STREAM)
-	s.bind(address)
-	s.listen(1)
+    s = socket(AF_INET, SOCK_STREAM)
+    s.bind(address)
+    s.listen(1)
 
-	# Wrap with an SSL layer requiring client certs
-	s_ssl = ssl.wrap_socket(s,
-							keyfile=KEYFILE,
-							certfile=CERTFILE,
-							server_side=True
-							)
-	# Wait for connections
-	while True:
-		try:
-			c,a = s_ssl.accept()
-			print('Got connection', c, a)
-			echo_client(c)
-		except Exception as e:
-			print('{}: {}'.format(e.__class__.__name__, e))
+    # Wrap with an SSL layer requiring client certs
+    s_ssl = ssl.wrap_socket(s,
+                            keyfile=KEYFILE,
+                            certfile=CERTFILE,
+                            server_side=True
+                            )
+    # Wait for connections
+    while True:
+        try:
+            c,a = s_ssl.accept()
+            print('Got connection', c, a)
+            echo_client(c)
+        except Exception as e:
+            print('{}: {}'.format(e.__class__.__name__, e))
 
 echo_server(('', 20000))
 ```  
@@ -18739,8 +18739,8 @@ echo_server(('', 20000))
 >>> import ssl
 >>> s = socket(AF_INET, SOCK_STREAM)
 >>> s_ssl = ssl.wrap_socket(s,
-...							cert_reqs=ssl.CERT_REQUIRED,
-...							ca_certs = 'server_cert.pem')
+...                         cert_reqs=ssl.CERT_REQUIRED,
+...                         ca_certs = 'server_cert.pem')
 >>> s_ssl.connect(('localhost', 20000))
 >>> s_ssl.send(b'Hello World?')
 12
@@ -18756,29 +18756,29 @@ b'Hello World?'
 import ssl
 
 class SSLMixin:
-	'''
-	Mixin class that adds support for SSL to existing servers based
-	on the socketserver module.
-	'''
-	def __init__(self, *args,
-				 keyfile=None, certfile=None, ca_certs=None,
-				 cert_reqs=ssl.NONE,
-				 **kwargs):
-		self._keyfile = keyfile
-		self._certfile = certfile
-		self._ca_certs = ca_certs
-		self._cert_reqs = cert_reqs
-		super().__init__(*args, **kwargs)
-	
-	def get_request(self):
-		client, addr = super().get_request()
-		client_ssl = ssl.wrap_socket(client,
-								     keyfile = self._keyfile,
-									 certfile = self._certfile,
-									 ca_certs = self._ca_certs,
-									 cert_reqs = self._cert_reqs,
-									 server_side = True)
-		return client_ssl, addr
+    '''
+    Mixin class that adds support for SSL to existing servers based
+    on the socketserver module.
+    '''
+    def __init__(self, *args,
+                 keyfile=None, certfile=None, ca_certs=None,
+                 cert_reqs=ssl.NONE,
+                 **kwargs):
+        self._keyfile = keyfile
+        self._certfile = certfile
+        self._ca_certs = ca_certs
+        self._cert_reqs = cert_reqs
+        super().__init__(*args, **kwargs)
+    
+    def get_request(self):
+        client, addr = super().get_request()
+        client_ssl = ssl.wrap_socket(client,
+                                     keyfile = self._keyfile,
+                                     certfile = self._certfile,
+                                     ca_certs = self._ca_certs,
+                                     cert_reqs = self._cert_reqs,
+                                     server_side = True)
+        return client_ssl, addr
 ```
 
 Чтобы использовать этот миксин, вы должн примешать его другим классам сервера. Например, вот как определить XML-RPC-сервер, который работает через SSL:
@@ -18789,7 +18789,7 @@ class SSLMixin:
 from xmlrpc.server import SimpleXMLRPCServer
 
 class SSLSimpleXMLRPCServer(SSLMixin, SimpleXMLRPCServer):
-	pass
+    pass
 ```
 
 Вот XML-RPC-сервер из **рецепта 11.6.**, немного модифицированного для работы через SSL:
@@ -18799,41 +18799,41 @@ from xmlrpc.server import SimpleXMLRPCServer
 from sslmixin import SSLMixin
 
 class SSLSimpleXMLRPCServer(SSLMixin, SimpleXMLRPCServer):
-	pass
+    pass
 
 class KeyValueServer:
-	_rpc_methods_ = ['get', 'set', 'delete', 'exists', 'keys']
-	def __init__(self, *args, **kwargs):
-		self._data = {}
-		self._serv = SSLSimpleXMLRPCServer(*args, allow_none=True, **kwargs)
-		for name in self._rpc_methods_:
-			self._serv.register_function(getattr(self, name))
-		
-	def get(self, name):
-		return self._data[name]
-	
-	def set(self, name, value):
-		self._data[name] = value
-	
-	def delete(self, name):
-		del self._data[name]
-	
-	def exists(self, name):
-		return name in self._data
-	
-	def keys(self):
-		return list(self._data)
-	
-	def serve_forever(self):
-		self._serv.serve_forever()
+    _rpc_methods_ = ['get', 'set', 'delete', 'exists', 'keys']
+    def __init__(self, *args, **kwargs):
+        self._data = {}
+        self._serv = SSLSimpleXMLRPCServer(*args, allow_none=True, **kwargs)
+        for name in self._rpc_methods_:
+            self._serv.register_function(getattr(self, name))
+        
+    def get(self, name):
+        return self._data[name]
+    
+    def set(self, name, value):
+        self._data[name] = value
+    
+    def delete(self, name):
+        del self._data[name]
+    
+    def exists(self, name):
+        return name in self._data
+    
+    def keys(self):
+        return list(self._data)
+    
+    def serve_forever(self):
+        self._serv.serve_forever()
 
 if __name__ == '__main__':
-	KEYFILE='server_key.pem'	# Private key of the server
-	CERTFILE='server_cert.pem'  # Server certificate
-	kvserv = KeyValueServer(('', 15000),
-							 keyfile=KEYFILE,
-							 certfile=CERTFILE),
-	kvserv.serve_forever()
+    KEYFILE='server_key.pem'    # Private key of the server
+    CERTFILE='server_cert.pem'  # Server certificate
+    kvserv = KeyValueServer(('', 15000),
+                             keyfile=KEYFILE,
+                             certfile=CERTFILE),
+    kvserv.serve_forever()
 ```
 
 Чтобы использовать этот сервер, вы можете соединиться с ним с помощью обычного модуля *xmlrpc.client*. Просто напишите *https:* в URL. Например:
@@ -18860,37 +18860,37 @@ from xmlrpc.client import SafeTransport, ServerProxy
 import ssl
 
 class VerifyCertSafeTransport(SafeTransport):
-	def __init__(self, cafile, certfile=None, keyfile=None):
-		SafeTransport.__init__(self)
-		self._ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-		self._ssl_context.load_verify_locations(cafile)
-		if cert:
-			self._ssl_context.load_cert_chain(certfile, keyfile)
-		self._ssl_context.verify_mode = ssl.CERT_REQUIRED
+    def __init__(self, cafile, certfile=None, keyfile=None):
+        SafeTransport.__init__(self)
+        self._ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        self._ssl_context.load_verify_locations(cafile)
+        if cert:
+            self._ssl_context.load_cert_chain(certfile, keyfile)
+        self._ssl_context.verify_mode = ssl.CERT_REQUIRED
 
-	def make_connection(self, host):
-		# Items in the passed dictionary are passed as keyword
-		# arguments to the http.client.HTTPSConnection() constructor.
-		# The context argument allows an ssl.SSLContext instance to
-		# be passed with information about the SSL configuration
-		s = super().make_connection((host, {'context': self._ssl_context}))
-		
-		return s
+    def make_connection(self, host):
+        # Items in the passed dictionary are passed as keyword
+        # arguments to the http.client.HTTPSConnection() constructor.
+        # The context argument allows an ssl.SSLContext instance to
+        # be passed with information about the SSL configuration
+        s = super().make_connection((host, {'context': self._ssl_context}))
+        
+        return s
 
 # Create the client proxy
 s = ServerProxy('https://localhost:15000',
-				 transport=VerifyCertSafeTransport('server_cert.pem'),
-				 allow_none=True)
+                 transport=VerifyCertSafeTransport('server_cert.pem'),
+                 allow_none=True)
 ```
 
 Как показано выше, сервер предоставляет сертификат клиенту, и клиент его проверяет. Эта верификация может быть двунаправленной. Если сервер хочет верифицировать клиента, измените процесс его запуска на следующий:
 ```python
 # Create the client proxy
 s = ServerProxy('https://localhost:15000',
-				 transport=VerifyCertSafeTransport('server_cert.pem',
-												   'client_cert.pem',
-												   'client_key.pem'),
-			     allow_none=True)
+                 transport=VerifyCertSafeTransport('server_cert.pem',
+                                                   'client_cert.pem',
+                                                   'client_key.pem'),
+                 allow_none=True)
 ```
 
 ### Обсуждение
@@ -18989,41 +18989,41 @@ from multiprocessing.reduction import recv_handle, send_handle
 import socket
 
 def worker(in_p, out_p):
-	out_p.close()
-	while True:
-		fd = recv_handle(in_p)
-		print('CHILD: GOT FD', fd)
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM, fileno=fd) as s:
-			while True:
-				msg = s.recv(1024)
-				if not msg:
-					break
-				print('CHILD: RECV {!r}'.format(msg))
-				s.send(msg)
+    out_p.close()
+    while True:
+        fd = recv_handle(in_p)
+        print('CHILD: GOT FD', fd)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM, fileno=fd) as s:
+            while True:
+                msg = s.recv(1024)
+                if not msg:
+                    break
+                print('CHILD: RECV {!r}'.format(msg))
+                s.send(msg)
 
 def server(address, in_p, out_p, worker_pid):
-	in_p.close()
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-	s.bind(address)
-	s.listen(1)
-	while True:
-		client, addr = s.accept()
-		print('SERVER: Got connection from', addr)
-		send_handle(out_p, client.fileno(), worker_pid)
-		client.close()
+    in_p.close()
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+    s.bind(address)
+    s.listen(1)
+    while True:
+        client, addr = s.accept()
+        print('SERVER: Got connection from', addr)
+        send_handle(out_p, client.fileno(), worker_pid)
+        client.close()
 
 if __name__ == '__main__':
-	c1, c2 = multiprocessing.Pipe()
-	worker_p = multiprocessing.Process(target=worker, args=(c1,c2))
-	worker_p.start()
+    c1, c2 = multiprocessing.Pipe()
+    worker_p = multiprocessing.Process(target=worker, args=(c1,c2))
+    worker_p.start()
 
-	server_p = multiprocessing.Process(target=server,
-									   args=(('', 15000), c1, c2, worker_p.pid))
-	server_p.start()
+    server_p = multiprocessing.Process(target=server,
+                                       args=(('', 15000), c1, c2, worker_p.pid))
+    server_p.start()
 
-	c1.close()
-	c2.close()
+    c1.close()
+    c2.close()
 ```
 
 В этом примере создаются два процесса и соединяются через объект *Pipe* из *multiprocessing*. Серверный процесс открывает сокет и ждёт соединений с клиентами. Процесс-воркер ждёт получения файлового дескриптора по каналу, используя *recv_handle()*. Когда сервер получает соединение, он посылает получившийся файловый дескриптор сокета воркеру, используя *send_handle()*. Воркер принимает сокет и эхом отправляет данные обратно клиенту, пока соединение не закроется.  
@@ -19050,29 +19050,29 @@ from multiprocessing.reduction import send_handle
 import socket
 
 def server(work_address, port):
-	# Wait for the worker to connect
-	work_serv = Listener(work_address, authkey=b'peekaboo')
-	worker = work_serv.accept()
-	worker_pid = worker.recv()
+    # Wait for the worker to connect
+    work_serv = Listener(work_address, authkey=b'peekaboo')
+    worker = work_serv.accept()
+    worker_pid = worker.recv()
 
-	# Now run a TCP/IP server and send clients to worker
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-	s.bind(('', port))
-	s.listen(1)
-	while True:
-		client, addr = s.accept()
-		print('SERVER: Got connection from', addr)
-		send_handle(worker, client.fileno(), worker_pid)
-		client.close()
+    # Now run a TCP/IP server and send clients to worker
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+    s.bind(('', port))
+    s.listen(1)
+    while True:
+        client, addr = s.accept()
+        print('SERVER: Got connection from', addr)
+        send_handle(worker, client.fileno(), worker_pid)
+        client.close()
 
 if __name__ == '__main__':
-	import sys
-	if len(sys.argv) != 3:
-		print('Usage: server.py server_address port', file=sys.stderr)
-		raise SystemExit(1)
-	
-	server(sys.argv[1], int(sys.argv[2]))
+    import sys
+    if len(sys.argv) != 3:
+        print('Usage: server.py server_address port', file=sys.stderr)
+        raise SystemExit(1)
+    
+    server(sys.argv[1], int(sys.argv[2]))
 ```
 
 Чтобы запустить этот сервер, вы можете напечатать команду *python3 servermp.py /tmp/ servconn 15000*. Вот соответствующий код клиента:
@@ -19085,26 +19085,26 @@ import os
 from socket import socket, AF_INET, SOCK_STREAM
 
 def worker(server_address):
-	serv = Client(server_address, authkey=b'peekaboo')
-	serv.send(os.getpid())
-	while True:
-		fd = recv_handle(serv)
-		print('WORKER: GOT FD', fd)
-		with socket(AF_INET, SOCK_STREAM, fileno=fd) as client:
-			while True:
-				msg = client.recv(1024)
-				if not msg:
-					break
-				print('WORKER: RECV {!r}'.format(msg))
-				client.send(msg)
+    serv = Client(server_address, authkey=b'peekaboo')
+    serv.send(os.getpid())
+    while True:
+        fd = recv_handle(serv)
+        print('WORKER: GOT FD', fd)
+        with socket(AF_INET, SOCK_STREAM, fileno=fd) as client:
+            while True:
+                msg = client.recv(1024)
+                if not msg:
+                    break
+                print('WORKER: RECV {!r}'.format(msg))
+                client.send(msg)
 
 if __name__ == '__main__':
-	import sys
-	if len(sys.argv) != 2:
-		print('Usage: worker.py server_address', file=sys.stderr)
-		raise SystemExit(1)
-	
-	worker(sys.argv[1])
+    import sys
+    if len(sys.argv) != 2:
+        print('Usage: worker.py server_address', file=sys.stderr)
+        raise SystemExit(1)
+    
+    worker(sys.argv[1])
 ```
 
 Чтобы запустить воркер, напечатайте *python3 workermp.py /tmp/servconn*. Получившаяся операция будет точно такой же, как и в примере, который использует *Pipe()*. 
@@ -19116,39 +19116,39 @@ import socket
 import struct
 
 def send_fd(sock, fd):
-	'''
-	Send a single file descriptor.
-	'''
-	sock.sendmsg([b'x'],
-			   	 [(socket.SOL_SOCKET, socket.SCM_RIGHTS, struct.pack('i', fd))])
-	ack = sock.recv(2)
-	assert ack == b'OK'
+    '''
+    Send a single file descriptor.
+    '''
+    sock.sendmsg([b'x'],
+                 [(socket.SOL_SOCKET, socket.SCM_RIGHTS, struct.pack('i', fd))])
+    ack = sock.recv(2)
+    assert ack == b'OK'
 
 def server(work_address, port):
-	# Wait for the worker to connect
-	work_serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-	work_serv.bind(work_address)
-	work_serv.listen(1)
-	worker, addr = work_serv.accept()
+    # Wait for the worker to connect
+    work_serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    work_serv.bind(work_address)
+    work_serv.listen(1)
+    worker, addr = work_serv.accept()
 
-	# Now run a TCP/IP server and send clients to worker
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-	s.bind(('',port))
-	s.listen(1)
-	while True:
-		client, addr = s.accept()
-		print('SERVER: Got connection from', addr)
-		send_fd(worker, client.fileno())
-		client.close()
+    # Now run a TCP/IP server and send clients to worker
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+    s.bind(('',port))
+    s.listen(1)
+    while True:
+        client, addr = s.accept()
+        print('SERVER: Got connection from', addr)
+        send_fd(worker, client.fileno())
+        client.close()
 
 if __name__ == '__main__':
-	import sys
-	if len(sys.argv) != 3:
-		print('Usage: server.py server_address port', file=sys.stderr)
-		raise SystemExit(1)
+    import sys
+    if len(sys.argv) != 3:
+        print('Usage: server.py server_address port', file=sys.stderr)
+        raise SystemExit(1)
 
-	server(sys.argv[1], int(sys.argv[2]))
+    server(sys.argv[1], int(sys.argv[2]))
 ``` 
 
 Вот реализация воркера с использованием сокетов:
@@ -19158,39 +19158,39 @@ import socket
 import struct
 
 def recv_fd(sock):
-	'''
-	Receive a single file descriptor
-	'''
-	msg, ancdata, flags, addr = sock.recvmsg(1,
-									socket.CMSG_LEN(struct.calcsize('i')))
-	
-	cmsg_level, cmsg_type, cmsg_data = ancdata[0]
-	assert cmsg_level == socket.SOL_SOCKET and cmsg_type == socket.SCM_RIGHTS
-	sock.sendall(b'OK')
-	return struct.unpack('i', cmsg_data)[0]
+    '''
+    Receive a single file descriptor
+    '''
+    msg, ancdata, flags, addr = sock.recvmsg(1,
+                                    socket.CMSG_LEN(struct.calcsize('i')))
+    
+    cmsg_level, cmsg_type, cmsg_data = ancdata[0]
+    assert cmsg_level == socket.SOL_SOCKET and cmsg_type == socket.SCM_RIGHTS
+    sock.sendall(b'OK')
+    return struct.unpack('i', cmsg_data)[0]
 
 
 def worker(server_address):
-	serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-	serv.connect(server_address)
-	while True:
-		fd = recv_fd(serv)
-		print('WORKER: GOT FD', fd)
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM, fileno=fd) as client:
-			while True:
-				msg = client.recv(1024)
-				if not msg:
-					break
-				print('WORKER: RECV {!r}'.format(msg))
-				client.send(msg)
+    serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    serv.connect(server_address)
+    while True:
+        fd = recv_fd(serv)
+        print('WORKER: GOT FD', fd)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM, fileno=fd) as client:
+            while True:
+                msg = client.recv(1024)
+                if not msg:
+                    break
+                print('WORKER: RECV {!r}'.format(msg))
+                client.send(msg)
 
 if __name__ == '__main__':
-	import sys
-	if len(sys.argv) != 2:
-		print('Usage: worker.py server_address', file=sys.stderr)
-		raise SystemExit(1)
+    import sys
+    if len(sys.argv) != 2:
+        print('Usage: worker.py server_address', file=sys.stderr)
+        raise SystemExit(1)
 
-	worker(sys.argv[1])
+    worker(sys.argv[1])
 ```
 
 Если собираетесь использовать передачу файловых дескрипторов в своей программе, рекомендуем почитать более продвинутый материал, такой как *Unix Network Programming* У. Ричарда Стивенса. Передача файловых дескрипторов в Windows использует другие приёмы (не показанные здесь). Для работы с этой ОС рекомендуем внимательно изучить исходный код *multiprocessing.reduction* и понять, как он работает. 
@@ -19204,25 +19204,25 @@ if __name__ == '__main__':
 На фундаментальном уровне управляемый событиями ввод-вывод — это приём, который принимает базовые операции ввода-вывода (то есть чтение и запись) и конвертирует их в события, которые должны быть обработаны вашей программой. Например, когда данные приходят в сокет, это превращается в событие «получено», которое обрабатывается каким-то методом или функцией обратного вызова (коллбэком), которую вы должны предоставить для ответа на это событие. Чтобы понять, откуда копать, приведём такой пример: управляемый событиями фреймворк может начаться с базового класса, который реализует набор базовых методов обработки событий:
 ```python
 class EventHandler:
-	def fileno(self):
-		'Return the associated file descriptor'
-		raise NotImplemented('must implement')
-	
-	def wants_to_receive(self):
-		'Return True if receiving is allowed'
-		return False
-	
-	def handle_receive(self):
-		'Perform the receive operation'
-		pass
-	
-	def wants_to_send(self):
-		'Return True if sending is requested'
-		return False
-	
-	def handle_send(self):
-		'Send outgoing data'
-		pass
+    def fileno(self):
+        'Return the associated file descriptor'
+        raise NotImplemented('must implement')
+    
+    def wants_to_receive(self):
+        'Return True if receiving is allowed'
+        return False
+    
+    def handle_receive(self):
+        'Perform the receive operation'
+        pass
+    
+    def wants_to_send(self):
+        'Return True if sending is requested'
+        return False
+    
+    def handle_send(self):
+        'Send outgoing data'
+        pass
 ```
 
 Экземпляры этого класса могут быть подключены к циклу, который выглядит так:
@@ -19230,14 +19230,14 @@ class EventHandler:
 import select
 
 def event_loop(handlers):
-	while True:
-		wants_recv = [h for h in handlers if h.wants_to_receive()]
-		wants_send = [h for h in handlers if h.wants_to_send()]
-		can_recv, can_send, _ = select.select(wants_recv, wants_send, [])
-		for h in can_recv:
-			h.handle_receive()
-		for h in can_send:
-			h.handle_send()
+    while True:
+        wants_recv = [h for h in handlers if h.wants_to_receive()]
+        wants_send = [h for h in handlers if h.wants_to_send()]
+        can_recv, can_send, _ = select.select(wants_recv, wants_send, [])
+        for h in can_recv:
+            h.handle_receive()
+        for h in can_send:
+            h.handle_send()
 ```
 
 Вот и всё! Секрет цикла событий — это вызов *select()*, который опрашивает файловые дескрипторы на предмет активности. Перед вызовом *select()* цикл событий просто опрашивает все обработчики, чтобы понять, какой хочет принимать или посылать. Далее он предоставляет получившиеся списки в *select()*. В результате *select()* возвращает список объектов, которые уже готовы принимать или посылать. Запускаются соответствующие методы *handle_receive()* или *handle_send()*. 
@@ -19248,29 +19248,29 @@ import socket
 import time
 
 class UDPServer(EventHandler):
-	def __init__(self, address):
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		self.sock.bind(address)
-	
-	def fileno(self):
-		return self.sock.fileno()
-	
-	def wants_to_receive(self):
-		return True
+    def __init__(self, address):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind(address)
+    
+    def fileno(self):
+        return self.sock.fileno()
+    
+    def wants_to_receive(self):
+        return True
 
 class UDPTimeServer(UDPServer):
-	def handle_receive(self):
-		msg, addr = self.sock.recvfrom(1)
-		self.sock.sendto(time.ctime().encode('ascii'), addr)
+    def handle_receive(self):
+        msg, addr = self.sock.recvfrom(1)
+        self.sock.sendto(time.ctime().encode('ascii'), addr)
 
 class UDPEchoServer(UDPServer):
-	def handle_receive(self):
-		msg, addr = self.sock.recvfrom(8192)
-		self.sock.sendto(msg, addr)
+    def handle_receive(self):
+        msg, addr = self.sock.recvfrom(8192)
+        self.sock.sendto(msg, addr)
 
 if __name__ == '__main__':
-	handlers = [ UDPTimeServer(('',14000)), UDPEchoServer(('',15000))
-	event_loop(handlers)
+    handlers = [ UDPTimeServer(('',14000)), UDPEchoServer(('',15000))
+    event_loop(handlers)
 ```
 
 Чтобы протестировать этот код, вы можете попробовать соединиться с ним из другого интерпретатора Python:
@@ -19291,60 +19291,60 @@ if __name__ == '__main__':
 Реализация TCP-сервера сложнее, поскольку каждый клиент вызывает создание нового объекта-обработчика. Вот пример TCP-эхо-клиента:
 ```python
 class TCPServer(EventHandler):
-	def __init__(self, address, client_handler, handler_list):
-		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-		self.sock.bind(address)
-		self.sock.listen(1)
-		self.client_handler = client_handler
-		self.handler_list = handler_list
-	
-	def fileno(self):
-		return self.sock.fileno()
-	
-	def wants_to_receive(self):
-		return True
-	
-	def handle_receive(self):
-		client, addr = self.sock.accept()
-		# Add the client to the event loop's handler list
-		self.handler_list.append(self.client_handler(client, self.handler_list))
+    def __init__(self, address, client_handler, handler_list):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+        self.sock.bind(address)
+        self.sock.listen(1)
+        self.client_handler = client_handler
+        self.handler_list = handler_list
+    
+    def fileno(self):
+        return self.sock.fileno()
+    
+    def wants_to_receive(self):
+        return True
+    
+    def handle_receive(self):
+        client, addr = self.sock.accept()
+        # Add the client to the event loop's handler list
+        self.handler_list.append(self.client_handler(client, self.handler_list))
 
 class TCPClient(EventHandler):
-	def __init__(self, sock, handler_list):
-		self.sock = sock
-		self.handler_list = handler_list
-		self.outgoing = bytearray()
-	
-	def fileno(self):
-		return self.sock.fileno()
-	
-	def close(self):
-		self.sock.close()
-		# Remove myself from the event loop's handler list
-		self.handler_list.remove(self)
-	
-	def wants_to_send(self):
-		return True if self.outgoing else False
-	
-	def handle_send(self):
-		nsent = self.sock.send(self.outgoing)
-		self.outgoing = self.outgoing[nsent:]
+    def __init__(self, sock, handler_list):
+        self.sock = sock
+        self.handler_list = handler_list
+        self.outgoing = bytearray()
+    
+    def fileno(self):
+        return self.sock.fileno()
+    
+    def close(self):
+        self.sock.close()
+        # Remove myself from the event loop's handler list
+        self.handler_list.remove(self)
+    
+    def wants_to_send(self):
+        return True if self.outgoing else False
+    
+    def handle_send(self):
+        nsent = self.sock.send(self.outgoing)
+        self.outgoing = self.outgoing[nsent:]
 
 class TCPEchoClient(TCPClient):
-	def wants_to_receive(self):
-		return True
-	def handle_receive(self):
-		data = self.sock.recv(8192)
-		if not data:
-			self.close()
-		else:
-			self.outgoing.extend(data)
+    def wants_to_receive(self):
+        return True
+    def handle_receive(self):
+        data = self.sock.recv(8192)
+        if not data:
+            self.close()
+        else:
+            self.outgoing.extend(data)
 
 if __name__ == '__main__':
-	handlers = []
-	handlers.append(TCPServer(('',16000), TCPEchoClient, handlers))
-	event_loop(handlers)
+    handlers = []
+    handlers.append(TCPServer(('',16000), TCPEchoClient, handlers))
+    event_loop(handlers)
 ``` 
 
 Ключевой момент примера с TCP — это добавление и удаление клиентов из списка обработчика. На каждое соединение для клиента создаётся и добавляется в список новый обработчик. Когда соединение закрывается, каждый клиент должен позаботиться о том, чтобы удалить себя из списка. 
@@ -19364,45 +19364,45 @@ from concurrent.futures import ThreadPoolExecutor
 import os
 
 class ThreadPoolHandler(EventHandler):
-	def __init__(self, nworkers):
-		if os.name == 'posix':
-			self.signal_done_sock, self.done_sock = socket.socketpair()
-		else:
-			server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			server.bind(('127.0.0.1', 0))
-			server.listen(1)
-			self.signal_done_sock = socket.socket(socket.AF_INET,
-			socket.SOCK_STREAM)
-			self.signal_done_sock.connect(server.getsockname())
-			self.done_sock, _ = server.accept()
-			server.close()
-		
-		self.pending = []
-		self.pool = ThreadPoolExecutor(nworkers)
-	
-	def fileno(self):
-		return self.done_sock.fileno()
-	
-	# Callback that executes when the thread is done
-	def _complete(self, callback, r):
-		self.pending.append((callback, r.result()))
-		self.signal_done_sock.send(b'x')
-		
-	# Run a function in a thread pool
-	def run(self, func, args=(), kwargs={},*,callback):
-		r = self.pool.submit(func, *args, **kwargs)
-		r.add_done_callback(lambda r: self._complete(callback, r))
-		
-	def wants_to_receive(self):
-		return True
-	
-	# Run callback functions of completed work
-	def handle_receive(self):
-		# Invoke all pending callback functions
-		for callback, result in self.pending:
-			callback(result)
-			self.done_sock.recv(1)
-		self.pending = []
+    def __init__(self, nworkers):
+        if os.name == 'posix':
+            self.signal_done_sock, self.done_sock = socket.socketpair()
+        else:
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server.bind(('127.0.0.1', 0))
+            server.listen(1)
+            self.signal_done_sock = socket.socket(socket.AF_INET,
+            socket.SOCK_STREAM)
+            self.signal_done_sock.connect(server.getsockname())
+            self.done_sock, _ = server.accept()
+            server.close()
+        
+        self.pending = []
+        self.pool = ThreadPoolExecutor(nworkers)
+    
+    def fileno(self):
+        return self.done_sock.fileno()
+    
+    # Callback that executes when the thread is done
+    def _complete(self, callback, r):
+        self.pending.append((callback, r.result()))
+        self.signal_done_sock.send(b'x')
+        
+    # Run a function in a thread pool
+    def run(self, func, args=(), kwargs={},*,callback):
+        r = self.pool.submit(func, *args, **kwargs)
+        r.add_done_callback(lambda r: self._complete(callback, r))
+        
+    def wants_to_receive(self):
+        return True
+    
+    # Run callback functions of completed work
+    def handle_receive(self):
+        # Invoke all pending callback functions
+        for callback, result in self.pending:
+            callback(result)
+            self.done_sock.recv(1)
+        self.pending = []
 ```
 
 В этом коде метод *run()* использован для отправки работы пулу вместе с функцией обратного вызова, которая должна быть вызвана по завершению. Затем работа отправляется в экземпляр *ThreadPoolExecutor*. Однако по-настоящему сложная проблема касается координации вычисленного результата и цикла событий. Чтобы это сделать, «под капотом» создается пара сокетов, которая используется как своего рода сигнальный механизм. Когда работа выполнена пулом потоков, выполняется метод *_complete()* в классе. Этот метод формирует очередь из ожидающего коллбэка и результата перед записью первого байта в один из этих сокетов. Метод *fileno()* запрограммирован возвращать другой сокет. Когда этот байт записан, он даст циклу событий сигнал о том, что что-то произошло. Когда запускается метод *handle_receive()*, выполняются все функции обратного вызова для ранее отправленной работы. Если честно, от этого может закружиться голова. 
@@ -19411,24 +19411,24 @@ class ThreadPoolHandler(EventHandler):
 ```python
 # A really bad Fibonacci implementation
 def fib(n):
-	if n < 2:
-		return 1
-	else:
-		return fib(n - 1) + fib(n - 2)
+    if n < 2:
+        return 1
+    else:
+        return fib(n - 1) + fib(n - 2)
 
 class UDPFibServer(UDPServer):
-	def handle_receive(self):
-		msg, addr = self.sock.recvfrom(128)
-		n = int(msg)
-		pool.run(fib, (n,), callback=lambda r: self.respond(r, addr))
-	
-	def respond(self, result, addr):
-		self.sock.sendto(str(result).encode('ascii'), addr)
+    def handle_receive(self):
+        msg, addr = self.sock.recvfrom(128)
+        n = int(msg)
+        pool.run(fib, (n,), callback=lambda r: self.respond(r, addr))
+    
+    def respond(self, result, addr):
+        self.sock.sendto(str(result).encode('ascii'), addr)
 
 if __name__ == '__main__':
-	pool = ThreadPoolHandler(16)
-	handlers = [ pool, UDPFibServer(('',16000))]
-	event_loop(handlers)
+    pool = ThreadPoolHandler(16)
+    handlers = [ pool, UDPFibServer(('',16000))]
+    event_loop(handlers)
 ```  
 
 Чтобы опробовать сервер в работе, просто запустите его и поэкспериментируйте с другой программой на Python:
@@ -19436,9 +19436,9 @@ if __name__ == '__main__':
 from socket import *
 sock = socket(AF_INET, SOCK_DGRAM)
 for x in range(40):
-	sock.sendto(str(x).encode('ascii'), ('localhost', 16000))
-	resp = sock.recvfrom(8192)
-	print(resp[0])
+    sock.sendto(str(x).encode('ascii'), ('localhost', 16000))
+    resp = sock.recvfrom(8192)
+    print(resp[0])
 ```
 
 У вас должно получиться запустить эту программу многократно, из разных окон, и всё должно работать без остановки других программ, даже если всё будет работать медленнее и медленнее.
@@ -19457,16 +19457,16 @@ for x in range(40):
 # zerocopy.py
 
 def send_from(arr, dest):
-	view = memoryview(arr).cast('B')
-	while len(view):
-		nsent = dest.send(view)
-		view = view[nsent:]
+    view = memoryview(arr).cast('B')
+    while len(view):
+        nsent = dest.send(view)
+        view = view[nsent:]
 
 def recv_into(arr, source):
-	view = memoryview(arr).cast('B')
-	while len(view):
-		nrecv = source.recv_into(view)
-		view = view[nrecv:]
+    view = memoryview(arr).cast('B')
+    while len(view):
+        nrecv = source.recv_into(view)
+        view = view[nrecv:]
 ```
 
 Чтобы протестировать эту программу, сначала создайте сервер и клиентскую программу, соединенные через сокет. В сервере:
@@ -19539,10 +19539,10 @@ Python уже давно поддерживает различные подхо�
 import time
 
 def countdown(n):
-	while n > 0:
-		print('T-minus', n)
-		n -= 1
-		time.sleep(5)
+    while n > 0:
+        print('T-minus', n)
+        n -= 1
+        time.sleep(5)
 
 # Create and launch a thread
 from threading import Thread
@@ -19555,9 +19555,9 @@ t.start()
 Потоки выполняются в их собственном потоке системного уровня (т.е., потоке POSIX или потоках Windows), который полностью управляется операционной системой. Будучи запущены, потоки выполняются независимо, пока целевая функция не вернёт результат. Вы можете опросить экземпляр потока, чтобы проверить, запущен ли он:
 ```python
 f t.is_alive():
-	print('Still running')
+    print('Still running')
 else:
-	print('Completed')
+    print('Completed')
 ```
 
 Вы также можете запросить объединение с потоком. Это означает, что поток, в котором выполнен этот вызов, будет ждать завершения потока, к которому применён метод:
@@ -19578,46 +19578,46 @@ t.start()
 Если вы хотите получить возможность завершать потоки, поток должен быть запрограммирован получать указания о выходе в определенных точках. Например вы можете поместить свой поток в такой класс:
 ```python
 class CountdownTask:
-	def __init__(self):
-		self._running = True
-	
-	def terminate(self):
-		self._running = False
+    def __init__(self):
+        self._running = True
+    
+    def terminate(self):
+        self._running = False
 
-	def run(self, n):
-		while self._running and n > 0:
-			print('T-minus', n)
-			n -= 1
-			time.sleep(5)
+    def run(self, n):
+        while self._running and n > 0:
+            print('T-minus', n)
+            n -= 1
+            time.sleep(5)
 
 c = CountdownTask()
 t = Thread(target=c.run, args=(10,))
 t.start()
 ...
-c.terminate() 	# Signal termination
-t.join()		# Wait for actual termination (if needed)
+c.terminate()   # Signal termination
+t.join()        # Wait for actual termination (if needed)
 ```
 
 Отправка запросов на завершение треда может быть сложной в координации, если треды выполняют блокирующие операции, такие как ввод-вывод. Например, если поток заблокирован на неопределённое время операцией ввода-вывода, он может никогда не вернуться, чтобы посмотреть, не убит ли он. Чтобы корректно разобраться с этим случаем, вам нужно аккуратно программировать треды с использованием циклов с таймаутами. Например:
 ```python
 class IOTask:
-	def terminate(self):
-		self._running = False
-	
-	def run(self, sock):
-		# sock is a socket
-		sock.settimeout(5) 		# Set timeout period
-		while self._running:
-			# Perform a blocking I/O operation w/ timeout
-			try:
-				data = sock.recv(8192)
-				break
-			except socket.timeout:
-				continue
-			# Continued processing
-			...
-		# Terminated
-		return
+    def terminate(self):
+        self._running = False
+    
+    def run(self, sock):
+        # sock is a socket
+        sock.settimeout(5)      # Set timeout period
+        while self._running:
+            # Perform a blocking I/O operation w/ timeout
+            try:
+                data = sock.recv(8192)
+                break
+            except socket.timeout:
+                continue
+            # Continued processing
+            ...
+        # Terminated
+        return
 ```
 
 ### Обсуждение
@@ -19628,15 +19628,15 @@ class IOTask:
 from threading import Thread
 
 class CountdownThread(Thread):
-	def __init__(self, n):
-		super().__init__()
-		self.n = 0
-	
-	def run(self):
-		while self.n > 0:
-			print('T-minus', self.n)
-			self.n -= 1
-			time.sleep(5)
+    def __init__(self, n):
+        super().__init__()
+        self.n = 0
+    
+    def run(self):
+        while self.n > 0:
+            print('T-minus', self.n)
+            self.n -= 1
+            time.sleep(5)
 
 c = CountdownThread(5)
 c.start()
@@ -19669,12 +19669,12 @@ import time
 
 # Code to execute in an independent thread
 def countdown(n, started_evt):
-	print('countdown starting')
-	started_evt.set()
-	while n > 0:
-		print('T-minus', n)
-		n -= 1
-		time.sleep(5)
+    print('countdown starting')
+    started_evt.set()
+    while n > 0:
+        print('T-minus', n)
+        n -= 1
+        time.sleep(5)
 
 # Create the event object that will be used to signal startup
 started_evt = Event()
@@ -19700,34 +19700,34 @@ import threading
 import time
 
 class PeriodicTimer:
-	def __init__(self, interval):
-		self._interval = interval
-		self._flag = 0
-		self._cv = threading.Condition()
+    def __init__(self, interval):
+        self._interval = interval
+        self._flag = 0
+        self._cv = threading.Condition()
 
-	def start(self):
-		t = threading.Thread(target=self.run)
-		t.daemon = True
-		t.start()
+    def start(self):
+        t = threading.Thread(target=self.run)
+        t.daemon = True
+        t.start()
 
-	def run(self):
-		'''
-		Run the timer and notify waiting threads after each interval
-		'''
-		while True:
-			time.sleep(self._interval)
-			with self._cv:
-				self._flag ^= 1
-				self._cv.notify_all()
-	
-	def wait_for_tick(self):
-		'''
-		Wait for the next tick of the timer
-		'''
-		with self._cv:
-			last_flag = self._flag
-			while last_flag == self._flag:
-				self._cv.wait()
+    def run(self):
+        '''
+        Run the timer and notify waiting threads after each interval
+        '''
+        while True:
+            time.sleep(self._interval)
+            with self._cv:
+                self._flag ^= 1
+                self._cv.notify_all()
+    
+    def wait_for_tick(self):
+        '''
+        Wait for the next tick of the timer
+        '''
+        with self._cv:
+            last_flag = self._flag
+            while last_flag == self._flag:
+                self._cv.wait()
 
 # Example use of the timer
 ptimer = PeriodicTimer(5)
@@ -19735,17 +19735,17 @@ ptimer.start()
 
 # Two threads that synchronize on the timer
 def countdown(nticks):
-	while nticks > 0:
-		ptimer.wait_for_tick()
-		print('T-minus', nticks)
-		nticks -= 1
+    while nticks > 0:
+        ptimer.wait_for_tick()
+        print('T-minus', nticks)
+        nticks -= 1
 
 def countup(last):
-	n = 0
-	while n < last:
-		ptimer.wait_for_tick()
-		print('Counting', n)
-		n += 1
+    n = 0
+    while n < last:
+        ptimer.wait_for_tick()
+        print('Counting', n)
+        n += 1
 
 threading.Thread(target=countdown, args=(10,)).start()
 threading.Thread(target=countup, args=(5,)).start()
@@ -19757,17 +19757,17 @@ threading.Thread(target=countup, args=(5,)).start()
 ```python
 # Worker thread
 def worker(n, sema):
-	# Wait to be signaled
-	sema.acquire()
-	# Do some work
-	print('Working', n)
+    # Wait to be signaled
+    sema.acquire()
+    # Do some work
+    print('Working', n)
 
 # Create some threads
 sema = threading.Semaphore(0)
 nworkers = 10
 for n in range(nworkers):
-	t = threading.Thread(target=worker, args=(n, sema,))
-	t.start()
+    t = threading.Thread(target=worker, args=(n, sema,))
+    t.start()
 ```
 
 Если вы запустите эту программу, стартует пул потоков, но ничего не произойдёт, поскольку все они заблокированы, ожидая получения семафора. Каждый раз, когда высвобождается семафор, только один воркер проснется и запустится. Например:
@@ -19781,8 +19781,231 @@ Working 1
 
 Написание кода, который использует хитрую синхронизацию между потоками, может взорвать вашу голову. Более разумный подход к использованию потоков — работать с ними как с коммуницирующими задачами, используя очереди, или же как с акторами. Очереди описаны в следующем рецепте. Акторы описаны в **рецепте 12.10.** 
 
+## 12.3. Коммуникация между потоками
+### Задача
+В вашей программе есть несколько потоков, и вы хотите безопасно коммуницировать или обмениться данными между ними.
 
+### Решение
+Вероятно, самый безопасный путь переслать данные из одного потока в другой — это использовать *Queue* из библиотеки *queue*. Чтобы сделать это, создайте экземпляр *Queue*, который будет общим для всех потоков. Затем потоки должны использовать операции *put()* или *get()*, чтобы добавлять или убирать элементы из очереди. Например:
+```python
+from queue import Queue
+from threading import Thread
 
+# A thread that produces data
+def producer(out_q):
+    while True:
+        # Produce some data
+        ...
+        out_q.put(data)
+
+# A thread that consumes data
+def consumer(in_q):
+    while True:
+        # Get some data
+        data = in_q.get()
+        # Process the data
+        ...
+
+# Create the shared queue and launch both threads
+q = Queue()
+t1 = Thread(target=consumer, args=(q,))
+t2 = Thread(target=producer, args=(q,))
+t1.start()
+t2.start()
+```
+
+Экземпляры *Queue* уже имеют все нужные блокировки, поэтому они могут быть безопасно стать общими для любого количества потоков. 
+
+При использовании очередей иногда довольно сложно скоординировать отключение продюсера и консьюмера. Общепринятое решение этой проблемы опирается на специальное «сторожевое» значение, которое при помещении в очередь заставляет консьюмеров завершаться. Например:
+```python
+from queue import Queue
+from threading import Thread
+
+# Object that signals shutdown
+_sentinel = object()
+
+# A thread that produces data
+def producer(out_q):
+    while running:
+        # Produce some data
+        ...
+        out_q.put(data)
+        
+    # Put the sentinel on the queue to indicate completion
+    out_q.put(_sentinel)
+
+# A thread that consumes data
+def consumer(in_q):
+    while True:
+        # Get some data
+        data = in_q.get()
+
+        # Check for termination
+        if data is _sentinel:
+            in_q.put(_sentinel)
+            break
+
+        # Process the data
+        ...
+```
+
+В этом примере есть тонкий момент — при получении специального «сторожевого» значения консьюмер немедленно помещает его обратно в очередь. Это позволяет «сторожевому» значению распространиться и попасть к другим консьюмерам, подключенным к той же очереди — и это отключит их, один за одним.
+
+Хотя очереди — это наиболее распространённый механизм коммуникации, вы можете построить собственные структуры данных, которые просто должны иметь требуемую блокировку и синхронизацию. Самый распространённый способ это сделать — обернуть ваши структуры данных в условную переменную. Например, вот так вы можете построить потокобезопасную очередь с приоритетом, обсуждавшуюся в **рецепте 1.5.**:
+```python
+import heapq
+import threading
+
+class PriorityQueue:
+    def __init__(self):
+        self._queue = []
+        self._count = 0
+        self._cv = threading.Condition()
+    
+    def put(self, item, priority):
+        with self._cv:
+            heapq.heappush(self._queue, (-priority, self._count, item))
+            self._count += 1
+            self._cv.notify()
+    
+    def get(self):
+        with self._cv:
+            while len(self._queue) == 0:
+                self._cv.wait()
+            return heapq.heappop(self._queue)[-1]
+```
+
+Коммуникация потоков через очередь — однонаправленный и недетерминистический процесс. В общем случае нет возможности узнать, когда получающий поток в действительности получил и обработал сообщение. Однако объекты *Queue* предоставляют некоторые базовые возможности завершения, как показано в методах *task_done()* и *join()* в этом примере:
+```python
+from queue import Queue
+from threading import Thread
+
+# A thread that produces data
+def producer(out_q):
+    while running:
+        # Produce some data
+        ...
+        out_q.put(data)
+
+# A thread that consumes data
+def consumer(in_q):
+    while True:
+        # Get some data
+        data = in_q.get()
+        # Process the data
+        ...
+        # Indicate completion
+        in_q.task_done()
+
+# Create the shared queue and launch both threads
+q = Queue()
+t1 = Thread(target=consumer, args=(q,))
+t2 = Thread(target=producer, args=(q,))
+t1.start()
+t2.start()
+# Wait for all produced items to be consumed
+q.join()
+```
+
+Если потоку нужно немедленно узнавать о том, что поток-консьюмер обработал определённый элемент данных, вы должны «спарить» отправленные данные с объектом *Event*, что позволит продюсеру отслеживать прогресс. Например:
+```python
+from queue import Queue
+from threading import Thread, Event
+
+# A thread that produces data
+def producer(out_q):
+    while running:
+        # Produce some data
+        ...
+        # Make an (data, event) pair and hand it to the consumer
+        evt = Event()
+        out_q.put((data, evt))
+        ...
+        # Wait for the consumer to process the item
+        evt.wait()
+
+# A thread that consumes data
+def consumer(in_q):
+    while True:
+        # Get some data
+        data, evt = in_q.get()
+        # Process the data
+        ...
+        # Indicate completion
+        evt.set()
+``` 
+
+### Обсуждение
+Написание потоковых программ, основанных на простых очередях, часто будет хорошим способом сохранить рассудок. Если можете разбить всё на простые потокобезопасные очереди, то вы обнаружите, что вам не нужно замусоривать вашу программу блокировками и прочей низкоуровневой синхронизацией. Также коммуникация с помощью очередей часто помогает создать масштабируемые проекты, которые можно потом перевести на другие шаблоны коммуникации на базе сообщений. Например, вы могли бы разделить вашу программу на множество процессов, или даже превратить в распределённую систему, без переделки её внутренней архитектуры очередей.
+
+Предостережение тем, кто будет использовать потоковые очереди: помещение элемента в очередь не означает, что элемент будет скопирован. Поэтому коммуникация в действительности означает передачу ссылки на объект между потоками. Если вы беспокоитесь о появлении общего состояния (shared state), имеет смысл передавать только неизменяемые структуры данных (целые числа, строки или кортежи), или же делать «глубокие копии» помещаемых в очередь элементов. Например:
+```python
+from queue import Queue
+from threading import Thread
+import copy
+
+# A thread that produces data
+def producer(out_q):
+    while True:
+        # Produce some data
+        ...
+        out_q.put(copy.deepcopy(data))
+
+# A thread that consumes data
+def consumer(in_q):
+    while True:
+        # Get some data
+        data = in_q.get()
+        # Process the data
+        ...
+```   
+
+Объекты *Queue* предоставляют несколько дополнительных возможностей, которые могут быть полезны в некоторых контекстах. Если вы создаёте *Queue*, задавая размер — *Queue(N)* (что необязательно), то в очередь можно будет поместить ограниченное количество элементов, прежде чем *put()* заблокирует продюсера. Определение верхней границы количества элементов в очереди может иметь смысл, если есть разница в скорости работы продюсера и консьюмера. Например, продюсер может генерировать элементы гораздо быстрее, чем консьюмер может их обработать. С другой стороны, если очередь блокируется при заполнении, то это может вызвать непредумышленный каскадный эффект, который распространится на всю программу и вызовет дедлок или сбои в работе. В общем, проблема передачи потока управления между общающимися потоками намного сложнее, чем кажется. Если вы когда-либо обнаружите, что пытаетесь рашить проблему за счет манипуляций с размерами очередей, то это признак хрупкого дизайна или каких-то других врождённых проблем с масштабированием.
+
+И метод *get()*, и метод *put()* поддерживают неблокируемость и таймауты. Например:
+```python
+import queue
+
+q = queue.Queue()
+
+try:
+    data = q.get(block=False)
+except queue.Empty:
+    ...
+try:
+    q.put(item, block=False)
+except queue.Full:
+    ...
+try:
+    data = q.get(timeout=5.0)
+except queue.Empty:
+    ...
+```
+
+Обе эти опции могут быть использованы для избежания проблемы неопределённого блокирования при какой-либо операции с очередью. Например, неблокирующий *put()* может быть использован с очередью фиксированного размера, чтобы реализовать различные типы обрабатыващего кода, который будет срабатывать при заполнении очереди. Например, можно делать запись в лог и отбрасывать элемент:
+```python
+def producer(q):
+    ...
+    try:
+        q.put(item, block=False)
+    except queue.Full:
+        log.warning('queued item %r discarded!', item)
+```
+
+Таймауты полезны, если вы пытаетесь заставить потоки-консьюмеры периодически осуществлять операции типа *q.get()*, чтобы они могли проверить такие вещи как флаг завершения (описано в **рецепте 12.1.**):
+```python
+_running = True
+def consumer(q):
+    while _running:
+        try:
+            item = q.get(timeout=5.0)
+            # Process item
+            ...
+        except queue.Empty:
+            pass
+```
+
+И последнее: есть методы *q.qsize()*, *q.full()* и *q.empty()*, которые позволяют узнать текущий размер и статус очереди. Однако стоит знать, что все они ненадёжны в многопоточном окружении. Например, вызов *q.empty()* может сообщить вам, что очередь пуста, но за то время, которое пройдёт от момента вызова, другой поток может поместить элементы в очередь. Если честно, лучше писать код, который не полагается на такие функции.
 
 
 
