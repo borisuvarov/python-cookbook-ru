@@ -207,6 +207,7 @@
 	- 11.9. Простая аутентификация клиентов
 	- 11.10. Добавление SSL в сетевые сервисы
 	- 11.11. Передача файловых дескрипторов сокетов между процессами
+	- 11.12. Разбираемся с управляемым событиями вводом-выводом
 
 <!-- /MarkdownTOC -->
 
@@ -19406,3 +19407,255 @@ if __name__ == '__main__':
 ```
 
 Если собираетесь использовать передачу файловых дескрипторов в своей программе, рекомендуем почитать более продвинутый материал, такой как *Unix Network Programming* У. Ричарда Стивенса. Передача файловых дескрипторов в Windows использует другие приёмы (не показанные здесь). Для работы с этой ОС рекомендуем внимательно изучить исходный код *multiprocessing.reduction* и понять, как он работает. 
+
+
+## 11.12. Разбираемся с управляемым событиями вводом-выводом
+### Задача
+Вы слышали о пакетах, основанных на «управляемом событиями» или «асинхронном» вводе-выводе, но вы не уверены, что разобрались в том, что это значит, как это работает, и как это может повлиять на ваши программы, если вы начнете использовать такой подход.
+
+### Решение
+На фундаментальном уровне управляемый событиями ввод-вывод — это приём, который принимает базовые операции ввода-вывода (то есть чтение и запись) и конвертирует их в события, которые должны быть обработаны вашей программой. Например, когда данные приходят в сокет, это превращается в событие «получено», которое обрабатывается каким-то методом или функцией обратного вызова (коллбэком), которую вы должны предоставить для ответа на это событие. Чтобы понять, откуда копать, приведём такой пример: управляемый событиями фреймворк может начаться с базового класса, который реализует набор базовых методов обработки событий:
+```python
+class EventHandler:
+	def fileno(self):
+		'Return the associated file descriptor'
+		raise NotImplemented('must implement')
+	
+	def wants_to_receive(self):
+		'Return True if receiving is allowed'
+		return False
+	
+	def handle_receive(self):
+		'Perform the receive operation'
+		pass
+	
+	def wants_to_send(self):
+		'Return True if sending is requested'
+		return False
+	
+	def handle_send(self):
+		'Send outgoing data'
+		pass
+```
+
+Экземпляры этого класса могут быть подключены к циклу, который выглядит так:
+```python
+import select
+
+def event_loop(handlers):
+	while True:
+		wants_recv = [h for h in handlers if h.wants_to_receive()]
+		wants_send = [h for h in handlers if h.wants_to_send()]
+		can_recv, can_send, _ = select.select(wants_recv, wants_send, [])
+		for h in can_recv:
+			h.handle_receive()
+		for h in can_send:
+			h.handle_send()
+```
+
+Вот и всё! Секрет цикла событий — это вызов *select()*, который опрашивает файловые дескрипторы на предмет активности. Перед вызовом *select()* цикл событий просто опрашивает все обработчики, чтобы понять, какой хочет принимать или посылать. Далее он предоставляет получившиеся списки в *select()*. В результате *select()* возвращает список объектов, которые уже готовы принимать или посылать. Запускаются соответствующие методы *handle_receive()* или *handle_send()*. 
+
+Чтобы писать приложения, создаются специфические экземпляры класса *EventHandler*. Например, вот два простых обработчика, которые показывают работу двух сетевых UDP-сервисов:
+```python
+import socket
+import time
+
+class UDPServer(EventHandler):
+	def __init__(self, address):
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.sock.bind(address)
+	
+	def fileno(self):
+		return self.sock.fileno()
+	
+	def wants_to_receive(self):
+		return True
+
+class UDPTimeServer(UDPServer):
+	def handle_receive(self):
+		msg, addr = self.sock.recvfrom(1)
+		self.sock.sendto(time.ctime().encode('ascii'), addr)
+
+class UDPEchoServer(UDPServer):
+	def handle_receive(self):
+		msg, addr = self.sock.recvfrom(8192)
+		self.sock.sendto(msg, addr)
+
+if __name__ == '__main__':
+	handlers = [ UDPTimeServer(('',14000)), UDPEchoServer(('',15000))
+	event_loop(handlers)
+```
+
+Чтобы протестировать этот код, вы можете попробовать соединиться с ним из другого интерпретатора Python:
+```python
+>>> from socket import *
+>>> s = socket(AF_INET, SOCK_DGRAM)
+>>> s.sendto(b'',('localhost',14000))
+0
+>>> s.recvfrom(128)
+(b'Tue Sep 18 14:29:23 2012', ('127.0.0.1', 14000))
+>>> s.sendto(b'Hello',('localhost',15000))
+5
+>>> s.recvfrom(128)
+(b'Hello', ('127.0.0.1', 15000))
+>>>
+```
+
+Реализация TCP-сервера сложнее, поскольку каждый клиент вызывает создание нового объекта-обработчика. Вот пример TCP-эхо-клиента:
+```python
+class TCPServer(EventHandler):
+	def __init__(self, address, client_handler, handler_list):
+		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
+		self.sock.bind(address)
+		self.sock.listen(1)
+		self.client_handler = client_handler
+		self.handler_list = handler_list
+	
+	def fileno(self):
+		return self.sock.fileno()
+	
+	def wants_to_receive(self):
+		return True
+	
+	def handle_receive(self):
+		client, addr = self.sock.accept()
+		# Add the client to the event loop's handler list
+		self.handler_list.append(self.client_handler(client, self.handler_list))
+
+class TCPClient(EventHandler):
+	def __init__(self, sock, handler_list):
+		self.sock = sock
+		self.handler_list = handler_list
+		self.outgoing = bytearray()
+	
+	def fileno(self):
+		return self.sock.fileno()
+	
+	def close(self):
+		self.sock.close()
+		# Remove myself from the event loop's handler list
+		self.handler_list.remove(self)
+	
+	def wants_to_send(self):
+		return True if self.outgoing else False
+	
+	def handle_send(self):
+		nsent = self.sock.send(self.outgoing)
+		self.outgoing = self.outgoing[nsent:]
+
+class TCPEchoClient(TCPClient):
+	def wants_to_receive(self):
+		return True
+	def handle_receive(self):
+		data = self.sock.recv(8192)
+		if not data:
+			self.close()
+		else:
+			self.outgoing.extend(data)
+
+if __name__ == '__main__':
+	handlers = []
+	handlers.append(TCPServer(('',16000), TCPEchoClient, handlers))
+	event_loop(handlers)
+``` 
+
+Ключевой момент примера с TCP — это добавление и удаление клиентов из списка обработчика. На каждое соединение для клиента создаётся и добавляется в список новый обработчик. Когда соединение закрывается, каждый клиент должен позаботиться о том, чтобы удалить себя из списка. 
+
+Если вы запустите эту программу и попробуете соединиться с ней с помощью Telnet или другого похожего инструмента, то вы увидите, как она эхом отправляет полученные данные обратно. Программа, по идее, должна легко работать с многочисленными клиентами.
+
+### Обсуждение 
+Фактически, все управляемые событиями фреймворки работают похожим образом. Реализация деталей и общая архитектура могут сильно варьироваться, но по сути всегда имеет место быть опрашивающий цикл, который проверяет сокеты на предмет активности и выполняет операции в ответ.
+
+Потенциальное преимущество управляемого событиями ввода-вывода в том, что он позволяет работать с большим количеством одновременных соединений без использования потоков или процессов. Вызов *select()* (или эквивалентный) может быть использован для мониторинга сотен и тысяч сокетов и ответа на возникающие в них события. События обрабатываются циклом событий поочерёдно, без необходимости использования каких-либо конкурентных (параллельных) примитивов. 
+
+Недостаток управляемого событиями ввода-вывода в том, что он не использует настоящую конкурентность (распараллеливание). Если любой из методов-обработчиков событий устанавливает блокировку или выполняет длительное вычисление, то всё останавливается. Также существует проблема вызова библиотечных функций, написанных не в стиле управления событиями. Всегда существует риск того, что в каком-то библиотечный вызове возникнет блокировка, которая остановит весь цикл.
+
+Проблемы с блокированием или долгими вычислениями могут быть решены путем отсылки выполнения работы в отдельный поток или процесс. Однако координация потоков и процессов с циклом событий — это хитрая штука. Вот пример кода, который делает это с помощью модуля *concurrent.futures*:
+```python
+from concurrent.futures import ThreadPoolExecutor
+import os
+
+class ThreadPoolHandler(EventHandler):
+	def __init__(self, nworkers):
+		if os.name == 'posix':
+			self.signal_done_sock, self.done_sock = socket.socketpair()
+		else:
+			server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			server.bind(('127.0.0.1', 0))
+			server.listen(1)
+			self.signal_done_sock = socket.socket(socket.AF_INET,
+			socket.SOCK_STREAM)
+			self.signal_done_sock.connect(server.getsockname())
+			self.done_sock, _ = server.accept()
+			server.close()
+		
+		self.pending = []
+		self.pool = ThreadPoolExecutor(nworkers)
+	
+	def fileno(self):
+		return self.done_sock.fileno()
+	
+	# Callback that executes when the thread is done
+	def _complete(self, callback, r):
+		self.pending.append((callback, r.result()))
+		self.signal_done_sock.send(b'x')
+		
+	# Run a function in a thread pool
+	def run(self, func, args=(), kwargs={},*,callback):
+		r = self.pool.submit(func, *args, **kwargs)
+		r.add_done_callback(lambda r: self._complete(callback, r))
+		
+	def wants_to_receive(self):
+		return True
+	
+	# Run callback functions of completed work
+	def handle_receive(self):
+		# Invoke all pending callback functions
+		for callback, result in self.pending:
+			callback(result)
+			self.done_sock.recv(1)
+		self.pending = []
+```
+
+В этом коде метод *run()* использован для отправки работы пулу вместе с функцией обратного вызова, которая должна быть вызвана по завершению. Затем работа отправляется в экземпляр *ThreadPoolExecutor*. Однако по-настоящему сложная проблема касается координации вычисленного результата и цикла событий. Чтобы это сделать, «под капотом» создается пара сокетов, которая используется как своего рода сигнальный механизм. Когда работа выполнена пулом потоков, выполняется метод *_complete()* в классе. Этот метод формирует очередь из ожидающего коллбэка и результата перед записью первого байта в один из этих сокетов. Метод *fileno()* запрограммирован возвращать другой сокет. Когда этот байт записан, он даст циклу событий сигнал о том, что что-то произошло. Когда запускается метод *handle_receive()*, выполняются все функции обратного вызова для ранее отправленной работы. Если честно, от этого может закружиться голова. 
+
+Вот простой сервер, который демонстрирует использование пула потоков для выполнения длительных вычислений:
+```python
+# A really bad Fibonacci implementation
+def fib(n):
+	if n < 2:
+		return 1
+	else:
+		return fib(n - 1) + fib(n - 2)
+
+class UDPFibServer(UDPServer):
+	def handle_receive(self):
+		msg, addr = self.sock.recvfrom(128)
+		n = int(msg)
+		pool.run(fib, (n,), callback=lambda r: self.respond(r, addr))
+	
+	def respond(self, result, addr):
+		self.sock.sendto(str(result).encode('ascii'), addr)
+
+if __name__ == '__main__':
+	pool = ThreadPoolHandler(16)
+	handlers = [ pool, UDPFibServer(('',16000))]
+	event_loop(handlers)
+```  
+
+Чтобы опробовать сервер в работе, просто запустите его и поэкспериментируйте с другой программой на Python:
+```python
+from socket import *
+sock = socket(AF_INET, SOCK_DGRAM)
+for x in range(40):
+	sock.sendto(str(x).encode('ascii'), ('localhost', 16000))
+	resp = sock.recvfrom(8192)
+	print(resp[0])
+```
+
+У вас должно получиться запустить эту программу многократно, из разных окон, и всё должно работать без остановки других программ, даже если всё будет работать медленнее и медленнее.
+
+Должны ли вы использовать код из этого рецепта? Скорее всего, нет. Вместо этого вам стоит изучить более полный фреймворк, который решает ту же задачу. Однако если вы поймете базовые концепции, представленные здесь, вы поймете основные приёмы, на базе которых работают такие фреймворки. 
+
+В качестве альтернативы программированию на базе коллбэков, управляемый событиями код часто использует корутины (сопрограммы). См. **рецепт 12.12.**, где приведён соответствующий пример.  
