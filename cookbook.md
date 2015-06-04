@@ -20334,7 +20334,149 @@ if __name__ == '__main__':
 
 «Под капотом» экземпляр *threading.local()* поддерживает отдельный экземпляр словаря на каждый поток. Все обычные операции над экземплярами, такие как получение, установка, удаление значения просто манипулируют словарём конкретного потока. То, что каждый поток использует отдельный словарь, обеспечивает изоляцию данных.
 
-   
+
+## 12.7. Создание пула потоков
+## Задача
+Вы хотите создать пул потоков-воркеров для обслуживания клиентов или выполнения других типов работы.
+
+### Решение
+В библиотеке *concurrent.futures* есть класс *ThreadPoolExecutor*, который можно использовать для этой цели. Вот пример простого TCP-сервера, использующего пул потоков для обслуживания клиентов:
+```python
+from socket import AF_INET, SOCK_STREAM, socket
+from concurrent.futures import ThreadPoolExecutor
+
+def echo_client(sock, client_addr):
+    '''
+    Handle a client connection
+    '''
+    print('Got connection from', client_addr)
+    while True:
+        msg = sock.recv(65536)
+        if not msg:
+            break
+        sock.sendall(msg)
+    print('Client closed connection')
+    sock.close()
+
+def echo_server(addr):
+    pool = ThreadPoolExecutor(128)
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.bind(addr)
+    sock.listen(5)
+    while True:
+        client_sock, client_addr = sock.accept()
+        pool.submit(echo_client, client_sock, client_addr)
+
+echo_server(('',15000))
+``` 
+
+Если вы хотите вручную создать собственный пул потоков, обычно достаточно просто это сделать с помощью *Queue*. Вот немного отличающаяся «ручная» реализация того же кода:
+```python
+from socket import socket, AF_INET, SOCK_STREAM
+from threading import Thread
+from queue import Queue
+
+def echo_client(q):
+    '''
+    Handle a client connection
+    '''
+    sock, client_addr = q.get()
+    print('Got connection from', client_addr)
+    while True:
+        msg = sock.recv(65536)
+        if not msg:
+            break
+        sock.sendall(msg)
+    print('Client closed connection')
+    sock.close()
+
+def echo_server(addr, nworkers):
+    # Launch the client workers
+    q = Queue()
+    for n in range(nworkers):
+        t = Thread(target=echo_client, args=(q,))
+        t.daemon = True
+        t.start()
+    
+    # Run the server
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.bind(addr)
+    sock.listen(5)
+    while True:
+        client_sock, client_addr = sock.accept()
+        q.put((client_sock, client_addr))
+
+echo_server(('',15000), 128)
+```
+
+Преимущество *ThreadPoolExecutor* перед ручной реализацией в том, что он облегчает отправляющему (сабмиттеру) задачу приёмки результатов из вызванной функции. Например, вы можете написать такой код:
+```python
+from concurrent.futures import ThreadPoolExecutor
+import urllib.request
+
+def fetch_url(url):
+    u = urllib.request.urlopen(url)
+    data = u.read()
+    return data
+
+pool = ThreadPoolExecutor(10)
+# Submit work to the pool
+a = pool.submit(fetch_url, 'http://www.python.org')
+b = pool.submit(fetch_url, 'http://www.pypy.org')
+
+# Get the results back
+x = a.result()
+y = b.result()
+```
+
+Объекты результатов в примере обрабатывают всё блокирование и выполняют координацию, необходимую для получения данных обратно из потока-воркера. Говоря конкретно, операция *a.result()* блокируется до тех пор, пока соответствующая функция не выполнится пулом и не вернёт значение.
+
+### Обсуждение
+В общем случае вам стоит избегать написания программ, которые позволяют количеству потоков расти неограниченно. Например, взгляните на такой сервер:
+```python
+from threading import Thread
+from socket import socket, AF_INET, SOCK_STREAM
+
+def echo_client(sock, client_addr):
+    '''
+    Handle a client connection
+    '''
+    print('Got connection from', client_addr)
+    while True:
+        msg = sock.recv(65536)
+        if not msg:
+            break
+        sock.sendall(msg)
+    print('Client closed connection')
+    sock.close()
+
+def echo_server(addr, nworkers):
+    # Run the server
+    sock = socket(AF_INET, SOCK_STREAM)
+    sock.bind(addr)
+    sock.listen(5)
+    while True:
+        client_sock, client_addr = sock.accept()
+        t = Thread(target=echo_client, args=(client_sock, client_addr))
+        t.daemon = True
+        t.start()
+
+echo_server(('',15000))
+```
+
+Хотя это работает, но не запрещает некому асинхронному хипстеру атаковать ваш сервер, заставив его создавать так много потоков, что заставит программу потребить все ресурсы и упасть. Путём использования предварительно инициализированного пула потоков вы аккуратно создаете верхнюю границу объема поддерживаемой конкурентности (параллелизма).
+
+Вы можете быть обеспокоены эффектом, который произведёт создание большого количества потоков. Однако современные системы не должны иметь проблем с созданием пулов из нескольких тысяч потоков. Более того, тысяча просто ждущих работы потоков не оказывает серьёзного (а то и никакого) воздействия на производительность другого кода (спящий поток ничего не делает). Конечно, если все эти потоки проснутся одновременно и начнут требовать CPU, это будет совсем другая история — особенно в свете глобальной блокировки интерпретатора (GIL). Общее правило: используйте пулы потоков для связанной со вводом-выводом обработки. 
+
+Возможно, у вас при создании больших пулов потоков возникнет опасение по поводу потребление памяти. Например, если вы создаёте 2000 потоков на OS X, система покажет, что процесс Python использует 9 гигабайт виртуальной памяти. Но не дайте этим цифрам себя запутать. При создании потока операционная система резервирует область виртуальной памяти, чтобы держать в ней стек выполнения потока (часто до 8 мегабайт). Однако только небольшой фрагмент этой памяти на самом деле отображен на реальную память. Если вы взглянете на вопрос повнимательнее, вы обнаружите, что интерпретатор Python использует намного меньше реальной памяти (для 2000 потоков используется только 70 мегабайт, но не 9 гигабайт). Если объем занятой виртуальной памяти важен, вы можете снизить его, используя функцию *threading.stack_size()*. Например:
+```python
+import threading
+threading.stack_size(65536)
+```   
+
+Если вы добавите этот вызов и повторите эксперимент с созданием 2000 потоков, то процесс Python съест всего 210 мегабайт виртуальной памяти, хотя объем реальной памяти останется практически таким же. Обратите внимание, что размер стека потока должен быть не меньше 32768 байтов, и обычно это значение является результатом умножения целого числа на размер системной страницы памяти (4096, 8192 и т.п.)
+
+
 
 
 
