@@ -20734,9 +20734,171 @@ PyObject *pyfunc(PyObject *self, PyObject *args) {
 
 Очевидно, что эти решения для обхода GIL не универсальны и не подходят для абсолютно любой задачи. Например, некоторые типы приложений не очень хорошо работают при разделении на несколько процессов или при попытках переписать часть кода на C. Для таких приложений вы можете придумать собственное решение (например, несколько процессов, осуществляющих доступ к общим областям памяти, несколько интерпретаторов, работающих в одном процессе и т.д.) В качестве альтернативы вы можете взглянуть на другие реализации интепретатора, такие как PyPy.
 
-См. **рецепт 15.7.** и **рецепт 15.10.**, где приведена дополнительная информация об освобождении GIL в расширениях на С.   
+См. **рецепт 15.7.** и **рецепт 15.10.**, где приведена дополнительная информация об освобождении GIL в расширениях на С.
 
 
+## 12.10. Определение акторной задачи
+### Задача
+Вы хотите определять задачи с поведением, аналогичным «акторам» в так называемой «модели акторов».
+
+### Решение
+«Модель акторов» — один из самых старых и простых подходов к конкуретности и распределённым вычислениям. На самом деле, простота — это часть её привлекательности. Если вкратце, то актор — это конкурентно выполняемая задача, которая просто производит действия над посылаемыми ей сообщениями. В ответ на эти сообщения актор может решите послать другие сообщения другим акторам. Коммуникация между акторами односторонняя и асинхронная. Отправляющий сообщение не знает, когда сообщение будет доставлено, а также не получает ответа или уведомления об обработке сообщения.
+
+Акторы определяются без особых хитростей — путём объединения потока и очереди. Например:
+```python
+from queue import Queue
+from threading import Thread, Event
+
+# Sentinel used for shutdown
+class ActorExit(Exception):
+    pass
+
+class Actor:
+    def __init__(self):
+        self._mailbox = Queue()
+    
+    def send(self, msg):
+        '''
+        Send a message to the actor
+        '''
+        self._mailbox.put(msg)
+        
+    def recv(self):
+        '''
+        Receive an incoming message
+        '''
+        msg = self._mailbox.get()
+        if msg is ActorExit:
+            raise ActorExit()
+        return msg
+        
+    def close(self):
+        '''
+        Close the actor, thus shutting it down
+        '''
+        self.send(ActorExit)
+
+    def start(self):
+        '''
+        Start concurrent execution
+        '''
+        self._terminated = Event()
+        t = Thread(target=self._bootstrap)
+        t.daemon = True
+        t.start()
+
+    def _bootstrap(self):
+        try:
+            self.run()
+        except ActorExit:
+            pass
+        finally:
+            self._terminated.set()
+    
+    def join(self):
+        self._terminated.wait()
+    
+    def run(self):
+        '''
+        Run method to be implemented by the user
+        '''
+        while True:
+            msg = self.recv()
+
+# Sample ActorTask
+class PrintActor(Actor):
+    def run(self):
+        while True:
+            msg = self.recv()
+            print('Got:', msg)
+
+# Sample use
+p = PrintActor()
+p.start()
+p.send('Hello')
+p.send('World')
+p.close()
+p.join()
+```
+
+В этом примере экземпляры *Actor* — это штуки, который просто посылают сообщение, используя свой метод *send()*. «Под капотом» тут происходит помещение сообщения в очередь и передача его внутреннему потоку, который запущен для обработки полученных сообщений. Метод *close()* запрограммирован, чтобы отключать актор путём помещения специального «сторожевого» значения (*ActorExit*) в очередь. Пользователи определяют новые акторы путём наследования от *Actor* и переопределения метода *run()* для реализации кастомной обработки.  Особенность исключения *ActorExit* в том, что определённый пользователем код может быть запрограммирован так, чтобы поймать запрос на завершение и правильного его обработать (исключение возбуждается методом *get()* и распространяется).
+
+Если вы ослабите требования к конкурентности и асинхронной доставки сообщений, актороподобные объекты могут быть минималистично определены с помощью генераторов. Например:
+```python
+def print_actor():
+    while True:
+        try:
+            msg = yield     # Get a message
+            print('Got:', msg)
+        except GeneratorExit:
+            print('Actor terminating')
+
+# Sample use
+p = print_actor()
+next(p)             # Advance to the yield (ready to receive)
+p.send('Hello')
+p.send('World')
+p.close()
+```
+
+### Обсуждение
+Важная часть привлекательности акторов — их простота. На практике у нас есть только одна основная операция — *send()*. А общая концепция «сообщения» в основанных на акторах системах может быть расширена по многим различным направлениям. Например, вы могли бы передавать помеченные тегами сообщения в форме кортежей и заставлять акторы принимать различные решения:
+```python
+class TaggedActor(Actor):
+def run(self):
+    while True:
+        tag, *payload = self.recv()
+        getattr(self,'do_'+tag)(*payload)
+    
+    # Methods correponding to different message tags
+    def do_A(self, x):
+        print('Running A', x)
+
+    def do_B(self, x, y):
+        print('Running B', x, y)
+
+# Example
+a = TaggedActor()
+a.start()
+a.send(('A', 1))        # Invokes do_A(1)
+a.send(('B', 2, 3))     # Invokes do_B(2,3)
+``` 
+
+А вот другой пример — актор, который позволяет произвольной функции выполняться в воркере, а результатам — отправляться обратно с использованием специального объекта *Result*:
+```python
+from threading import Event
+class Result:
+    def __init__(self):
+        self._evt = Event()
+        self._result = None
+    
+    def set_result(self, value):
+        self._result = value
+        self._evt.set()
+    
+    def result(self):
+        self._evt.wait()
+        return self._result
+
+class Worker(Actor):
+    def submit(self, func, *args, **kwargs):
+        r = Result()
+        self.send((func, args, kwargs, r))
+        return r
+    
+    def run(self):
+        while True:
+            func, args, kwargs, r = self.recv()
+            r.set_result(func(*args, **kwargs))
+
+# Example use
+worker = Worker()
+worker.start()
+r = worker.submit(pow, 2, 3)
+print(r.result())
+```
+
+И последнее: концепция «отсылки» задачи в сообщении может быть масштабирована в системы, которые используют несколько процессов, или даже в крупные распределённые системы. Например, метод *send()* актороподобных объектов может быть запрограммирован для передачи данных по соединению через сокет или доставки данных через какую-то инфраструктуру передачи сообщений (например, AMQP, ZMQ и т.д.)
 
 
 
