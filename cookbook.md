@@ -21043,5 +21043,354 @@ with exc.subscribe(task_a, task_b):
 
 В конце стоит отметить, что у идеи пункта обмена есть огромное количество возможностей для расширения. Например, пункты обмена могут реализовывать весь набор каналов обмена сообщениями или применять правила паттерн-матчинга (сопоставления с образцом) к именам пунктов обмена. Пункты обмена также могут быть расширены до приложений распределённых вычислений (например, переправки сообщений задачам на разных компьютерах и т.п.) 
 
+## 12.12. Использование генераторов в качестве альтернативы потокам
+### Задача
+Вы хотите реализовать конкурентность, используя генераторы (корутины) в качестве альтернативы системным потокам. Такой подход иногда называют потоками на уровне пользователя или зелёными потоками.
+
+### Решение
+Чтобы реализовать собственную конкурентность, используя генераторы, сначала вам нужно осознать фундаментальную мысль о функциях-генераторах и инструкции *yield*. Если точнее, фундаментальная вещь в  поведении *yield* — это то, что она заставляет генератор приостановить своё выполнение. Путём приостановки выполнения можно написать планировщик, который обращается с генераторами как со своего рода «задачами» и изменять их выполнение, используя некое кооперативное переключение задач.
+
+Чтобы проиллюстрировать эту идею, рассмотрите две функции-генератора, использующих простой *yield*:
+```python
+# Two simple generator functions
+def countdown(n):
+    while n > 0:
+        print('T-minus', n)
+        yield
+        n -= 1
+    print('Blastoff!')
+
+def countup(n):
+    x = 0
+    while x < n:
+        print('Counting up', x)
+        yield
+        x += 1
+``` 
+
+Эти функции, возможно, выглядят немного странно, потому что используют *yield* сами по себе. Однако рассмотрим следующий код, который реализует простой планировщик задач:
+```python
+from collections import deque
+
+class TaskScheduler:
+    def __init__(self):
+        self._task_queue = deque()
+        
+    def new_task(self, task):
+        '''
+        Admit a newly started task to the scheduler
+        '''
+        self._task_queue.append(task)
+    
+    def run(self):
+        '''
+        Run until there are no more tasks
+        '''
+        while self._task_queue:
+            task = self._task_queue.popleft()
+            try:
+                # Run until the next yield statement
+                next(task)
+                self._task_queue.append(task)
+            except StopIteration:
+                # Generator is no longer executing
+                pass
+
+# Example use
+sched = TaskScheduler()
+sched.new_task(countdown(10))
+sched.new_task(countdown(5))
+sched.new_task(countup(15))
+sched.run()
+```
+
+В этом коде класс *TaskSheduler* запускает коллекцию генераторов в манере round-robin — каждый работает, пока они не достигнут инструкции *yield*. Например, вывод будет таким:
+```
+T-minus 10
+T-minus 5
+Counting up 0
+T-minus 9
+T-minus 4
+Counting up 1
+T-minus 8
+T-minus 3
+Counting up 2
+T-minus 7
+T-minus 2
+...
+```
+
+В этой точке вы, по сути, реализовали маленькое ядро «операционной системы». Функции-генераторы — это задачи, а инструкция *yield* — это способ, с помощью которого залачи сигнализируют о том, что хотят приостановиться. Планировщик просто проходит по задачам в цикле, пока не останется ни одной выполняющейся. 
+
+На практике вы, вероятно, не будете использовать генераторы для реализации конкуретности в такой простой форме, как показано выше. Вместо этого вы можете использовать генераторы, чтобы заменить потоки при реализации акторов (см. **рецепт 12.10.**) или сетевые серверы.
+
+Следующий код иллюстрирует использование генераторов для реализации акторов без использования потоков:
+```python
+from collections import deque
+
+class ActorScheduler:
+    def __init__(self):
+        self._actors = { }          # Mapping of names to actors
+        self._msg_queue = deque()   # Message queue
+    
+    def new_actor(self, name, actor):
+        '''
+        Admit a newly started actor to the scheduler and give it a name
+        '''
+        self._msg_queue.append((actor,None))
+        self._actors[name] = actor
+        
+    def send(self, name, msg):
+        '''
+        Send a message to a named actor
+        '''
+        actor = self._actors.get(name)
+        if actor:
+            self._msg_queue.append((actor,msg))
+   
+    def run(self):
+        '''
+        Run as long as there are pending messages.
+        '''
+        while self._msg_queue:
+            actor, msg = self._msg_queue.popleft()
+            try:
+                actor.send(msg)
+            except StopIteration:
+                pass
+
+# Example use
+if __name__ == '__main__':
+    def printer():
+        while True:
+            msg = yield
+            print('Got:', msg)
+        
+    def counter(sched):
+        while True:
+            # Receive the current count
+            n = yield
+            if n == 0:
+                break
+            # Send to the printer task
+            sched.send('printer', n)
+            # Send the next count to the counter task (recursive)
+            sched.send('counter', n-1)
+        
+    sched = ActorScheduler()
+    # Create the initial actors
+    sched.new_actor('printer', printer())
+    sched.new_actor('counter', counter(sched))
+    
+    # Send an initial message to the counter to initiate
+    sched.send('counter', 10000)
+    sched.run()
+```
+
+Понимание этого кода может потребовать некоторого изучения, но ключевой момент тут — очередь ожидающих сообщений. По сути, планировщик работает до тех пор, пока есть сообщения, которые нужно доставить. Стоит отметить, что генератор *counter* отсылает сообщения себе и работает в рекурсивном цикле, не ограниченном лимитом на рекурсию Python.
+
+Вот продвинутый пример, показывающий использование генераторов для реализации конкурентного сетевого приложения:
+```python
+from collections import deque
+from select import select
+
+# This class represents a generic yield event in the scheduler
+class YieldEvent:
+    def handle_yield(self, sched, task):
+        pass
+    def handle_resume(self, sched, task):
+        pass
+
+# Task Scheduler
+class Scheduler:
+    def __init__(self):
+        self._numtasks = 0          # Total num of tasks
+        self._ready = deque()       # Tasks ready to run
+        self._read_waiting = {}     # Tasks waiting to read
+        self._write_waiting = {}    # Tasks waiting to write
+
+    # Poll for I/O events and restart waiting tasks
+    def _iopoll(self):
+        rset,wset,eset = select(self._read_waiting,
+                                self._write_waiting,[])
+        for r in rset:
+            evt, task = self._read_waiting.pop(r)
+            evt.handle_resume(self, task)
+        for w in wset:
+            evt, task = self._write_waiting.pop(w)
+            evt.handle_resume(self, task)
+    
+    def new(self,task):
+        '''
+        Add a newly started task to the scheduler
+        '''
+        self._ready.append((task, None))
+        self._numtasks += 1
+
+    def add_ready(self, task, msg=None):
+        '''
+        Append an already started task to the ready queue.
+        msg is what to send into the task when it resumes.
+        '''
+        self._ready.append((task, msg))
+
+    # Add a task to the reading set
+    def _read_wait(self, fileno, evt, task):
+        self._read_waiting[fileno] = (evt, task)
+
+    # Add a task to the write set
+    def _write_wait(self, fileno, evt, task):
+        self._write_waiting[fileno] = (evt, task)
+    
+    def run(self):
+        '''
+        Run the task scheduler until there are no tasks
+        '''
+        while self._numtasks:
+            if not self._ready:
+                self._iopoll()
+            task, msg = self._ready.popleft()
+            try:
+                # Run the coroutine to the next yield
+                r = task.send(msg)
+                if isinstance(r, YieldEvent):
+                    r.handle_yield(self, task)
+                else:
+                    raise RuntimeError('unrecognized yield event')
+            except StopIteration:
+                self._numtasks -= 1
+
+
+# Example implementation of coroutine-based socket I/O
+class ReadSocket(YieldEvent):
+    def __init__(self, sock, nbytes):
+        self.sock = sock
+        self.nbytes = nbytes
+    def handle_yield(self, sched, task):
+        sched._read_wait(self.sock.fileno(), self, task)
+    def handle_resume(self, sched, task):
+        data = self.sock.recv(self.nbytes)
+        sched.add_ready(task, data)
+
+class WriteSocket(YieldEvent):
+    def __init__(self, sock, data):
+        self.sock = sock
+        self.data = data
+    def handle_yield(self, sched, task):
+        sched._write_wait(self.sock.fileno(), self, task)
+    def handle_resume(self, sched, task):
+        nsent = self.sock.send(self.data)
+        sched.add_ready(task, nsent)
+
+class AcceptSocket(YieldEvent):
+    def __init__(self, sock):
+        self.sock = sock
+    def handle_yield(self, sched, task):
+        sched._read_wait(self.sock.fileno(), self, task)
+        def handle_resume(self, sched, task):
+        r = self.sock.accept()
+        sched.add_ready(task, r)
+
+# Wrapper around a socket object for use with yield
+class Socket(object):
+    def __init__(self, sock):
+        self._sock = sock
+    def recv(self, maxbytes):
+        return ReadSocket(self._sock, maxbytes)
+    def send(self, data):
+        return WriteSocket(self._sock, data)
+    def accept(self):
+        return AcceptSocket(self._sock)
+    def __getattr__(self, name):
+        return getattr(self._sock, name)
+
+if __name__ == '__main__':
+    from socket import socket, AF_INET, SOCK_STREAM
+    import time
+
+    # Example of a function involving generators. This should
+    # be called using line = yield from readline(sock)
+    def readline(sock):
+        chars = []
+        while True:
+            c = yield sock.recv(1)
+            if not c:
+                break
+            chars.append(c)
+            if c == b'\n':
+                break
+        return b''.join(chars)
+    
+    # Echo server using generators
+    class EchoServer:
+        def __init__(self,addr,sched):
+            self.sched = sched
+            sched.new(self.server_loop(addr))
+        
+        def server_loop(self,addr):
+            s = Socket(socket(AF_INET,SOCK_STREAM))
+            s.bind(addr)
+            s.listen(5)
+            while True:
+                c,a = yield s.accept()
+                print('Got connection from ', a)
+                self.sched.new(self.client_handler(Socket(c)))
+        
+        def client_handler(self,client):
+        while True:
+            line = yield from readline(client)
+            if not line:
+                break
+            line = b'GOT:' + line
+            while line:
+                nsent = yield client.send(line)
+                line = line[nsent:]
+        client.close()
+        print('Client closed')
+    
+    sched = Scheduler()
+    EchoServer(('',16000),sched)
+    sched.run()
+```
+
+Этот код, несомненно, потребует времени на внимательное изучение. Однако это, по сути, реализация маленькой операционной системы. Здесь есть очередь задач, готовых к запуску, и ожидающие области для задач, спящих в ожидании ввода-вывода. Большая часть планировщика занимается перемещением задач между очередью готовых и ожидающей ввода-вывода областью.
+
+### Обсуждение
+При создании фреймворка на базе генераторов, обеспечивающих конкурентность, наиболее часто работают с более общей формой *yield*:
+```python
+def some_generator():
+    ...
+    result = yield data
+    ...
+```
+
+Функции, которые используют *yield* этим способом часто называются «корутинами» (сопрограммами). Внутри планировщика инструкция *yield* обрабатывается в цикле:
+```python
+f = some_generator()
+
+# Initial result. Is None to start since nothing has been computed
+result = None
+while True:
+    try:
+        data = f.send(result)
+        result = ... do some calculation ...
+    except StopIteration:
+        break
+```
+
+###
+Логика, касающаяся *result*, немного извилиста. Передаваемое в *send()* значение определяет, что будет возвращено, когда инструкция *yield* проснётся. Итак, если *yield* вернёт результат в ответ на данные, которые были ранее выданы (yielded), он будет возвращён в следующей операции *send()*. Если функция-генератор только что стартовала, посылка есть значения *None* просто заставляет продвинуться к первой инструкции *yield*.
+ 
+В дополнение к отсылке значений, также можно выполнить над генератором метод *close()*. Это приведет к возбуждению тихого исключения *GeneratorExit* при достижении инструкции *yield*, что остановит выполнение. Если вы пожелаете, генератор может поймать это исключение и выполнить действия по очистке. Также можно использовать метод генератора *throw()*, чтобы возбудить произвольное исключение в инструкции *yield*. Планировщик задач может использовать это для коммуникации ошибок в запущенных генераторах.
+
+Инструкция *yield from*, использованная в последнем примере, применяется для реализации корутин, которые служат в качестве подпрограмм или процедур, вызываемых из других генераторов. По сути, поток управления прозрачно переходит в новую функцию. В отличие от обычных генераторов, функции, которые вызываются путём *yield from*, могут возвращать значение, которое становится результатом выполнения инструкции *yield from*. Дополнительные сведения об этой инструкции вы найдете в [PEP 380](http://www.python.org/dev/peps/pep-0380).
+
+И последнее: при программировании с использованием генераторов важно знать о нескольких базовых ограничениях. В частности, вы не получите преимуществ, предоставляемых потоками. Например, если вы выполняете любой завязанный на CPU код — или код, блокирующий ввод-вывод, он приостановит весь планировщик задач до завершения операции. Единственная возможность обойти это — делегировать операцию отдельному потоку или процессу, где она будет работать независимо. Ещё одно ограничение в том, что большинство библиотек Python не писались с целью хорошо работать с потоками на базе генераторов. Если вы примените этот подход, то обнаружите, что вам нужно писать замены для многих стандартных библиотечных функций.
+
+В качестве базового материала о корутинах и использованных в этом рецепте приёмах рекомендуем [PEP 342](http://www.python.org/dev/peps/pep-0342) и “[A Curious Course on Coroutines and Concurrency](http://www.dabeaz.com/coroutines)”.
+
+[PEP 3156](http://www.python.org/dev/peps/pep-3156) описывает современный подход к асинхронному вводу-выводу с использованием корутин. На практике вы очень вряд ли будете писать низкоуровневый планировщик корутин. Однако идеи, окружающие корутины, являются базой для многих популярных библиотек: [gevent](http://www.gevent.org), [greenlet](http://pypi.python.org/pypi/greenlet), [Stackless Python](http://www.stackless.com) и других похожих проектов. 
+
+
 
 
