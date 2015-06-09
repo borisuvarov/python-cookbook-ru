@@ -21715,4 +21715,134 @@ raise SystemExit(1)
 
 Но дополнительные шаги импортирования или записи в *sys.stderr* не нужны, если вы просто предоставите сообщение в *SystemExit()*.
 
+## 13.3. Парсинг аргументов командной строки
+### Задача
+Вы хотите написать программу, которая парсит аргументы, передаваемые в командной строке (найденные в *sys.argv*).
 
+### Решение
+Модуль *argparse* может быть использован для парсинга аргументов командной строки. Вот простой пример, который показывает его основные возможности:
+```python
+# search.py
+'''
+Hypothetical command-line tool for searching a collection of
+files for one or more text patterns.
+'''
+import argparse
+parser = argparse.ArgumentParser(description='Search some files')
+
+parser.add_argument(dest='filenames',metavar='filename', nargs='*')
+
+parser.add_argument('-p', '--pat',metavar='pattern', required=True,
+                    dest='patterns', action='append',
+                    help='text pattern to search for')
+
+parser.add_argument('-v', dest='verbose', action='store_true',
+                    help='verbose mode')
+
+parser.add_argument('-o', dest='outfile', action='store',
+                    help='output file')
+
+parser.add_argument('--speed', dest='speed', action='store',
+                    choices={'slow','fast'}, default='slow',
+                    help='search speed')
+
+args = parser.parse_args()
+
+# Output the collected arguments
+print(args.filenames)
+print(args.patterns)
+print(args.verbose)
+print(args.outfile)
+print(args.speed)
+```
+
+Эта программа определяет парсер командной строки, который можно использовать так:
+```
+bash % python3 search.py -h
+usage: search.py [-h] [-p pattern] [-v] [-o OUTFILE] [--speed {slow,fast}]
+                 [filename [filename ...]]
+
+Search some files
+
+positional arguments:
+    filename
+
+optional arguments:
+-h, --help                  show this help message and exit
+-p pattern, --pat pattern   text pattern to search for
+-v                          verbose mode
+-o OUTFILE                  output file
+--speed {slow,fast}         search speed
+```
+
+Приведённый ниже сеанс демонстрирует, как данные показываются в программе. Понаблюдайте за выводом инструкций *print()*.
+```
+bash % python3 search.py foo.txt bar.txt
+usage: search.py [-h] -p pattern [-v] [-o OUTFILE] [--speed {fast,slow}]
+                 [filename [filename ...]]
+search.py: error: the following arguments are required: -p/--pat
+
+bash % python3 search.py -v -p spam --pat=eggs foo.txt bar.txt
+filenames = ['foo.txt', 'bar.txt']
+patterns  = ['spam', 'eggs']
+verbose   = True
+outfile   = None
+speed     = slow
+
+bash % python3 search.py -v -p spam --pat=eggs foo.txt bar.txt -o results
+filenames = ['foo.txt', 'bar.txt']
+patterns  = ['spam', 'eggs']
+verbose   = True
+outfile   = results
+speed     = slow
+
+bash % python3 search.py -v -p spam --pat=eggs foo.txt bar.txt -o results
+               --speed=fast
+filenames = ['foo.txt', 'bar.txt']
+patterns  = ['spam', 'eggs']
+verbose   = True
+outfile   = results
+speed     = fast
+```  
+
+Последующая обработка аргументов зависит от программы. Просто замените функции *print()* на что-то более интересное.
+
+### Обсуждение
+Модуль *argparse* — один из самых крупных в стандартной библиотеке, у него огромное количество различных конфигурационных опций. Этот рецепт показывает самое необходимое их подмножество, которое может быть использовано на старте, а потом расширено по необходимости. 
+
+Чтобы парсить аргументы, сначала вы создаёте экземпляр *ArgumentParser* и добавляете объявления для аргументов, которые вы хотите поддерживать, используя метод *add_argument()*. В каждом вызове *add_argument()* аргумент *dest* определяет имя атрибута, куда будет помещаться разультат парсинга. Аргумент *metavar* используется при генерации сообщений помощи. Аргумент *action* определяет обработку, связанную с аргументом. Часто это будет *store* — для сохранения значения, или *append* — для сбора многих значений аргументов в список.
+
+Следующий аргумент собирает все дополнительные аргументы командной строки в список. В примере это используется для составления списка имён файлов:
+```python
+parser.add_argument(dest='filenames',metavar='filename', nargs='*')
+```  
+
+Следующий аргумент устанавливает булевый флаг в зависимости от того, был ли предоставлен аргумент:
+```python
+parser.add_argument('-v', dest='verbose', action='store_true',
+                    help='verbose mode')
+``` 
+
+Следующий аргумент принимает единственное значение и сохраняет его в форме строки:
+```python
+parser.add_argument('-o', dest='outfile', action='store',
+                    help='output file')
+```
+
+Следующее определение аргумента позволяет аргументу повторяться множество раз, и при этом все значения добавляются в список. Флаг *required* означает, что аргумент должен быть предоставлен хотя бы один раз. Использование *-p* и *--pat* означает, что оба имени аргумента приемлёмы.
+```python
+parser.add_argument('-p', '--pat', metavar='pattern', required=True,
+                    dest='patterns', action='append',
+                    help='text pattern to search for')
+```
+
+Наконец, следующее определение аргумента принимает значение и проверяет его на соответствие множеству возможных вариантов.
+```python
+parser.add_argument('--speed', dest='speed', action='store',
+                    choices={'slow','fast'}, default='slow',
+                    help='search speed')
+```
+
+Когда опции переданы, вы просто выполняете метод *parser.parse()*. Это обработает значение *sys.argv* и вернёт экземпляр с результатами. Результаты для каждого аргумента помещаются в атрибут с именем, заданным в параметре *dest*, переданном в *add_argument()*. 
+
+Есть несколько подходов к парсингу аргументов командной строки. Например, вы можете вручную обработать *sys.argv* или использовать модуль *getopt* (который назван в честь библиотеки на языке C с похожим названием). Однако если вы пойдёте по этому пути, то закончите переписыванием кода, который предоставляет *argparse*. Вы также можете столкнуться с кодом, который использует библиотеку *optparse* для разбора аргументов. Хотя она очень похожа на *argparse*, последняя более современна, и в новых проектах стоит использовать именно её.   
