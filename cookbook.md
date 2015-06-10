@@ -22296,3 +22296,118 @@ False
 ```
 
 Наконец, важно отметить, что Python не поддерживает весь набор возможностей, которые можно обнаружить в .ini-файлах, используемых другими программами (например, Windows-приложениями). Посмотрите документацию *configparser*, чтобы ознакомиться с деталями синтаксиса и поддерживаемыми возможностями. 
+
+## 13.11. Добавление логирования в простые скрипты
+### Задача
+Вы хотите, чтобы скрипты и простые программы записывали диагностическую информацию в логи.
+
+### Решение
+Самый простой способ добавить логирование в простую программу — использовать модуль *logging*. Например:
+```python
+import logging
+
+def main():
+    # Configure the logging system
+    logging.basicConfig(
+        filename='app.log',
+        level=logging.ERROR
+    )
+
+    # Variables (to make the calls that follow work)
+    hostname = 'www.python.org'
+    item = 'spam'
+    filename = 'data.csv'
+    mode = 'r'
+    
+    # Example logging calls (insert into your program)
+    logging.critical('Host %s unknown', hostname)
+    logging.error("Couldn't find %r", item)
+    logging.warning('Feature is deprecated')
+    logging.info('Opening file %r, mode=%r', filename, mode)
+    logging.debug('Got here')
+
+if __name__ == '__main__':
+    main()
+```
+
+Пять логирущих вызовов (*critical()*, *error()*, *warning()*, *info()*, *debug()*) представляют несколько уровней серьёзности в уменьшающемся порядке. Передаваемый в *basicConfig()* аргумент *level* — это фильтр. Все сообщения, которые уходят на более низком уровне, чем указанный, будут проигнорированы.
+
+Аргумент каждой логирующей операции — это строка сообщения, за которой следуют ноль или более аргументов. При создании финального сообщения для отправки в лог, используется оператор *%* для форматирования строки сообщения с применением предоставленных аргументов.
+
+Если вы запустите эту программу, содержание файла *app.log* будет таким:
+```
+CRITICAL:root:Host www.python.org unknown
+ERROR:root:Could not find 'spam'
+```
+
+Если вы хотите изменить вывод или уровень вывода, вы можете поменять передаваемые в вызов *basicConfig()* параметры. Например:
+```python
+logging.basicConfig(
+    filename='app.log',
+    level=logging.WARNING,
+    format='%(levelname)s:%(asctime)s:%(message)s')
+```
+
+В результате вывод изменится на такой:
+```
+CRITICAL:2012-11-20 12:27:13,595:Host www.python.org unknown
+ERROR:2012-11-20 12:27:13,595:Could not find 'spam'
+WARNING:2012-11-20 12:27:13,595:Feature is deprecated
+```
+
+Как показано выше, конфигурация логирования жестко закодирована в программе. Если вы хотите конфигурировать её конфигурационным файлом, измените вызов *basicConfig()* на следующий:
+```python
+import logging
+import logging.config
+
+def main():
+    # Configure the logging system
+    logging.config.fileConfig('logconfig.ini')
+    ...
+```
+
+Теперь создайте конфигурационный файл *logconfig.ini*, который выглядит так:
+```
+[loggers]
+keys=root
+
+[handlers]
+keys=defaultHandler
+
+[formatters]
+keys=defaultFormatter
+
+[logger_root]
+level=INFO
+handlers=defaultHandler
+qualname=root
+
+[handler_defaultHandler]
+class=FileHandler
+formatter=defaultFormatter
+args=('app.log', 'a')
+
+[formatter_defaultFormatter]
+format=%(levelname)s:%(name)s:%(message)s
+```
+
+Если вы хотите внести изменения в конфигурацию, просто отредактируйте *logconfig.ini*.
+
+### Обсуждение
+Если мы на секунду забудем, что модуль *logging* понимает миллион продвинутых конфигурационных параметров, то это решение выглядит вполне достаточным для простых программ и скриптов. Просто убедитесь, что вы выполняете вызов *basicConfig()* перед тем, как выполнять любые логирующие вызовы — и ваша программа будет генерировать логирующий вывод.
+
+Если вы хотите перенаправить сообщения логирования в стандартный поток ошибок, а не в файл, то не передавайте никакой информации об имени файла в *basicConfig()*. Например, просто сделайте так:
+```python
+logging.basicConfig(level=logging.INFO)
+``` 
+
+Тонкость использования *basicConfig()* в том, что её можно вызвать в программе только один раз. Если вам позже нужно будет изменить конфигурацию модуля *logging*, вам нужно получить корневой логгер и изменить его напрямую. Например:
+```python
+logging.getLogger().level = logging.DEBUG
+```
+
+Нужно подчеркнуть, что этот рецепт демонстрирует только базовое использование модуля *logging*. Его можно настроить под конкретные потребности намного более продвинутым образом. Рекомендуем обратиться к отличному ресурсу [Logging Cookbook](http://docs.python.org/3/howto/logging-cookbook.html).
+
+
+
+
