@@ -22964,7 +22964,65 @@ if __name__ == '__main__':
 
 Хотя этот рецепт состоит всего лишь из нескольких строк кода, он даёт намёк как вы можете далее настаивать под свои потребности фреймворк *unittest*. Чтобы кастомизировать сборку тест-комплектов, вы можете выполнить различные операции, применяя класс *TestLoader*. Чтобы кастомизировать выполнение тестов, вы можете создать собственные классы (тест-раннеры), которые эмулируют функциональность *TestRunner*. Освещение обеих тем находится за пределами возможностей этой книги, однако документация модуля *unittest* покрывает все «подкапотные» протоколы.        
 
+## 14.5. Пропуск или ожидание провалов тестов
+### Задача
+Вы хотите пропустить или пометить выбранные тесты как «ожидается провал».
 
+### Решение
+В модуле *unittest* есть декораторы, которые могут быть применены к выбранным тестовым методам для контролирования их обработки. Например:
+```python
+import unittest
+import os
+import platform
+
+class Tests(unittest.TestCase):
+    def test_0(self):
+        self.assertTrue(True)
+    
+    @unittest.skip('skipped test')
+    def test_1(self):
+        self.fail('should have failed!')
+    
+    @unittest.skipIf(os.name=='posix', 'Not supported on Unix')
+    def test_2(self):
+        import winreg
+    
+    @unittest.skipUnless(platform.system() == 'Darwin', 'Mac specific test')
+    def test_3(self):
+        self.assertTrue(True)
+    
+    @unittest.expectedFailure
+    def test_4(self):
+        self.assertEqual(2+2, 5)
+
+if __name__ == '__main__':
+    unittest.main()
+``` 
+
+Если вы запустите этот код на Mac, то получите получите такой вывод:
+```
+bash % python3 testsample.py -v
+test_0 (__main__.Tests) ... ok
+test_1 (__main__.Tests) ... skipped 'skipped test'
+test_2 (__main__.Tests) ... skipped 'Not supported on Unix'
+test_3 (__main__.Tests) ... ok
+test_4 (__main__.Tests) ... expected failure
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.002s
+
+OK (skipped=2, expected failures=1)
+```
+
+### Обсуждение
+Декоратор *skip()* может быть использован для пропуска теста, который вы не хотите выполнять. *skipIf()* и *skipUnless()* могут быть полезны для написания тестов, которые применяются только на некоторых платформах, версиях Python или при наличии каких-то других зависимостей. Использование декоратора *@expectedFailure* позволяет отметить тесты, о которых вы знаете, что они провалятся, и вы не хотите, чтобы тестовый фреймворк выводил о них информацию. 
+
+Декораторы для пропуска методов также могут быть применены на классы тестов целиком. Например:
+```python
+@unittest.skipUnless(platform.system() == 'Darwin', 'Mac specific tests')
+class DarwinTests(unittest.TestCase):
+    ...
+```
 
 
 
