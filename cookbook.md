@@ -22139,4 +22139,160 @@ if __name__ == '__main__':
 
 Построение намного более сложной логики на базе этой маленькой функции не займёт много времени, если использовать различные возможности *os*, *os.path*, *glob* и других похожих модулей. См. **рецепт 5.11.** и **рецепт 5.13.**
 
+## 13.10. Чтение конфигурационных файлов
+### Задача
+Вы хотите читать конфигурационные файлы, написанные в распространённом формате *.ini*.
 
+### Решение
+Модуль *configparser* может быть использован для чтения конфигурационных файлов. Предположим, например, что у вас есть такой конфигурационный файл:
+```
+; config.ini
+; Sample configuration file
+[installation]
+library=%(prefix)s/lib
+include=%(prefix)s/include
+bin=%(prefix)s/bin
+prefix=/usr/local
+
+# Setting related to debug configuration
+[debug]
+log_errors=true
+show_warnings=False
+
+[server]
+port: 8080
+nworkers: 32
+pid-file=/tmp/spam.pid
+root=/www/root
+signature:
+    =================================
+    Brought to you by the Python Cookbook
+    =================================
+```
+
+Вот пример того, как читать его и извлекать значения:
+```python
+>>> from configparser import ConfigParser
+>>> cfg = ConfigParser()
+>>> cfg.read('config.ini')
+['config.ini']
+>>> cfg.sections()
+['installation', 'debug', 'server']
+>>> cfg.get('installation','library')
+'/usr/local/lib'
+>>> cfg.getboolean('debug','log_errors')
+True
+>>> cfg.getint('server','port')
+8080
+>>> cfg.getint('server','nworkers')
+32
+>>> print(cfg.get('server','signature'))
+=================================
+Brought to you by the Python Cookbook
+=================================
+>>>
+```
+
+Если захотите, вы также можете изменить конфигурацию и записать её обратно в файл с помощью метода *cfg.write()*. Например:
+```python
+>>> cfg.set('server','port','9000')
+>>> cfg.set('debug','log_errors','False')
+>>> import sys
+>>> cfg.write(sys.stdout)
+[installation]
+library = %(prefix)s/lib
+include = %(prefix)s/include
+bin = %(prefix)s/bin
+prefix = /usr/local
+
+[debug]
+log_errors = False
+show_warnings = False
+
+[server]
+port = 9000
+nworkers = 32
+pid-file = /tmp/spam.pid
+root = /www/root
+signature =
+            =================================
+            Brought to you by the Python Cookbook
+            =================================
+>>>
+```
+
+### Обсуждение
+Конфигурационные файлы хорошо подходят для определения конфигурации в удобочитаемом человеком формате. Внутри каждого конфигурационного файла значения сгруппированы в разные секции (в примере это “installation” “debug” и “server”). Каждая секция затем определяет значения для различных переменных, относящихся к этой секции.
+
+Есть несколько стоящих упоминания отличий между конфигурационным файлом и использованием файла с исходным кодом Python для той же цели. Во-первых, синтаксис намного более «необязательный» и «расхлябанный». Например, эти присваивания равнозначны:
+```
+prefix=/usr/local
+prefix: /usr/local
+```
+
+Предполагается, что имена, используемые в конфигурационном файле, также являются нечувствительными к регистру. Например:
+```python
+>>> cfg.get('installation','PREFIX')
+'/usr/local'
+>>> cfg.get('installation','prefix')
+'/usr/local'
+>>>
+```
+
+При парсинге значений такие методы, как *getboolean()* ищут любое разумное значение. Например, такие записи эквивалентны:
+```
+log_errors = true
+log_errors = True
+log_errors = Yes
+log_errors = 1
+```
+
+Вероятно, наиболее значительное отличие между конфигурационным файлом и кодом Python в том, что в отличие от скриптов конфигурационные файлы не выполняются последовательно сверху вниз. Вместо этого файл читается полностью. Если делаются подстановки переменных, они будут выполнены. Например, в этой части конфигурационного файла неважно, что переменной *prefix* присваивается значение после других переменных, которые её используют:
+```
+[installation]
+library=%(prefix)s/lib
+include=%(prefix)s/include
+bin=%(prefix)s/bin
+prefix=/usr/local
+```
+
+Легко проглядеть возможность *ConfigParser*, которая заключается в том, что он может читать несколько конфигурационных файлов и объединять их результаты в единую конфигурацию. Предположим, например, что пользователь создал свой собственный конфигурационный файл, который выглядит так: 
+```
+; ~/.config.ini
+[installation]
+prefix=/Users/beazley/test
+
+[debug]
+log_errors=False
+```
+
+Этот файл может быть объединён с предыдущей конфигурацией путём чтения их по отдельности. Например:
+```python
+>>> # Previously read configuration
+>>> cfg.get('installation', 'prefix')
+'/usr/local'
+
+>>> # Merge in user-specific configuration
+>>> import os
+>>> cfg.read(os.path.expanduser('~/.config.ini'))
+['/Users/beazley/.config.ini']
+>>> cfg.get('installation', 'prefix')
+'/Users/beazley/test'
+>>> cfg.get('installation', 'library')
+'/Users/beazley/test/lib'
+>>> cfg.getboolean('debug', 'log_errors')
+False
+>>>
+```
+
+Понаблюдайте, как переназначение переменной *prefix* влияет на другие связанные переменные, такие как установки *library*. Это работает, потому что интерполяция переменных производится настолько поздно, насколько это возможно. Вы можете увидеть это в ходе такого эксперимента:
+```python
+>>> cfg.get('installation','library')
+'/Users/beazley/test/lib'
+>>> cfg.set('installation','prefix','/tmp/dir')
+>>> cfg.get('installation','library')
+'/tmp/dir/lib'
+>>>
+```
+
+Наконец, важно отметить, что Python не поддерживает весь набор возможностей, которые можно обнаружить в .ini-файлах, используемых другими программами (например, Windows-приложениями). Посмотрите документацию *configparser*, чтобы ознакомиться с деталями синтаксиса и поддерживаемыми возможностями. 
