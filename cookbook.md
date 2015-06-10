@@ -22850,6 +22850,80 @@ if __name__ == '__main__':
 
 Этот рецепт всего лишь слегка намёкает на то, что можно делать с помощью модуля *unittest.mock*. Обязательно прочитайте [официальную документацию](http://docs.python.org/3/library/unittest.mock), чтобы узнать о более продвинутых возможностях. 
 
+## 14.3. Проверка вызывающих исключения условий в рамках юнит-тестов
+### Задача
+Вы хотите написать юнит-тест, который чётко показывает, возбуждается ли исключение.
+
+### Решение
+Чтобы провести тест на исключения, используйте метод *assertRaises()*. Например, если вы хотите проверить, возбуждает ли функция *ValueError*, используйте такой код:
+```python
+import unittest
+
+# A simple function to illustrate
+def parse_int(s):
+    return int(s)
+
+class TestConversion(unittest.TestCase):
+    def test_bad_int(self):
+        self.assertRaises(ValueError, parse_int, 'N/A')
+``` 
+
+Если вам нужно как-то проверить значение исключения, тогда нужен другой подход. Например:
+```python
+import errno
+
+class TestIO(unittest.TestCase):
+    def test_file_not_found(self):
+        try:
+            f = open('/file/not/found')
+        except IOError as e:
+            self.assertEqual(e.errno, errno.ENOENT)
+``` 
+
+### Обсуждение
+Метод *assertRaises()* предоставляет удобный способ провести проверку на наличие исключения. Обычная проблема — написать тесты, которые вручную пытаются работать с исключениями. Например:
+```python
+class TestConversion(unittest.TestCase):
+    def test_bad_int(self):
+        try:
+            r = parse_int('N/A')
+        except ValueError as e:
+            self.assertEqual(type(e), ValueError)
+``` 
+
+Проблема такого подхода в том, что легко забыть о граничных случаях, таких как если исключение не возбужается. Чтобы сделать это, вам нужно добавить дополнительную проверку для такой ситуации, как показано тут:
+```python
+class TestConversion(unittest.TestCase):
+    def test_bad_int(self):
+        try:
+            r = parse_int('N/A')
+        except ValueError as e:
+            self.assertEqual(type(e), ValueError)
+        else:
+            self.fail('ValueError not raised')
+``` 
+
+Метод *assertRaises()* просто берёт на себя заботу об этих деталях, так что лучше использовать именно его. 
+
+Единственное ограничение *assertRaises()* в том, что она не предоставляет средства для проверки значения создаваемого объекта исключения. Чтобы сделать это, вам нужно вручную проверить его, как показано выше. Иногда между двумя этим крайними точками вы можете задуматься об использовании метода *assertRaisesRegex()*, который позволяет вам одновременно проводить проверку на исключение и выполнять поиск совпадений по регулярному выражению на строковом представлении исключения. Например:
+```python
+class TestConversion(unittest.TestCase):
+    def test_bad_int(self):
+        self.assertRaisesRegex(ValueError, 'invalid literal .*',
+        parse_int, 'N/A')
+```
+
+Малоизвестный факт об *assertRaises()* и *assertRaisesRegex()* — они могут быть использованы в качестве менеджеров контекста:
+```python
+class TestConversion(unittest.TestCase):
+    def test_bad_int(self):
+        with self.assertRaisesRegex(ValueError, 'invalid literal .*'):
+            r = parse_int('N/A')
+```
+
+Эта форма может быть полезна, если в вашем тесте много шагов (например, предустановка), помимо просто выполнения вызываемого объекта.
+
+
 
 
 
