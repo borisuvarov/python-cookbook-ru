@@ -22695,6 +22695,161 @@ class TestURLPrint(TestCase):
 Дополнительную информацию о захвате ввода-вывода в строки и объекты *StringIO* вы можете найти в **рецепте 5.6.**
 
 
+## 14.2. Патчинг объектов в юнит-тестах
+### Задача
+Вы пишете юнит-тесты, и вам нужно применить патчи к выбранным объектам, чтобы создать ассерты по поводу того, как они будут использованы в тесте (например, ассерты о вызове с определёнными параметрами, доступе к определённым атрибутам и т.п.)
+
+### Решение
+Для решения этой задачи можно использовать функцию *unittest.mock.patch()*. Это немного необычно, но *patch()* можно использовать и как декоратор, и отдельно. Например, вот пример её использования в качестве декоратора:
+```python
+from unittest.mock import patch
+import example
+
+@patch('example.func')
+def test1(x, mock_func):
+    example.func(x)             # Uses patched example.func
+    mock_func.assert_called_with(x)
+```
+
+Также она может быть использована как менеджер контекста:
+```python
+with patch('example.func') as mock_func:
+    example.func(x)     # Uses patched example.func
+    mock_func.assert_called_with(x)
+```
+
+И, наконец, вы можете пропатчить что-то вручную:
+```python
+p = patch('example.func')
+mock_func = p.start()
+example.func(x)
+mock_func.assert_called_with(x)
+p.stop()
+```
+
+Если нужно, вы можете последовательно применить декораторы и менеджеры контекста, чтобы пропатчить несколько объектов. Например:
+```python
+@patch('example.func1')
+@patch('example.func2')
+@patch('example.func3')
+def test1(mock1, mock2, mock3):
+    ...
+
+def test2():
+    with patch('example.patch1') as mock1, \
+        patch('example.patch2') as mock2, \
+        patch('example.patch3') as mock3:
+        ...
+```
+
+### Обсуждение
+*patch()* работает так: берёт существующий объект с полностью определённым именем, которое вы предоставите, и заменяет его новым значением. Изначальное значение затем восстанавливается после завершения выполнения декорированной функции или выхода из менеджера контекста. По умолчанию значения заменяются экземплярами *MagicMock*. Например:
+```python
+>>> x = 42
+>>> with patch('__main__.x'):
+...     print(x)
+...
+<MagicMock name='x' id='4314230032'>
+>>> x
+42
+>>>
+```
+
+Однако вы можете заменить значение чем угодно — достаточно лишь предоставить этот объект в качестве второго аргумента в *patch()*:
+```python
+>>> x
+42
+>>> with patch('__main__.x', 'patched_value'):
+...     print(x)
+...
+patched_value
+>>> x
+42
+>>>
+```
+
+Экземпляры *MagicMock* обычно используются в качестве подменных значений, предназначенных для имитации вызываемых объектов и экземпляров. Они записывают информацию об использовании и позволяют вам делать ассерты. Например:
+```python
+>>> from unittest.mock import MagicMock
+>>> m = MagicMock(return_value = 10)
+>>> m(1, 2, debug=True)
+10
+>>> m.assert_called_with(1, 2, debug=True)
+>>> m.assert_called_with(1, 2)
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File ".../unittest/mock.py", line 726, in assert_called_with
+        raise AssertionError(msg)
+AssertionError: Expected call: mock(1, 2)
+Actual call: mock(1, 2, debug=True)
+>>>
+
+>>> m.upper.return_value = 'HELLO'
+>>> m.upper('hello')
+'HELLO'
+>>> assert m.upper.called
+>>> m.split.return_value = ['hello', 'world']
+>>> m.split('hello world')
+['hello', 'world']
+>>> m.split.assert_called_with('hello world')
+>>>
+
+>>> m['blah']
+<MagicMock name='mock.__getitem__()' id='4314412048'>
+>>> m.__getitem__.called
+True
+>>> m.__getitem__.assert_called_with('blah')
+>>>
+```
+
+Обычно такие операции выполняются в юнит-тестах. Предположим, например, что у вас есть такая функция:
+```python
+# example.py
+from urllib.request import urlopen
+import csv
+
+def dowprices():
+    u = urlopen('http://finance.yahoo.com/d/quotes.csv?s=@^DJI&f=sl1')
+    lines = (line.decode('utf-8') for line in u)
+    rows = (row for row in csv.reader(lines) if len(row) == 2)
+    prices = { name:float(price) for name, price in rows }
+    return prices
+```
+
+В обычном случае эта функция использует *urlopen()* для получения данных из интернета и парсит их. Чтобы протестировать её с помощью юнит-теста, вы можете захотите предоставить ей более предсказуемый набор данных, который вы сами создадите. Вот пример, использующий патчинг:
+```python
+import unittest
+from unittest.mock import patch
+import io
+import example
+
+sample_data = io.BytesIO(b'''\
+"IBM",91.1\r
+"AA",13.25\r
+"MSFT",27.72\r
+\r
+''')
+
+class Tests(unittest.TestCase):
+    @patch('example.urlopen', return_value=sample_data)
+    def test_dowprices(self, mock_urlopen):
+        p = example.dowprices()
+        self.assertTrue(mock_urlopen.called)
+        self.assertEqual(p,
+                        {'IBM': 91.1,
+                        'AA': 13.25,
+                        'MSFT' : 27.72})
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+В этом примере функция *urlopen()* в модуле *example* заменена объектом-моком, который возвращает *BytesIO()*, содержащий созданные заранее данные.
+
+Важный и тонкий момент этого теста — это патчинг *example.urlopen* вместо *urllib.request.urlopen*. Когда вы применяете патчи, вы должны использовать имена, которые уже используются в тестируемом коде. Поскольку код примера использует *from urllib.request import urlopen*, функция *urlopen()*, использованная в функции *downprices()*, на самом деле находится в *example*.
+
+Этот рецепт всего лишь слегка намёкает на то, что можно делать с помощью модуля *unittest.mock*. Обязательно прочитайте [официальную документацию](http://docs.python.org/3/library/unittest.mock), чтобы узнать о более продвинутых возможностях. 
+
 
 
 
