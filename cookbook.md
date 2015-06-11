@@ -23242,5 +23242,103 @@ class CustomError(Exception):
 
 За дополнительной информацией о создании собственных исключений обратитесь к [документации Python](http://docs.python.org/3/tutorial/errors.html).
 
+## 14.9. Возбужение исключения в ответ на другое исключение
+### Задача
+Вы хотите возбуждать исключение в ответ на поимку другого исключения, но при этом хотите добавить в информацию об обоих исключениях в отладочную информацию стека вызовов (traceback).
 
+### Решение
+Чтобы создать цепочку исключений, используйте инструкцию *raise from* вместо простой *raise*. Это даст вам информацию об обеих ошибках. Например:
+```python
+>>> def example():
+... try:
+...     int('N/A')
+... except ValueError as e:
+...     raise RuntimeError('A parsing error occurred') from e...
+>>>
+example()
+Traceback (most recent call last):
+    File "<stdin>", line 3, in example
+ValueError: invalid literal for int() with base 10: 'N/A'
 
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "<stdin>", line 5, in example
+RuntimeError: A parsing error occurred
+>>
+```
+
+Как вы можете видеть в трейсбэке, захвачены оба исключения. Чтобы поймать такое исключение, вы могли бы использовать обычную инструкцию *except*. Однако, если пожелаете, вы можете взглянуть на атрибут *__cause__* объекта исключения, чтобы проследить цепочку исключений. Например:
+```python
+try:
+    example()
+except RuntimeError as e:
+    print("It didn't work:", e)
+    if e.__cause__:
+        print('Cause:', e.__cause__)
+```
+
+Неявная форма цепочек исключений возникает, когда другое исключение возбужается внутри блока *except*. Например:
+```python
+>>> def example2():
+... try:
+...     int('N/A')
+... except ValueError as e:
+...     print("Couldn't parse:", err)
+...
+>>>
+>>> example2()
+Traceback (most recent call last):
+    File "<stdin>", line 3, in example2
+ValueError: invalid literal for int() with base 10: 'N/A'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "<stdin>", line 5, in example2
+NameError: global name 'err' is not defined
+>>>
+```
+
+В этом примере вы получаете информацию об обоих исключениях, но интерпретация немного отличается. В этом случае исключение *NameError* возбуждается как результат ошибки программирования, а не как прямой ответ на ошибку парсинга. Дляэтого случая атрибут исключения *__cause__* не установлен. Вместо этого установлен на предыдущее исключение атрибут *__context__*. 
+
+Если по какой-то причине вы хотите подавить образование цепочек, используйте *raise from None*:
+```python
+>>> def example3():
+... try:
+...     int('N/A')
+... except ValueError:
+...     raise RuntimeError('A parsing error occurred') from None...
+>>>
+example3()
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "<stdin>", line 5, in example3
+RuntimeError: A parsing error occurred
+>>>
+``` 
+
+### Обсуждение
+При проектировании кода вы должны внимательно следить за использованием инструкции *raise* в других блоках *except*. В большинстве случаев такие инструкции *raise* должны быть, вероятно, изменены на *raise from*. Так что вы должны выбирать такой стиль:
+```python
+try:
+    ...
+except SomeException as e:
+    raise DifferentException() from e
+```
+
+Причина делать так в том, что вы явно связываете цепочку причин. *DifferentException* возбуждается как прямой ответ на получение *SomeException*. Это отношение будет явно показано в получившемся трейсбэке.
+
+Если вы пишете ваш код в нижеприведённом стиле, вы всё еще получите связанные в цепочку исключения, но часто неясно, были ли они объединены в цепочку намеренно или в результате непредвиденной программной ошибки:
+```python
+try:
+    ...
+except SomeException:
+    raise DifferentException()
+```
+
+Когда вы используете *raise from*, вы четко показываете, что намеревались возбудить второе исключение.
+
+Сопротивляйтесь желанию подавить информацию об исключении, как то показано в последнем примере. Хотя подавление информации об исключении может привести к меньшему размеру трейсбэка, это также удаляет информацию, которая могла бы быть полезна для дебаггинга. При прочих равных часто лучше сохранить столько сведений, сколько возможно.
