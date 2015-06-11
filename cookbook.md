@@ -23025,5 +23025,90 @@ class DarwinTests(unittest.TestCase):
 ```
 
 
+## 14.6. Обработка множественных исключений
+### Задача
+У вас есть код, который может выбросить одно из нескольких различных исключений, и вам нужно принимать во внимание все исключения, которые могут быть возбуждены, без дублирования кода или длинных, запутанных частей кода.
+
+### Решение
+Вы можете обработать различные исключения с помощью единственного блока кода, объединив их в кортеж:
+```python
+try:
+    client_obj.get_url(url)
+except (URLError, ValueError, SocketTimeout):
+    client_obj.remove_url(url)
+```
+
+В предыдущем примере метод *remove_url()* будет вызван, если возникнет любое из перечисленных исключений. Если же, однако, вам нужно обработать одно из исключений по-другому, поместите его в его собственное условие *except*:
+```python
+try:
+    client_obj.get_url(url)
+except (URLError, ValueError):
+    client_obj.remove_url(url)
+except SocketTimeout:
+    client_obj.handle_url_timeout(url)
+```
+
+Многие исключения сгруппированы в иерархию наследования. Такие исключения вы можете поймать путём указания только базового класса. Например, вместо такого кода:
+```python
+try:
+    f = open(filename)
+except (FileNotFoundError, PermissionError):
+    ...
+```
+
+...вы можете переписать инструкцию *except* так:
+```python
+try:
+    f = open(filename)
+except OSError:
+    ...
+```
+
+Это работает, поскольку OSError — это базовый класс, который является общим для исключений *FileNotFoundError* и *PermissionError*. 
+
+### Обсуждение
+Хотя это не является специфичным для обработки *множественных* исключений как таковых, стоит отметить, что вы можете получить «ручку» (handler) к выброшенному исключению, используя ключевое слово *as*:
+```python
+try:
+    f = open(filename)
+except OSError as e:
+    if e.errno == errno.ENOENT:
+        logger.error('File not found')
+    elif e.errno == errno.EACCES:
+        logger.error('Permission denied')
+    else:
+        logger.error('Unexpected error: %d', e.errno)
+```
+
+В этом примере в переменной e лежит экземпляр возбуждённого исключения *OSError*. Это полезно, если вам нужно как-то инспектировать исключение — например, обработать его в зависимости от значения дополнительного кода статуса. 
+
+Помните, что условия *except* проверяются в порядке перечисления, и выполняется первое совпадение. Это может показаться немного безумным, но вы можете легко создать ситуации, в которых несколько условий *except* могут совпадать. Например:
+```python
+>>> f = open('missing')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: 'missing'
+>>> try:
+...     f = open('missing')
+... except OSError:
+...     print('It failed')
+... except FileNotFoundError:
+...     print('File not found')
+...
+It failed
+>>>
+```
+
+Здесь условие *except* исключения *FileNotFoundError* не выполняется, поскольку *OSError* является более общим и поэтому совпадает с исключением *FileNotFoundError*, а перечислено в списке первым.
+
+Совет для дебаггинга: если вы не полностью уверены, что знаете иерархию классов конкретного исключения, то можете быстро просмотреть её путём изучения атрибута исключения *__mro__*. Например:
+```python
+>>> FileNotFoundError.__mro__
+(<class 'FileNotFoundError'>, <class 'OSError'>, <class 'Exception'>,
+ <class 'BaseException'>, <class 'object'>)
+>>>
+```
+
+Все перечисленные классы до *BaseException* могут быть использованы с инструкцией *except*.
 
 
