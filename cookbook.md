@@ -24154,3 +24154,165 @@ class Point(ctypes.Structure):
 
 В качестве альтернативы *ctypes* вы можете также взглянуть на [CFFI](http://cffi.readthedocs.org/en/latest). CFFI предоставляет практически такую же функциональность, но использует синтаксис C и поддерживает более продвинутые типы кода на C. На момент написания этой книги CFFI был молодым проектом, но быстро рос. Обсуждается также возможность включения проекта в стандартную библиотеку Python в одном из будущих релизов. Так что за ним стоит поглядывать.
 
+## 15.2. Написание простого модуля расширения на C
+### Задача
+Вы хотите написать простой модуль расширения на С, напрямую используя API расширений Python. Вы не хотите использовать никакие другие инструменты.
+
+### Решение
+Для простого кода на C сделать собственный модуль расширения довольно просто. В качестве подготовительного шага вы, вероятно, захотите убедиться, что ваш код на C имеет правильный заголовочный файл. Например:
+```C
+/* sample.h */
+
+#include <math.h>
+
+extern int gcd(int, int);
+extern int in_mandel(double x0, double y0, int n);
+extern int divide(int a, int b, int *remainder);
+extern double avg(double *a, int n);
+
+typedef struct Point {
+    double x,y;
+} Point;
+
+extern double distance(Point *p1, Point *p2);
+```
+
+В типичном случае этот заголовок будет соответствовать библиотеке, которая была скомпилирована отдельно. Предполагая это, взгляните на пример модуля расширения, который иллюстрирует базовые принципы написания функций расширений:
+```C
+#include "Python.h"
+#include "sample.h"
+
+/* int gcd(int, int) */
+static PyObject *py_gcd(PyObject *self, PyObject *args) {
+    int x, y, result;
+
+    if (!PyArg_ParseTuple(args,"ii", &x, &y)) {
+        return NULL;
+    }
+    result = gcd(x,y);
+    return Py_BuildValue("i", result);
+}
+
+/* int in_mandel(double, double, int) */
+static PyObject *py_in_mandel(PyObject *self, PyObject *args) {
+    double x0, y0;
+    int n;
+    int result;
+
+    if (!PyArg_ParseTuple(args, "ddi", &x0, &y0, &n)) {
+        return NULL;
+    }
+    result = in_mandel(x0,y0,n);
+    return Py_BuildValue("i", result);
+}
+
+/* int divide(int, int, int *) */
+static PyObject *py_divide(PyObject *self, PyObject *args) {
+    int a, b, quotient, remainder;
+    if (!PyArg_ParseTuple(args, "ii", &a, &b)) {
+        return NULL;
+    }
+    quotient = divide(a,b, &remainder);
+    return Py_BuildValue("(ii)", quotient, remainder);
+}
+
+/* Module method table */
+static PyMethodDef SampleMethods[] = {
+    {"gcd", py_gcd, METH_VARARGS, "Greatest common divisor"},
+    {"in_mandel", py_in_mandel, METH_VARARGS, "Mandelbrot test"},
+    {"divide", py_divide, METH_VARARGS, "Integer division"},
+    { NULL, NULL, 0, NULL}
+};
+
+/* Module structure */
+static struct PyModuleDef samplemodule = {
+    PyModuleDef_HEAD_INIT,
+    "sample",               /* name of module */
+    "A sample module",      /* Doc string (may be NULL) */
+    -1,                     /* Size of per-interpreter state or -1 */
+    SampleMethods           /* Method table */
+};
+
+/* Module initialization function */
+PyMODINIT_FUNC
+PyInit_sample(void) {
+    return PyModule_Create(&samplemodule);
+}
+``` 
+
+Для компиляции модуля расширения создайте файл *setup.py*, который выглядит так:
+```python
+# setup.py
+from distutils.core import setup, Extension
+
+setup(name='sample',
+      ext_modules=[
+        Extension('sample',
+                  ['pysample.c'],
+                  include_dirs = ['/some/dir'],
+                  define_macros = [('FOO','1')],
+                  undef_macros = ['BAR'],
+                  library_dirs = ['/usr/local/lib'],
+                  libraries = ['sample']
+                  )
+        ]
+)
+```
+
+Теперь, чтобы скомпилировать получившуюся библиотеку, просто используйте *python3 buildlib.py build_ext --inplace*:
+```
+bash % python3 setup.py build_ext --inplace
+running build_ext
+building 'sample' extension
+gcc -fno-strict-aliasing -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes
+ -I/usr/local/include/python3.3m -c pysample.c
+ -o build/temp.macosx-10.6-x86_64-3.3/pysample.o
+gcc -bundle -undefined dynamic_lookup
+build/temp.macosx-10.6-x86_64-3.3/pysample.o \
+ -L/usr/local/lib -lsample -o sample.so
+bash %
+```
+
+Как тут показано, это создаст разделяемую библиотеку *sample.so*. Когда она скомпилируется, вы сможете импортировать её как модуль:
+```python
+>>> import sample
+>>> sample.gcd(35, 42)
+7
+>>> sample.in_mandel(0, 0, 500)
+1
+>>> sample.in_mandel(2.0, 1.0, 500)
+0
+>>> sample.divide(42, 8)
+(5, 2)
+>>>
+``` 
+
+Если вы попытаетесь выполнить эти шаги на Windows, то вам потребуется покорпеть над вашим окружением, чтобы заставить окружение компиляции правильно собрать модули расширения. Бинарные установочные файлы Python обычно собираются с помощью Microsoft Visual Studio. Чтобы заставить расширения работать, вам может потребоваться скомпилировать с помощью совместимых инструментов. См. [документацию Python](http://docs.python.org/3/extending/windows.html).
+
+### Обсуждение
+Перед тем, как создавать какие-то самописные расширения, крайне важно ознакомиться с разделом документации Python «[Расширение и встраиваение в интерпретатор Python](http://docs.python.org/3/extending/index.html)». API Python для расширений на Python весьма обширен, и повторять его здесь непрактично. Однако самые важные части мы обсудим.
+
+Во-первых, в модулях расширения функции, которые вы пишете, в обычном случае написаны с помощью обычного прототипа, как показано тут:
+```C
+static PyObject *py_func(PyObject *self, PyObject *args) {
+    ...
+}
+``` 
+
+*PyObject* — это тип данных C, который представляет объект Python. На очень высоком уровне функция расширения — это функция C, которая получает кортеж объектов Python (в \*args *PyObject*) и возвращает новый объект Python в качестве результата. Аргумент функции *self* не используется в простых функциях расширений, но входит в игру, если вы должны определить новые классы или типы объектов в C (например, если функция расширения является методом класса, то *self* будет содержать экземпляр).
+
+Функция *PyArg_ParseTuple()* используется для преобразования значений из Python в представление C. На входе она получает строку формата, которая указывает требуемые значения, такие как “i” для целых чисел и “d” для чисел двойной точности, а также адреса переменных С, в которые нужно поместить преобразованные результаты. *PyArg_ParseTuple()* выполняет разнообразные проверки количества и типов аргументов. Если имеет место несовпадение со строкой формата, возбуждается исключение и возвращается NULL. Путём проверки на это и простого возвращения NULL, в вызывающем коде будет возбуждено соответствующее исключение.
+
+Функция *Py_BuildValue()* используется для создания объектов Python из типов данных С. Она также принимает код формата, чтобы обозначит нужный тип. В функциях расширения это используется возвращения результатов обратно в Python. *Py_BuildValue()* может создавать более сложные объекты, такие как кортежи и словари. В коде *py_divide()* показан пример возвращения кортежа. Однако есть и другие примеры:
+```C
+return Py_BuildValue("i", 34);         // Return an integer
+return Py_BuildValue("d", 3.4);        // Return a double
+return Py_BuildValue("s", "Hello");    // Null-terminated UTF-8 string
+return Py_BuildValue("(ii)", 3, 4);    // Tuple (3, 4)
+```
+
+В конце любого модуля расширения вы обнаружите таблицу функций, похожую на *SampleMethods* из решения, показанного в этом рецепте. В этой таблице перечислены функции C, имена для использования в Python, а также строки документации. Все модули должны определять такую таблицу, поскольку она используется при инициализации модуля. 
+
+Последняя функция *PyInit_sample()* — это функция инициализации модуля, которая выполняется, когда модуль впервые импортируется. Основная работа этой функции — зарегистрировать объект модуля в интерпретаторе.
+
+И последнее: нужно подчеркнуть, что о расширении Python функциями на C можно рассказать намного больше, чем показано тут (C API содержит более 500 функций). Вам стоит рассматривать этот рецепт как первую ступеньку в восхождении к освоению этой темы. Начните изучение с документации функций *PyArg_ParseTuple()* и *Py_BuildValue()* и расширяйтесь из этой точки.  
