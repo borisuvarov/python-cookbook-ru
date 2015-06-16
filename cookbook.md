@@ -24711,3 +24711,229 @@ setup(name='ptexample',
 Наконец, есть еще одна важная причина использовать приём линковки модулей вместе — это проще и поддерживает модули в более чистом состоянии слабой связаности. Если вы не хотите использовать этот рецепт так, как показано, вы можете перекрестно слинковать модули, используя продвинутые возможности разделяемых библиотек и динамический загрузчик. Например, можно поместить обычные функции API в разделяемую библиотеку и убедиться, что все модули расширения слинкованы с этой библиотекой. По сути, этот рецепт вырезает всю магию и позволяет модулям линковаться друг к другу через обычный механизм импортирования Python и небольшое количество вызовов капсул. Для компилирования модулей вам нужно позаботиться только о заголовочных файлах, но не о кучерявых подробностях, касающихся разделяемых библиотек.  
 
 Дополнительную информацию о предоставлении C API модулям расширений можно найти в [документации Python](http://docs.python.org/3/extending/extending.html).
+
+## 15.6. Вызываем Python из С
+### Задача
+Вы хотите безопасно выполнить вызываемый объект Python и вернуть результат обратно в C. Возможно, например, вы пишете код на C, в котором хотите использовать функцию Python в качестве коллбэка.
+
+### Решение
+Вызов Python из C по большей части выполняется без каких-либо ухищрений, но включает и несколько тонких моментов. Следующий пример на C показывает, как можно сделать это безопасно:
+```C
+#include <Python.h>
+
+/* Execute func(x,y) in the Python interpreter. The
+   arguments and return result of the function must
+   be Python floats */
+
+double call_func(PyObject *func, double x, double y) {
+    PyObject *args;
+    PyObject *kwargs;
+    PyObject *result = 0;
+    double retval;
+
+    /* Make sure we own the GIL */
+    PyGILState_STATE state = PyGILState_Ensure();
+
+    /* Verify that func is a proper callable */
+    if (!PyCallable_Check(func)) {
+        fprintf(stderr,"call_func: expected a callable\n");
+        goto fail;
+    }
+    
+    /* Build arguments */
+    args = Py_BuildValue("(dd)", x, y);
+    kwargs = NULL;
+    
+    /* Call the function */
+    result = PyObject_Call(func, args, kwargs);
+    Py_DECREF(args);
+    Py_XDECREF(kwargs);
+    
+    /* Check for Python exceptions (if any) */
+    if (PyErr_Occurred()) {
+        PyErr_Print();
+        goto fail;
+    }
+    
+    /* Verify the result is a float object */
+    if (!PyFloat_Check(result)) {
+        fprintf(stderr,"call_func: callable didn't return a float\n");
+        goto fail;
+    }
+    
+    /* Create the return value */
+    retval = PyFloat_AsDouble(result);
+    Py_DECREF(result);
+    
+    /* Restore previous GIL state and return */
+    PyGILState_Release(state);
+    return retval;
+
+  fail:
+    Py_XDECREF(result);
+    PyGILState_Release(state);
+    abort(); // Change to something more appropriate
+}
+``` 
+
+Чтобы использовать эту функцию, вы должны получить ссылку на существующий вызываемый объект Python, чтобы передать её ей. Есть много способов это сделать — например, передать вызываемый объект в модуль расширения или просто написать код на C, чтобы извлечь символ из существующего модуля.
+
+Вот простой пример, который демонстрирует вызов функции из встроенного интерпретатора Python:
+```C
+#include <Python.h>
+
+/* Definition of call_func() same as above */
+...
+
+/* Load a symbol from a module */
+PyObject *import_name(const char *modname, const char *symbol) {
+    PyObject *u_name, *module;
+    u_name = PyUnicode_FromString(modname);
+    module = PyImport_Import(u_name);
+    Py_DECREF(u_name);
+    return PyObject_GetAttrString(module, symbol);
+}
+
+/* Simple embedding example */
+int main() {
+    PyObject *pow_func;
+    double x;
+
+    Py_Initialize();
+    /* Get a reference to the math.pow function */
+    pow_func = import_name("math","pow");
+
+    /* Call it using our call_func() code */
+    for (x = 0.0; x < 10.0; x += 0.1) {
+        printf("%0.2f %0.2f\n", x, call_func(pow_func,x,2.0));
+    }
+    /* Done */
+    Py_DECREF(pow_func);
+    Py_Finalize();
+    return 0;
+}
+```
+
+Чтобы скомпилировать этот последний пример, вы должны скомпилировать код C и слинковать его с интерпретатором Python. Вот make-файл, который показывает, как вы можете это сделать (это может потребовать некоторых танцев с бубном, чтобы всё запустилось на вашем компьютере):
+```
+all::
+        cc -g embed.c -I/usr/local/include/python3.3m \
+          -L/usr/local/lib/python3.3/config-3.3m -lpython3.3m
+``` 
+
+Компилирование и запуск получившегося исполняемого файла создаст похожий на этот вывод:
+```
+0.00 0.00
+0.10 0.01
+0.20 0.04
+0.30 0.09
+0.40 0.16
+...
+```
+
+А вот немного отличающийся пример, который показывает функцию расширения, которая принимает вызываемый объект и аргументы, а затем передаёт их в функцию *call_func()* для целей тестирования:
+```C
+/* Extension function for testing the C-Python callback */
+PyObject *py_call_func(PyObject *self, PyObject *args) {
+    PyObject *func;
+    double x, y, result;
+    if (!PyArg_ParseTuple(args,"Odd", &func,&x,&y)) {
+        return NULL;
+    }
+    result = call_func(func, x, y);
+    return Py_BuildValue("d", result);
+}
+``` 
+
+Эту функцию расширения вы можете протестировать так:
+```python
+>>> import sample
+>>> def add(x,y):
+...     return x+y
+...
+>>> sample.call_func(add,3,4)
+7.0
+>>>
+```
+
+### Обсуждение
+Если вы вызываете Python из С, самое важное — помнить о том, что C в общем случае должен всегда быть «главным». На C лежит ответственность за создание аргументов, вызов функций Python, проверку на исключения, проверку типов, извлечение возвращённых значений и т.д. 
+
+В качестве первого шага критически важно иметь объект Python, представляющий вызываемый объект, который вы будете вызывать. Это может быть функция, класс, метод, встроенный метод или всё, что реализует операцию *__call__()*. Чтобы убедиться, что объект можно вызвать, используйте *PyCallable_Check()*, как показано в этом фрагменте кода:
+```C
+double call_func(PyObject *func, double x, double y) {
+    ...
+    /* Verify that func is a proper callable */
+    if (!PyCallable_Check(func)) {
+        fprintf(stderr,"call_func: expected a callable\n");
+        goto fail;
+    }
+    ...
+```
+
+Отметим, что обработка ошибок в коде на C требует внимательного изучения. В качестве общего правила: вы не можете просто возбудить исключение Python. Вместо этого ошибки должны быть обработаны способом, который имеет смысл для вашего кода на C. В решении мы используем переход *goto*, чтобы передать управление блоку обработки ошибок, который вызывает *abort()*. Это вызывает завершение всей программы, но в настоящем коде вы, вероятно, захотите делать это более аккуратно (например, возвращать код статуса). Держите в голове, что C тут главный, и в нём нет ничего похожего на возбуждение исключения. Обработку ошибок нужно разрабатывать в конкретной программе отдельно.
+
+Вызов функции относительно бесхитростен — просто используйте *PyObject_Call()*, предоставив ей вызываемый объект, кортеж аргументов и необязательный словарь именованных аргументов. Чтобы создать кортеж аргументов или словарь, вы можете применить *Py_BuildValue()*.
+```C
+double call_func(PyObject *func, double x, double y) {
+    PyObject *args;
+    PyObject *kwargs;
+    ...
+
+    /* Build arguments */
+    args = Py_BuildValue("(dd)", x, y);
+    kwargs = NULL;
+
+    /* Call the function */
+    result = PyObject_Call(func, args, kwargs);
+    Py_DECREF(args);
+    Py_XDECREF(kwargs);
+    ...
+```
+
+Если у вас нет именованных аргументов, вы можете передать NULL. После выполнения вызова функции, вам нужно убедиться, что вы подчистили аргументы, используя *Py_DECREF()* или *Py_XDECREF()*. Последняя функция безопасно позволяет указателю NULL быть переданным (что игнорируется), и поэтому мы используем её для подчистки необязательных ключевых аргументов.
+
+После вызова функции Python, вы должны проверить, не возникли ли исключения. Для этого вам пригодится функция *PyErr_Occurred()*. Но определить, что сделать в ответ на исключение, достаточно трудно. Поскольку вы работаете из C, у вас просто нет всей системы исключений, которая есть в Python. Так что вы можете установить код статуса ошибки, логировать ошибку или выполнить какую-то другую имеющую смысл обработку. В решении этого рецепта при отсутствии простой альтернативы вызывается *abort()* (кроме того, чёткие C-разработчики оценят крутое падение программы):
+```C
+...
+/* Check for Python exceptions (if any) */
+if (PyErr_Occurred()) {
+    PyErr_Print();
+    goto fail;
+}
+...
+fail:
+    PyGILState_Release(state);
+    abort();
+```
+
+Получение информации из возвращённого функцией Python значения в типичном случае потребует некоторой проверки типов и извлечения значения. Чтобы сделать это, вы можете использовать функции из [слоя конкретных объектов Python](http://docs.python.org/3/c-api/concrete.html). В решении код проверяет тип числа с плавающей точкой и извлекает его значение с помощью *PyFloat_Check()* и *PyFloat_AsDouble()*. 
+
+Последняя сложная часть вызова Python из C касается управления глобальной блокировкой интепретатора (GIL) Python. Когда бы вы не обращались к Python из C, вам нужно убедиться, что GIL правильно получается и освобождается. В противном случае вы столкнётесь с ситуацией, когда интепретатор портит данные или падает. Вызовы *PyGILState_Ensure()* и *PyGILState_Release()* позволяют убедиться, что всё сделано правильно:
+```C
+double call_func(PyObject *func, double x, double y) {
+    ...
+    double retval;
+
+    /* Make sure we own the GIL */
+    PyGILState_STATE state = PyGILState_Ensure();
+    ...
+    /* Code that uses Python C API functions */
+    ...
+    /* Restore previous GIL state and return */
+    PyGILState_Release(state);
+    return retval;
+
+  fail:
+    PyGILState_Release(state);
+    abort();
+}
+```
+
+До завершения выполнения *PyGILState_Ensure()* всегда гарантирует, что вызывающий поток имеет эксклюзивный доступ к интепретатору Python. Это останется так, даже если вызывающий код на C запустит другой поток, который неизвестен интерпретатору. В этой точки код на С свободен использовать любые функции Python C API, какие пожелает. После успешного завершения *PyGILState_Release()* используется для восстановления изначального состояния интерпретатора.
+
+Критически важнот отметить, что за каждым вызовом *PyGILState_Ensure()* должен следовать соответствующий вызов *PyGILState_Release()* — даже если возникли ошибки. В решении использование инструкции *goto* может выглядеть как ужасное проектирование, но мы используем её для передачи управления обычному блоку вызода, который выполняет этот требуемый шаг. Думайте о коде после *fail:* как об аналоге блока *finally:* в Python.
+
+Если вы пишете ваш код на С, используя все эти соглашения, включая управление GIL, проверку на исключения и тщательную проверку ошибок, то вы обнаружите, что вы можете вполне надёжно вызывать интерпретатор Python из С — даже в очень сложных программах, который используют продвинутые приёмы программирования (такие как многопоточность).
+
+ 
