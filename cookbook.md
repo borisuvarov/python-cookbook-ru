@@ -24511,3 +24511,203 @@ static PyObject *py_distance(PyObject *self, PyObject *args) {
 
 Капсулы — это разумное решение для создания интерфейсов для некоторых типов кода на C, использующих структуры. Например, иногда вы просто не должны заботиться о показывании внутреннего устройства структуры или превращения её в полноценный тип расширения. При использовании капсулы вы можете обернуть её легковесной обёрткой и без труда передать другим функциям расширения.
 
+## 15.5. Определение и экспортирование С API из модулей расширения
+### Задача 
+У вас есть модуль расширения на C, который внутри себя определяет разнообразные полезные функции, которые вы бы хотели экспортировать  для использования в других местах как публичный C API. Вы хотели бы использовать эти функции в других модулях расширения, но не знаете, как связать их вместе, поскольку сделать это с помощью компилятора/линковщика языка С кажется чрезмерно сложной или даже невозможной задачей.
+
+### Решение
+Этот рецепт фокусируется на коде, написанном для работы с объектами *Point*, который был представлен в **рецепте 15.4.** Как вы помните, этот код на C включает некоторые полезные функции:
+```C
+/* Destructor function for points */
+static void del_Point(PyObject *obj) {
+    free(PyCapsule_GetPointer(obj,"Point"));
+}
+
+/* Utility functions */
+static Point *PyPoint_AsPoint(PyObject *obj) {
+    return (Point *) PyCapsule_GetPointer(obj, "Point");
+}
+
+static PyObject *PyPoint_FromPoint(Point *p, int must_free) {
+    return PyCapsule_New(p, "Point", must_free ? del_Point : NULL);
+}
+``` 
+
+Проблема, которую мы сейчас решаем, заключается в том, как экспортировать функции *Point_AsPoint()* и *PyPoint_FromPoint()* как API, который другие модули расширения могут использовать и прилинковываться к нему (например, если у вас есть другие расширения, которые тоже хотят использовать обёрнутые объекты *Point*).
+
+Чтобы решить эту задачу, введём новый заголовочный файл для расширения-примера под названием *pysample.h*. Поместим в него следующий код:
+```C
+/* pysample.h */
+#include "Python.h"
+#include "sample.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Public API Table */
+typedef struct {
+    Point *(*aspoint)(PyObject *);
+    PyObject *(*frompoint)(Point *, int);
+} _PointAPIMethods;
+
+#ifndef PYSAMPLE_MODULE
+/* Method table in external module */
+static _PointAPIMethods *_point_api = 0;
+
+/* Import the API table from sample */
+static int import_sample(void) {
+    _point_api = (_PointAPIMethods *) PyCapsule_Import("sample._point_api",0);
+    return (_point_api != NULL) ? 1 : 0;
+}
+
+/* Macros to implement the programming interface */
+#define PyPoint_AsPoint(obj) (_point_api->aspoint)(obj)
+#define PyPoint_FromPoint(obj) (_point_api->frompoint)(obj)
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+``` 
+
+Главный аспект здесь — это таблица указателей функций *_PointAPIMethods*. Она будет инициализирована в экспортирующем модуле и обнаружена в импортирующих модулях. 
+
+Измените изначальный модуль расширения, чтобы наполнить таблицу и экспортировать её, как показано:
+```C
+/* pysample.c */
+
+#include "Python.h"
+#define PYSAMPLE_MODULE
+#include "pysample.h"
+
+...
+/* Destructor function for points */
+static void del_Point(PyObject *obj) {
+    printf("Deleting point\n");
+    free(PyCapsule_GetPointer(obj,"Point"));
+}
+
+/* Utility functions */
+static Point *PyPoint_AsPoint(PyObject *obj) {
+    return (Point *) PyCapsule_GetPointer(obj, "Point");
+}
+
+static PyObject *PyPoint_FromPoint(Point *p, int free) {
+    return PyCapsule_New(p, "Point", free ? del_Point : NULL);
+}
+
+static _PointAPIMethods _point_api = {
+    PyPoint_AsPoint,
+    PyPoint_FromPoint
+};
+...
+
+/* Module initialization function */
+PyMODINIT_FUNC
+PyInit_sample(void) {
+    PyObject *m;
+    PyObject *py_point_api;
+
+    m = PyModule_Create(&samplemodule);
+    if (m == NULL)
+        return NULL;
+
+    /* Add the Point C API functions */
+    py_point_api = PyCapsule_New((void *) &_point_api, "sample._point_api", NULL);
+    if (py_point_api) {
+        PyModule_AddObject(m, "_point_api", py_point_api);
+    }
+    return m;
+}
+``` 
+
+Наконец, вот пример нового модуля расширения, который загружает и использует эти функции API:
+```C
+/* ptexample.c */
+
+/* Include the header associated with the other module */
+#include "pysample.h"
+
+/* An extension function that uses the exported API */
+static PyObject *print_point(PyObject *self, PyObject *args) {
+    PyObject *obj;
+    Point *p;
+    if (!PyArg_ParseTuple(args,"O", &obj)) {
+        return NULL;
+    }
+
+    /* Note: This is defined in a different module */
+    p = PyPoint_AsPoint(obj);
+    if (!p) {
+        return NULL;
+    }
+    printf("%f %f\n", p->x, p->y);
+    return Py_BuildValue("");
+}
+
+static PyMethodDef PtExampleMethods[] = {
+    {"print_point", print_point, METH_VARARGS, "output a point"},
+    { NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef ptexamplemodule = {
+PyModuleDef_HEAD_INIT,
+    "ptexample",                    /* name of module */
+    "A module that imports an API", /* Doc string (may be NULL) */
+    -1,                             /* Size of per-interpreter state or -1 */
+    PtExampleMethods                /* Method table */
+};
+
+/* Module initialization function */
+PyMODINIT_FUNC
+PyInit_ptexample(void) {
+    PyObject *m;
+
+    m = PyModule_Create(&ptexamplemodule);
+    if (m == NULL)
+        return NULL;
+    /* Import sample, loading its API functions */
+    if (!import_sample()) {
+        return NULL;
+    }
+    return m;
+}
+```
+
+При компилировании этого нового модуля вам даже не нужно беспокоиться о том, чтобы прилинковать библиотеки или код из другого модуля. Например, вы просто можете создать простой файл *setup.py*:
+```python
+# setup.py
+from distutils.core import setup, Extension
+
+setup(name='ptexample',
+      ext_modules=[
+        Extension('ptexample',
+                  ['ptexample.c'],
+                  include_dirs = [], # May need pysample.h directory
+                  )
+        ]
+)
+```  
+
+Если всё это заработает, вы обнаружите, что ваша новая функция расширения отлично работает с функциями C API, определёнными в другом модуле:
+```python
+>>> import sample
+>>> p1 = sample.Point(2,3)
+>>> p1
+<capsule object "Point *" at 0x1004ea330>
+>>> import ptexample
+>>> ptexample.print_point(p1)
+2.000000 3.000000
+>>>
+```
+
+### Обсуждение
+Этот рецепт полагается на тот факт, что объекты капсул могут содержать указатель на всё, что угодно. В том случае определяющий модуль заполняет структуру указателей функций, создаёт капсулу, которая указывает на неё, а затем сохраняет капусулу в атрибуте уровня модуля (например, *sample._point_api*).
+
+Другие модули могут быть запрограммированы «подобрать» этот атрибут при импортировании и извлечь указатель. На самом деле, Python предоставляет вспомогательную функцию *PyCapsule_Import()*, которая выполняет за вас все эти шаги. Вы просто передаёте ей имя атрибута (например, *sample._point_api*), и она найдёт капсулу и извлечёт указатель за один шаг.
+
+Есть несколько приёмов программирования на C, которые используются для того, чтобы заставить экспортированные функции выглядеть обычными в других модулях. В файле *pysample.h* указатель *_point_api* использован чтобы указать на таблицу методов, которая была инициализирована в экспортирующем модуле. Связанная функция *import_sample()* использована, чтобы выполнить требуемый импорт капсулы и инициализирует этот указатель. Функция должна быть вызвана перед использованием любых других функций. В обычном случае она будет вызывана во время инициализации модуля. Наконец, набор макросов для препроцессинга на С определены для прозрачной диспетчеризации функций API по таблице методов. Пользователь просто вызывает изначальные имена функций, но не знает о дополнительном перенаправлении через эти макросы.
+
+Наконец, есть еще одна важная причина использовать приём линковки модулей вместе — это проще и поддерживает модули в более чистом состоянии слабой связаности. Если вы не хотите использовать этот рецепт так, как показано, вы можете перекрестно слинковать модули, используя продвинутые возможности разделяемых библиотек и динамический загрузчик. Например, можно поместить обычные функции API в разделяемую библиотеку и убедиться, что все модули расширения слинкованы с этой библиотекой. По сути, этот рецепт вырезает всю магию и позволяет модулям линковаться друг к другу через обычный механизм импортирования Python и небольшое количество вызовов капсул. Для компилирования модулей вам нужно позаботиться только о заголовочных файлах, но не о кучерявых подробностях, касающихся разделяемых библиотек.  
+
+Дополнительную информацию о предоставлении C API модулям расширений можно найти в [документации Python](http://docs.python.org/3/extending/extending.html).
