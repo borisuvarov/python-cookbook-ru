@@ -24997,3 +24997,210 @@ PyGILState_Release(state);
 
 Обратите внимание, что вызов *PyGILState_Ensure()* не мгновенно завладевает интерпретатором или прерывает его. Если другой код находится в состоянии исполнения, эта функция заблокируется до тех пор, пока этот код не решит освободить GIL. Внутри интерпретатор выполняет периодическое переключение потоков, так что даже если другой поток выполняется, вызывающий рано или поздно запустится (хотя ему, возможно, придётся сначала немного подождать).
 
+## 15.9. Оборачивание кода на C в Swig
+### Задача
+У вас есть существующий код на С, к которому вы хотели бы получить доступ как к модулю расширения на C. Мы можете сделать это с помощью [генератора обёрток Swig](http://www.swig.org).
+
+### Решение
+Swig работает путём парсинга заголовочных файлов C и автоматического создания кода расширения. Чтобы использовать его, вам сначала нужно иметь заголовочный файл C. Например, это заголовочный файл нашего кода-примера:
+```C
+/* sample.h */
+
+#include <math.h>
+extern int gcd(int, int);
+extern int in_mandel(double x0, double y0, int n);
+extern int divide(int a, int b, int *remainder);
+extern double avg(double *a, int n);
+
+typedef struct Point {
+    double x,y;
+} Point;
+
+extern double distance(Point *p1, Point *p2);
+```
+
+Если у вас есть заголовочные файлы, следующим шагом будет написание файла с «интерфейсом» Swig. Эти файлы имеют расширение *.i* и могут выглядеть как-то так:
+```C
+// sample.i - Swig interface
+%module sample
+%{
+#include "sample.h"
+%}
+
+/* Customizations */
+%extend Point {
+    /* Constructor for Point objects */
+    Point(double x, double y) {
+        Point *p = (Point *) malloc(sizeof(Point));
+        p->x = x;
+        p->y = y;
+        return p;
+    };
+};
+
+/* Map int *remainder as an output argument */
+%include typemaps.i
+%apply int *OUTPUT { int * remainder };
+
+/* Map the argument pattern (double *a, int n) to arrays */
+%typemap(in) (double *a, int n)(Py_buffer view) {
+    view.obj = NULL;
+    if (PyObject_GetBuffer($input, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1) {
+        SWIG_fail;
+    }
+    if (strcmp(view.format,"d") != 0) {
+        PyErr_SetString(PyExc_TypeError, "Expected an array of doubles");
+        SWIG_fail;
+    }
+    $1 = (double *) view.buf;
+    $2 = view.len / sizeof(double);
+}
+
+%typemap(freearg) (double *a, int n) {
+    if (view$argnum.obj) {
+        PyBuffer_Release(&view$argnum);
+    }
+}
+
+/* C declarations to be included in the extension module */
+extern int gcd(int, int);
+extern int in_mandel(double x0, double y0, int n);
+extern int divide(int a, int b, int *remainder);
+extern double avg(double *a, int n);
+
+typedef struct Point {
+    double x,y;
+} Point;
+
+extern double distance(Point *p1, Point *p2);
+```
+
+Когда вы написали файл интерфейса, Swig вызвается как инструмент командной строки:
+```
+bash % swig -python -py3 sample.i
+bash %
+```
+
+На выходе команды *swig* получатся два файла: *sample_wrap.c* и *sample.py*. Последний файл — это то, что импортирует пользователь. *sample_wrap.c* — это код на C, который должен быть скомпилирован в поддерживающий модуль под названием *_sample*. Это делается с использованием тех же приёмов, как и для обычных модулей расширения. Например, вы создаете файл setup.py таким образом:
+```python
+# setup.py
+from distutils.core import setup, Extension
+
+setup(name='sample',
+      py_modules=['sample.py'],
+      ext_modules=[
+        Extension('_sample',
+                  ['sample_wrap.c'],
+                  include_dirs = [],
+                  define_macros = [],
+                  undef_macros = [],
+                  library_dirs = [],
+                  libraries = ['sample']
+                  )
+      ]
+)
+```
+
+Чтобы скомпилировать и всё проверить, запустите *setup.py* в *python3*:
+```
+bash % python3 setup.py build_ext --inplace
+running build_ext
+building '_sample' extension
+gcc -fno-strict-aliasing -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes
+ -I/usr/local/include/python3.3m -c sample_wrap.c
+  -o build/temp.macosx-10.6-x86_64-3.3/sample_wrap.o
+sample_wrap.c: In function ‘SWIG_InitializeModule’:
+sample_wrap.c:3589: warning: statement with no effect
+gcc -bundle -undefined dynamic_lookup build/temp.macosx-10.6-x86_64-3.3/sample.o
+ build/temp.macosx-10.6-x86_64-3.3/sample_wrap.o -o _sample.so -lsample
+bash %
+``` 
+
+Если всё получится, вы обнаружите, что можете использовать получившийся модуль расширения C самым прямолинейным образом. Например:
+```python
+>>> import sample
+>>> sample.gcd(42,8)
+2
+>>> sample.divide(42,8)
+[5, 2]
+>>> p1 = sample.Point(2,3)
+>>> p2 = sample.Point(4,5)
+>>> sample.distance(p1,p2)
+2.8284271247461903
+>>> p1.x
+2.0
+>>> p1.y
+3.0
+>>> import array
+>>> a = array.array('d',[1,2,3])
+>>> sample.avg(a)
+2.0
+>>>
+```
+
+### Обсуждение
+Swig — это один из самых старых инструментов для создания модулей расширения, история которого восходит к Python 1.4. Однако текущие версии поддерживают Python 3. В основном пользователями Swig становятся программисты, у которых есть обширная кодовая база на C, к которой они хотят получить доступ, используя Python в качестве высокоуровневого языка управления. Например, пользователь может иметь код на C, содержащий тысячи функций и разнообразные структуры данных, к которым он хотел бы получить доступ из Python. Swig может автоматизировать большую часть процесса генерации обёрток.
+
+Все интерфейсы Swig склонны начинаться с короткого введения:
+```C
+%module sample
+%{
+#include "sample.h"
+%}
+```
+
+Это просто объявляет имя модуля расширения и определяет заголовочные файлы C, которые должны быть включены, чтобы всё скомпилировалось (код, заключённый между %{ %}, напрямую вставляется в выводимый код, так что сюда вам нужно поместить все включённые файлы и другие определения, необходимые для компиляции).
+
+В конце интерфейса Swig находится список объявлений C, которые нужно включить в расширение. Он часто просто копируется из заголовочных файлов. В нашем примере мы просто вставляем заголовочный файл напрямую:
+```C
+%module sample
+%{
+#include "sample.h"
+%}
+...
+extern int gcd(int, int);
+extern int in_mandel(double x0, double y0, int n);
+extern int divide(int a, int b, int *remainder);
+extern double avg(double *a, int n);
+
+typedef struct Point {
+    double x,y;
+} Point;
+
+extern double distance(Point *p1, Point *p2);
+```
+
+Важно подчеркнуть, что эти объявления сообщают Swig о том, что вы хотите включить в модуль Python. Очень часто этот список объявлений редактируют, чтобы внести необходимые изменения. Например, если вы не хотите включать некоторые объявления, вы можете удалить их из списка объявлений.
+
+Самый сложный момент работы со Swig — это разнообразные кастомизации, которые он может применить к коду на C. Это огромная тема, которую мы не можем тут детально разбирать, но несколько таких кастомизаций в рецепте показано.
+
+Первая использует директиву *%extend* и позволяет методам прикрепляться к существующим структурам и определениям классов. В примере это используется для добавления метода-конструктора к структуре *Point*. Эта кастомизация делает возможным использовать структуру таким образом:
+```python
+>>> p1 = sample.Point(2,3)
+>>>
+```
+
+Если это опустить, объекты *Point* придётся создавать намного более неуклюжим способом:
+```python
+>>> # Usage if %extend Point is omitted
+>>> p1 = sample.Point()
+>>> p1.x = 2.0
+>>> p1.y = 3
+``` 
+
+Вторая кастомизация подразумевает включение библиотеки *typemaps.i* и директивы *%apply*, которая сообщает Swig, что с аргументной сигнатурой int \*remainder нужно обращаться, как с выходным (output) значением. На самом деле, это правило сопоставления с образцом (pattern matching). Во всех следующих объявлениях при встрече с int *remainder с ним будут обращаться как с выводом (output). Эта кастомизация заставляет функцию *divide()* возвращать два значения:
+```python
+>>> sample.divide(42,8)
+[5, 2]
+>>>
+```
+
+Последняя кастомизация, использующая директиву %typemap, вероятно, самая продвинутая из показанных нами. Отображение типа (typemap) — это правило, которое применяется к конкретным паттернам аргументов ввода (input). В этом рецепте typemap написан для сопоставления с паттерном аргументов *(double *a, int n)*. Внутри typemap представляет собой фрагмент кода на C, который указывает Swig, как преобразовать объект Python в ассоциированные аргументы C. Код этого рецепта написан с использованием буферного протокола Python, чтобы попытаться сопоставить любые входные аргументы, которые выглядят как массивы чисел с двойной точностью (например, массивы NumPy, массивы модуля array и т.п.) См. **рецепт 15.3.**
+
+Внутри кода typemap такие подстановки, как $1 и $2, ссылаются на переменные, которые содержат преобразованные в паттерны typemap значения аргументов C (например, $1 отображается на double
+\*a, а $2 отображается на int n). $input ссылается на аргумент PyObject \*, который был предоставлен как аргумент ввода (input argument). $argnum — это номер аргумента.
+
+Написать и понять typemap'ы — одна из самых трудных, часто даже гибельно трудных, задач программистов, использующих Swig. Мало того, что код весьма загадочен — вам нужно также понимать замысловатые детали C API Python и того, как Swig с ним взаимодействует. В документации Swig приведено много примеров и подробная информация.
+
+Несмотря на это, если у вас много кода на С, который нужно использовать как модуль расширения, Swig может стать очень мощным инструментом. Главное — держать в уме, что Swig, по сути, является компилятором, обрабатывающим объявления C, но с мощным механизмом сопоставления с образцом (pattern matching) и компонентом для кастомизации, который позволяет вам менять способ, которым обрабатываются конкретные объявления и типы. Больше сведений вы найдёте на [сайте Swig](http://www.swig.org). Есть там и [документация по работе с Python](http://www.swig.org/Doc2.0/Python.html). 
+
