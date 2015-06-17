@@ -25204,3 +25204,279 @@ extern double distance(Point *p1, Point *p2);
 
 Несмотря на это, если у вас много кода на С, который нужно использовать как модуль расширения, Swig может стать очень мощным инструментом. Главное — держать в уме, что Swig, по сути, является компилятором, обрабатывающим объявления C, но с мощным механизмом сопоставления с образцом (pattern matching) и компонентом для кастомизации, который позволяет вам менять способ, которым обрабатываются конкретные объявления и типы. Больше сведений вы найдёте на [сайте Swig](http://www.swig.org). Есть там и [документация по работе с Python](http://www.swig.org/Doc2.0/Python.html). 
 
+## 15.10. Оборачивание существующего кода на C в Cython
+### Задача
+Вы хотите использовать [Cython](http://cython.org), чтобы заставить модуль расширения Python обернуться вокруг существующей библиотеки на C.
+
+### Решение
+Создание модуля расширения с помощью Cython выглядит похоже на создание самописного расширения, что подразумевает создание коллекции функций-обёрток. Однако, в отличие от предыдущих рецептов, вы не будете делать это на C — код будет выглядеть намного более похожим на код Python.
+
+В качестве предварительного условия предположим, что код примера, показанного во введении в эту главу, скомпилирован в библиотеку на C под названием *libsample*. Начнём с создания файла с именем *csample.pxd*, который выглядит так:
+```C
+# csample.pxd
+#
+# Declarations of "external" C functions and structures
+
+cdef extern from "sample.h":
+    int gcd(int, int)
+    bint in_mandel(double, double, int)
+    int divide(int, int, int *)
+    double avg(double *, int) nogil
+   
+    ctypedef struct Point:
+        double x
+        double y
+
+    double distance(Point *, Point *)
+```
+
+Этот файл служит в Cython тем же целям, что и заголовочный файл в C. Первоначальное объявление *cdef extern from "sample.h"* объявляет требуемый заголовочный файл C. Следующие объявления взяты из этого заголовка. Имя этого файла — *csample.pxd*, а не *sample.pxd*. Это важно.
+
+На следующем шаге мы создаём файл с именем *sample.pyx*. Этот файл определяет обёртки, которые соединяют интерпретатор Python с лежащим в основе кодом на C, определённом в файле *csample.pxd*:
+```C
+# sample.pyx
+
+# Import the low-level C declarations
+cimport csample
+
+# Import some functionality from Python and the C stdlib
+from cpython.pycapsule cimport *
+from libc.stdlib cimport malloc, free
+
+# Wrappers
+def gcd(unsigned int x, unsigned int y):
+    return csample.gcd(x, y)
+
+def in_mandel(x, y, unsigned int n):
+    return csample.in_mandel(x, y, n)
+
+def divide(x, y):
+    cdef int rem
+    quot = csample.divide(x, y, &rem)
+    return quot, rem
+
+def avg(double[:] a):
+    cdef:
+        int sz
+        double result
+    
+    sz = a.size
+    with nogil:
+        result = csample.avg(<double *> &a[0], sz)
+    return result
+
+# Destructor for cleaning up Point objects
+cdef del_Point(object obj):
+    pt = <csample.Point *> PyCapsule_GetPointer(obj,"Point")
+    free(<void *> pt)
+
+# Create a Point object and return as a capsule
+def Point(double x,double y):
+    cdef csample.Point *p
+    p = <csample.Point *> malloc(sizeof(csample.Point))
+    if p == NULL:
+        raise MemoryError("No memory to make a Point")
+    p.x = x
+    p.y = y
+    return PyCapsule_New(<void *>p,"Point",<PyCapsule_Destructor>del_Point)
+
+def distance(p1, p2):
+    pt1 = <csample.Point *> PyCapsule_GetPointer(p1,"Point")
+    pt2 = <csample.Point *> PyCapsule_GetPointer(p2,"Point")
+    return csample.distance(pt1,pt2)
+```
+
+Различные детали этого файла мы разберём в разделе «Обсуждение» этого рецепта. 
+
+Наконец, чтобы собрать модуль расширения, создадим файл setup.py, который выглядит так:
+```python
+from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
+
+ext_modules = [
+    Extension('sample',
+              ['sample.pyx'],
+              libraries=['sample'],
+              library_dirs=['.'])]
+setup(
+  name = 'Sample extension module',
+  cmdclass = {'build_ext': build_ext},
+  ext_modules = ext_modules
+)
+``` 
+
+Чтобы собрать получившийся модуль, напечатайте нижеследующее:
+```
+bash % python3 setup.py build_ext --inplace
+running build_ext
+cythoning sample.pyx to sample.c
+building 'sample' extension
+gcc -fno-strict-aliasing -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes
+ -I/usr/local/include/python3.3m -c sample.c
+ -o build/temp.macosx-10.6-x86_64-3.3/sample.o
+gcc -bundle -undefined dynamic_lookup build/temp.macosx-10.6-x86_64-3.3/sample.o
+ -L. -lsample -o sample.so
+bash %
+```
+
+Если это заработает, вы должны получить модуль расширения *sample.so*, который может быть использован так, как показано в примере:
+```python
+>>> import sample
+>>> sample.gcd(42,10)
+2
+>>> sample.in_mandel(1,1,400)
+False
+>>> sample.in_mandel(0,0,400)
+True
+>>> sample.divide(42,10)
+(4, 2)
+>>> import array
+>>> a = array.array('d',[1,2,3])
+>>> sample.avg(a)
+2.0
+>>> p1 = sample.Point(2,3)
+>>> p2 = sample.Point(4,5)
+>>> p1
+<capsule object "Point" at 0x1005d1e70>
+>>> p2
+<capsule object "Point" at 0x1005d1ea0>
+>>> sample.distance(p1,p2)
+2.8284271247461903
+>>>
+```
+
+### Обсуждение
+Этот рецепт объединяет многие продвинутые возможности, обсуждавшиеся в предыдущих рецептах — манипулирование массивами, оборачивание непрозрачных указателей, освобождение GIL. Каждая из этих частей будет рассмотрена далее, но для начала вы можете ещё раз прочитать предудыщие рецепты. 
+
+На высоком уровне использование Cython построено по модели С. Файлы *.pxd* просто содержат определения C (похожим на файлы *.h* образом), а файлы *.pyx* содержат реализацию (похожим на файлы *.с* образом). Инструкция *cimport* используется Cython для импортирования определений из файла *.pxd*. Это отличается от использования обычной инструкции *import*, которая загружает обычный модуль Python.
+
+Хотя файлы *.pxd* содержат определения, они не используются для цели автоматического создания кода расширения. Вам всё равно придётся писать простые функции-обёртки. Например, хотя файл *csample.pxd* объявляет *int gcd(int, int)* как функцию, вам всё равно придётся написать небольшую обёртку для неё в *sample.pxd*. Например:
+```C
+cimport csample
+
+def gcd(unsigned int x, unsigned int y):
+    return csample.gcd(x,y)
+``` 
+
+Для простых функций особо напрягаться не придётся. Cython сгенерирует оборачивающий код, который правильно преобразует аргументы и значение возврата. Типы данных C, прикреплённые к аргументам, являются необязательными. Однако если вы их включите, то получите дополнительную бесплатную проверку ошибок. Например, если кто-то вызовет эту функцию с отрицательными значениями, будет сгенерировано исключение:
+```python
+>>> sample.gcd(-10,2)
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    File "sample.pyx", line 7, in sample.gcd (sample.c:1284)
+        def gcd(unsigned int x,unsigned int y):
+OverflowError: can't convert negative value to unsigned int
+>>>
+```
+
+Если вы хотите добавить дополнительную проверку в обёртку, просто используйте дополнительный оборачивающий код. Например:
+```python
+def gcd(unsigned int x, unsigned int y):
+    if x <= 0:
+        raise ValueError("x must be > 0")
+    if y <= 0:
+        raise ValueError("y must be > 0")
+    return csample.gcd(x,y)
+``` 
+
+Объявление *in_mandel()* в файле *csample.pxd* — интересный и тонкий момент. В этом файле функция определена как возвращающая *bint* вместо *int*. Это заставляет функцию создавать правильное булево значение из результата вместо простого целого числа. Так что возвращаемое значение 0 отображается в False, а 1 — в True.
+
+Внутри обёрток Cython у вас есть необязательная возможность декларировать типы данных C в дополнение к использованию обычных объектов Python. Обёртка над *divide()* показывает пример этого, а также пример работы с аргументом-указателем.
+```python
+def divide(x,y):
+    cdef int rem
+    quot = csample.divide(x,y,&rem)
+    return quot, rem
+``` 
+
+Здесь переменная *rem* явно объявлена как переменная С *int*. При передаче в функцию *divide()*, *&rem* создает указатель на неё — так же, как в С. 
+
+Код функции *avg()* иллюстрирует некоторые более продвинутые возможности Cython. Во-первых, объявление *def avg(double[:] a)* объявляет avg() как принимающую одномерный просмотрщик памяти (memoryview) значений *double*. Интересно, что получившаяся функция будет принимать любой совместимый объект массива, включая созданные библиотеками типа *numpy*. Например:
+```python
+>>> import array
+>>> a = array.array('d',[1,2,3])
+>>> import numpy
+>>> b = numpy.array([1., 2., 3.])
+>>> import sample
+>>> sample.avg(a)
+2.0
+>>> sample.avg(b)
+2.0
+>>> 
+```
+
+В обёртке *a.size* и *&a[0]* ссылаются, соответственно, на количество элементов массива и «подкапотный» указатель. С помощью синтаксиса <double \*> &a[0] вы при необходимости переколдовываете (type cast) указатели в другой тип. Это нужно, чтобы убедиться, что *C avg()* принимает указатель корректного типа. Отсылаем вас к следующему рецепту, где рассматривается более продвинутый пример применения просмотрщиков памяти (memoryviews) Cython.
+
+В дополнение к работе с обобщенными массивами, пример *avg()* также показывает, как работать с глобальной блокировкой интерпретатора. Инструкция *with nogil:* объявляет блок кода, как выполняющийся без GIL. Внутри этого блока нельзя работать ни с какими обычными объектами Python, можно использовать только объекты и функции, определённые как *cdef*. В дополнение к этому, внешние функции должны явно определять, что они могут выполняться без GIL. Так, в файле *csample.pxd* мы определяем *avg()* как *double avg(double *, int) nogil*.
+
+Работа со структурой *Point* — это отдельный вызов способностям программиста. Как показано выше, этот рецепт обращается с объектами *Point* как непрозрачными указателями, используя объекты капсул, как описано в **рецепте 15.4.** Однако чтобы сделать это, лежащий в основе код Cython будет немного посложнее. Во-первых, нижеприведённые операции импортирования используются для переноса определений функций из библиотеки С и Python C API:
+```python
+from cpython.pycapsule cimport *
+from libc.stdlib cimport malloc, free
+```
+
+Функция *del_Point()* и Point() используют эту функциональность для создания объекта капсулы, который оборачивается вокруг указателя Point \*. Объявление cdef del_Point() объявляет *del_Point()* как функцию, которая доступна только из Cython, но не из Python. Также эта функция не будет видима извне — вместо этого она используется как функция обратного вызова (коллбэк) для очистки памяти, выделенной капсуле. Вызовы таких функций, как *PyCapsule_New()* и *PyCapsule_GetPointer()*, выполняются напрямую из Python C API и используются так же.
+
+Функция *distance()* написана, чтобы извлекать указатели из объектов капсул, созданных *Point()*. Стоит отметить, что вам не нужно волноваться об обработке исключений. В случае получения «плохого» объекта *PyCapsule_GetPointer()* возбуждает исключение, но Cython уже знает, каким образом на него смотреть, и распространяет его за пределы функции *distance()*, если оно возникает.
+
+Недостаток работы со структурами *Point* заключается в том, что они в этой реализации будут полностью непрозрачными. Вы не сможете подсмотреть, как они устроены, или получить доступ к их атрибутам. Есть альтернативный подход к оборачиванию, который состоит в определении типа расширения, как показано в этом коде:
+```python
+# sample.pyx
+
+cimport csample
+from libc.stdlib cimport malloc, free
+...
+
+cdef class Point:
+    cdef csample.Point *_c_point
+    def __cinit__(self, double x, double y):
+        self._c_point = <csample.Point *> malloc(sizeof(csample.Point))
+        self._c_point.x = x
+        self._c_point.y = y
+    
+    def __dealloc__(self):
+        free(self._c_point)
+    
+    property x:
+    def __get__(self):
+        return self._c_point.x
+    def __set__(self, value):
+        self._c_point.x = value
+    
+    property y:
+    def __get__(self):
+        return self._c_point.y
+    def __set__(self, value):
+        self._c_point.y = value
+
+def distance(Point p1, Point p2):
+    return csample.distance(p1._c_point, p2._c_point)
+```
+
+Здесь *cdef class Point* объявляет *Point* как тип расширения. Переменная класса cdef csample.Point \*_c_point объявляет переменную экземпляра, которая содержит указатель на лежащую в основе *Point* структуру на C. Методы *__cinit__()* и *__cinit__()* создают и разрушают лежащую в основе структуру C с помощью вызовов *malloc()* и *free()*. Объявления *property x* и *property y* создают код, который получает и устанавливает атрибуты лежащей в основе структуры. Обёртка для *distance()* также была удобно модифицирована, чтобы принимать экземпляры типа расширения *Point* как аргументы, но передавать лежащий в основе указатель функции на C.
+
+Внеся это изменение, вы обнаружите, что код для манипулирования объектами *Point* стал более естественным:
+```python
+>>> import sample
+>>> p1 = sample.Point(2,3)
+>>> p2 = sample.Point(4,5)
+>>> p1
+<sample.Point object at 0x100447288>
+>>> p2
+<sample.Point object at 0x1004472a0>
+>>> p1.x
+2.0
+>>> p1.y
+3.0
+>>> sample.distance(p1,p2)
+2.8284271247461903
+>>>
+```
+
+Этот рецепт демонстрирует многие ключевые возможности Cython, которые вы можете экстраполировать на более сложные типы оборачивания (wrapping). Однако вам точно понадобится почитать [официальную документацию](http://docs.cython.org).
+
+Следующие несколько примеров также демонстрируют дополнительные возможности Cython.
+
+
+
