@@ -25645,6 +25645,70 @@ cpdef clip2d(double[:,:] a, double min, double max, double[:,:] out):
 
 Надеемся, что от читателя не ускользнуло, что весь код в этом рецепте не привязан к какой-либо конкретной библиотеке для работы с массивами (например, NumPy). Это даёт коду большую гибкость. Однако также стоит заметить, что работа с массивами может быть намного более сложной, если в игру вступают многомерность, фрагментация, сдвиги и другие факторы. Обсуждение этих тем лежит за пределами этого рецепта, но дополнительные сведения вы сможете найти в [PEP 3118](http://www.python.org/dev/peps/pep-3118). Также обязательно стоит прочесть раздел [документации Cython](http://docs.cython.org/src/userguide/memoryviews.html) по «типизированным просмотрщикам памяти» (typed memoryviews).
 
+## 15.12. Превращение указателя на функцию в вызываемый объект
+### Задача
+У вас есть каким-то образом полученный адрес скомпилированной функции в памяти, но вы хотите превратить его в вызываемый объект Python, который можно будет использовать в качестве функции расширения.
+
+### Решение
+Модуль *ctypes* может быть использован для создания вызываемых объектов Python, которые являются обёртками над произвольными адресами в памяти. Следующий пример показывает, как получить «сырой» низкоуровневый адрес функции на C и превратить его в вызываемый объект:
+```python
+>>> import ctypes
+>>> lib = ctypes.cdll.LoadLibrary(None)
+>>> # Get the address of sin() from the C math library
+>>> addr = ctypes.cast(lib.sin, ctypes.c_void_p).value
+>>> addr
+140735505915760
+
+>>> # Turn the address into a callable function
+>>> functype = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.c_double)
+>>> func = functype(addr)
+>>> func
+<CFunctionType object at 0x1006816d0>
+
+>>> # Call the resulting function
+>>> func(2)
+0.9092974268256817
+>>> func(0)
+0.0
+>>>
+``` 
+
+### Обсуждение
+Чтобы создать вызываемый объект, вы должны создать экземпляр *CFUNCTYPE*. Первый аргумент *CFUNCTYPE()* — это тип возвращаемого объекта. Последующие аргументы — это типы аргументов. Когда вы определили тип функции, вы оборачиваете её вокруг целочисленного адреса в памяти, чтобы создать вызываемый объект. Получившийся объект используется как обычная функция с доступом через *ctypes*.
+
+Этот рецепт может показаться достаточно загадочным и низкоуровневым. Однако в программах и библиотеках всё чаще используют продвинутые приёмы генерации кода типа just-in-time-компиляции (это можно встретить в таких библиотеках, как LLVM).
+
+Например, вот простой пример, который использует [расширение llvmpy](http://www.llvmpy.org) для создания небольшой составной функции, получения функционального указателя на неё и превращения в вызывамый объект Python:
+```python
+>>> from llvm.core import Module, Function, Type, Builder
+>>> mod = Module.new('example')
+>>> f = Function.new(mod,Type.function(Type.double(), \
+                     [Type.double(), Type.double()], False), 'foo')
+>>> block = f.append_basic_block('entry')
+>>> builder = Builder.new(block)
+>>> x2 = builder.fmul(f.args[0],f.args[0])
+>>> y2 = builder.fmul(f.args[1],f.args[1])
+>>> r = builder.fadd(x2,y2)
+>>> builder.ret(r)
+<llvm.core.Instruction object at 0x10078e990>
+>>> from llvm.ee import ExecutionEngine
+>>> engine = ExecutionEngine.new(mod)
+>>> ptr = engine.get_pointer_to_function(f)
+>>> ptr
+4325863440
+>>> foo = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.c_double, ctypes.c_double)(ptr)
+
+>>> # Call the resulting function
+>>> foo(2,3)
+13.0
+>>> foo(4,5)
+41.0
+>>> foo(1,2)
+5.0
+>>>
+```   
+
+Не стоит говорить, что любая ошибка на этом уровне вызовет ужасную смерть интерпретатора Python. Помните, что вы напрямую работаете с адресами памяти компьютера и нативным машинным кодом, а не с функциями Python. 
 
 
 
