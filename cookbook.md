@@ -26330,7 +26330,124 @@ PyObject *fobj = PyFile_FromFd(fd, "filename","r",-1,NULL,NULL,NULL,1);
 
 Если вам нужно создать другой тип файлового объекта, такой как объект FILE \*  из стандартной библиотеки ввода-вывода C с использованием функции *fdopen()*, вам следует быть особенно осторожным. Если вы это сделаете, то возникнут два полностью отдельных слоя буферизации ввода-вывода в стеке ввода-вывода (один из модуля *io* Python, второй — из С *stdio*). Операции типа *fclose()* в C также могут ненароком закрыть файл от будущего использования в Python. Если у вас есть выбор, то, вероятно, лучше заставить код расширения работать с низкоуровневыми целочисленными файловыми дескрипторами, а не использовать высокоуровневую абстракцию наподобие предоставляемой *<stdio.h>*.
 
- 
+## 15.19. Чтение файлоподобных объектов из C
+### Задача
+Вы хотите написать код расширения на С, который будет потреблять данные из любого файлоподобного объекта Python (например, обычных файлов, объектов *StringIO* и т.п.)
+
+### Решение
+Чтобы потреблять данные из файлоподобного объекта, вам нужно раз за разом вызывать его метод *read()* и предпринимать шаги для правильного декодирования получившихся данных.
+
+Вот пример функции расширения на С, которая просто потребляет все данные из файлоподобного объекта и сбрасывает их в стандартный поток вывода, чтобы вы могли их увидеть:
+```C
+#define CHUNK_SIZE 8192
+/* Consume a "file-like" object and write bytes to stdout */
+static PyObject *py_consume_file(PyObject *self, PyObject *args) {
+    PyObject *obj;
+    PyObject *read_meth;
+    PyObject *result = NULL;
+    PyObject *read_args;
+
+    if (!PyArg_ParseTuple(args,"O", &obj)) {
+        return NULL;
+    }
+
+    /* Get the read method of the passed object */
+    if ((read_meth = PyObject_GetAttrString(obj, "read")) == NULL) {
+        return NULL;
+    }
+
+    /* Build the argument list to read() */
+    read_args = Py_BuildValue("(i)", CHUNK_SIZE);
+    while (1) {
+        PyObject *data;
+        PyObject *enc_data;
+        char *buf;
+        Py_ssize_t len;
+
+        /* Call read() */
+        if ((data = PyObject_Call(read_meth, read_args, NULL)) == NULL) {
+            goto final;
+        }
+        /* Check for EOF */
+        if (PySequence_Length(data) == 0) {
+            Py_DECREF(data);
+            break;
+        }
+
+        /* Encode Unicode as Bytes for C */
+        if ((enc_data=PyUnicode_AsEncodedString(data,"utf-8","strict"))==NULL) {
+            Py_DECREF(data);
+            goto final;
+        }
+
+        /* Extract underlying buffer data */
+        PyBytes_AsStringAndSize(enc_data, &buf, &len);
+
+        /* Write to stdout (replace with something more useful) */
+        write(1, buf, len);
+
+        /* Cleanup */
+        Py_DECREF(enc_data);
+        Py_DECREF(data);
+    }
+    result = Py_BuildValue("");
+
+    final:
+        /* Cleanup */
+        Py_DECREF(read_meth);
+        Py_DECREF(read_args);
+        return result;
+}
+```
+
+Чтобы проверить этот код, попробуйте создать файлоподобный объект типа  экземпляра *StringIO* и передать его:
+```python
+>>> import io
+>>> f = io.StringIO('Hello\nWorld\n')
+>>> import sample
+>>> sample.consume_file(f)
+Hello
+World
+>>>
+```
+
+### Обсуждение
+В отличие от обычных системных файлов, файлоподобные объекты необязательно построены на базе низкоуровневого файлового дескриптора. Поэтому вы не можете использовать обычные функции библиотек C для доступа к ним. Вместо этого вам нужен Python C API, с помощью которого вы можете работать с файлоподобным объектом во многом так же, как вы делаете это в Python.
+
+В решении метод *read()* извлечён из переданного объекта. Список аргументов строится и затем раз за разом передаётся в *PyObject_Call()*, чтобы вызвать метод. Чтобы обнаружить конец файла (EOF), используется *PySequence_Length()* — чтобы посмотреть, имеет ли возвращённый результат нулевую длину.
+
+При всех операциях ввода-вывода вам нужно думать над «подкапотной» кодировкой и различием между байтами и Unicode. Этот рецепт показывает, как прочесть файл в текстовом режиме и декодировать получившийся текст в байтовую кодировку, которая может быть использована в C. Если вы хотите прочесть файл в бинарном режиме, нужно внести в код лишь косметические изменения. Например:
+```C
+...
+    /* Call read() */
+    if ((data = PyObject_Call(read_meth, read_args, NULL)) == NULL) {
+        goto final;
+    }
+
+    /* Check for EOF */
+    if (PySequence_Length(data) == 0) {
+        Py_DECREF(data);
+        break;
+    }
+
+    if (!PyBytes_Check(data)) {
+        Py_DECREF(data);
+        PyErr_SetString(PyExc_IOError, "File must be in binary mode");
+        goto final;
+    }
+
+/* Extract underlying buffer data */
+PyBytes_AsStringAndSize(data, &buf, &len);
+...
+```
+
+Самая сложная часть этого рецепта касается правильного управления памяти. При работе с переменными PyObject \* нужно внимательно следить за управлением подсчётом ссылок и очисткой значений после того, как они уже не требуются. Различные вызовы *Py_DECREF()* занимаются как раз этим.
+
+Этот рецепт написан так, чтобы иметь общее назначение — его можно адаптировать к другим операциям, таким как запись. Например, чтобы записать данные, просто получите метод *write()* из файлоподобного объекта, преобразуйте данные в подходящий объект Python (байты или Unicode) и вызовите метод, чтобы записать его в файл.
+
+Наконец, хотя файлоподобные объекты часто предоставляют другие методы (например, *readline()*, *read_into()*), вероятно, лучше будет придерживаться базовых методов *read()* и *write()* для максимальной переносимости. Придерживаться максимальной простоты — хорошая политика при работе с расширениями на C.
+
+
 
 
 
