@@ -26243,6 +26243,60 @@ b'Spicy Jalape\xc3\xb1o\xae'
 
 [PEP 383](http://www.python.org/dev/peps/pep-0383) содержит дополнительные сведения о проблеме, которая рассмотрена в этом рецепте, а также об обработке ошибок *surrogateescape*.
 
+## 15.17. Передача имён файлов в расширения на С
+### Задача
+Вам нужно передать имена файлов в функции библиотеки на C, но вы хотите убедиться, что имена правильно закодированы в соответствии с ожидаемой системной кодировкой имён файлов.
+
+### Решение
+Чтобы написать функцию расширения, которая принимает имя файла, используйте такой код:
+```C
+static PyObject *py_get_filename(PyObject *self, PyObject *args) {
+    PyObject *bytes;
+    char *filename;
+    Py_ssize_t len;
+    if (!PyArg_ParseTuple(args,"O&", PyUnicode_FSConverter, &bytes)) {
+        return NULL;
+    }
+    PyBytes_AsStringAndSize(bytes, &filename, &len);
+    /* Use filename */
+    ...
+
+    /* Cleanup and return */
+    Py_DECREF(bytes)
+    Py_RETURN_NONE;
+}
+``` 
+
+Если у вас уже есть PyObject \*, который вы хотите преобразовать в имя файла, используйте такой код:
+```C
+PyObject *obj;  /* Object with the filename */
+PyObject *bytes;
+char *filename;
+Py_ssize_t len;
+
+bytes = PyUnicode_EncodeFSDefault(obj);
+PyBytes_AsStringAndSize(bytes, &filename, &len);
+/* Use filename */
+...
+
+/* Cleanup */
+Py_DECREF(bytes);
+```
+
+Если вам нужно вернуть имя файла обратно в Python, используйте следующий код:
+```C
+/* Turn a filename into a Python object */
+
+char *filename;      /* Already set */
+int   filename_len;  /* Already set */
+
+PyObject *obj = PyUnicode_DecodeFSDefaultAndSize(filename, filename_len);
+```
+
+### Обсуждение
+Работа с именами файлов переносимым образом — это сложная задача, которую лучше переложить на Python. Если вы используете этот рецепт в вашем коде расширения, имена файлов будут обрабатываться способом, которая соответствует принципам обработки в Python. Это включает кодирование/декодирование байтов, решение проблем с некорректными символами, суррогатные экранированные последовательности и другие осложнения.
+
+
 
 
 
