@@ -25708,7 +25708,205 @@ cpdef clip2d(double[:,:] a, double min, double max, double[:,:] out):
 >>>
 ```   
 
-Не стоит говорить, что любая ошибка на этом уровне вызовет ужасную смерть интерпретатора Python. Помните, что вы напрямую работаете с адресами памяти компьютера и нативным машинным кодом, а не с функциями Python. 
+Не стоит говорить, что любая ошибка на этом уровне вызовет ужасную смерть интерпретатора Python. Помните, что вы напрямую работаете с адресами памяти компьютера и нативным машинным кодом, а не с функциями Python.
+
+## 15.13. Передача NULL-терминированных строк библиотекам на C
+### Задача
+Вы пишете модуль расширения, который должен передавать NULL-терминированные строки в библиотеку на С. Однако вы не совсем уверены, как сделать это с помощью реализации строк Unicode в Python.
+
+### Решение
+Многие библиотеки на С включают функции, которые работают с NULL-терминированными строками, объявленными как type char \*. Рассмотрим следующую функцию на C, которую мы будем использовать для целей демонстрации и тестирования:
+```C
+void print_chars(char *s) {
+    while (*s) {
+        printf("%2x ", (unsigned char) *s);
+        s++;
+    }
+    printf("\n");
+}
+```
+
+Эта функция просто выводит шестнадцатеричное представление отдельных символов, так что передаваемые строки легко дебажить. Например:
+```python
+print_chars("Hello");    // Outputs: 48 65 6c 6c 6f
+``` 
+
+Для вызова такой функции на C из Python вы можете выбрать один из нескольких способов. Во-первых, вы можете ограничить её работой только с байтами, используя код преобразования *"y"* в функции *PyArg_ParseTuple()*:
+```C
+static PyObject *py_print_chars(PyObject *self, PyObject *args) {
+    char *s;
+
+    if (!PyArg_ParseTuple(args, "y", &s)) {
+        return NULL;
+    }
+    print_chars(s);
+    Py_RETURN_NONE;
+}
+```
+
+Получившаяся функция работает так, как показано ниже. Внимательно понаблюдайте, как отвергаются байты с вставленными байтами NULL и строки Unicode:
+```python
+>>> print_chars(b'Hello World')
+48 65 6c 6c 6f 20 57 6f 72 6c 64
+>>> print_chars(b'Hello\x00World')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: must be bytes without null bytes, not bytes
+>>> print_chars('Hello World')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: 'str' does not support the buffer interface
+>>>
+```
+
+Если вы хотите вместо этого передать строки Unicode, используйте код форматирования *"s"* в *PyArg_ParseTuple()*:
+```C
+static PyObject *py_print_chars(PyObject *self, PyObject *args) {
+    char *s;
+
+    if (!PyArg_ParseTuple(args, "s", &s)) {
+        return NULL;
+    }
+    print_chars(s);
+    Py_RETURN_NONE;
+}
+```
+
+При использовании она автоматически преобразует все строки в NULL-терминированные в кодировке UTF-8. Например:
+```python
+>>> print_chars('Hello World')
+48 65 6c 6c 6f 20 57 6f 72 6c 64
+>>> print_chars('Spicy Jalape\u00f1o') # Note: UTF-8 encoding
+53 70 69 63 79 20 4a 61 6c 61 70 65 c3 b1 6f
+>>> print_chars('Hello\x00World')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: must be str without null characters, not str
+>>> print_chars(b'Hello World')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: must be str, not bytes
+>>>
+```
+
+Если по какой-то причине вы работаете напрямую с PyObject \* и не можете использовать *PyArg_ParseTuple()*, следующий пример кода показывает, как вы можете проверить и извлечь подходящую ссылку  char \* из байтового или строкового объекта:
+```C
+/* Some Python Object (obtained somehow) */
+PyObject *obj;
+
+/* Conversion from bytes */
+{
+    char *s;
+    s = PyBytes_AsString(o);
+    if (!s) {
+        return NULL;  /* TypeError already raised */
+    }
+    print_chars(s);
+}
+
+/* Conversion to UTF-8 bytes from a string */
+{
+    PyObject *bytes;
+    char *s;
+    if (!PyUnicode_Check(obj)) {
+        PyErr_SetString(PyExc_TypeError, "Expected string");
+        return NULL;
+    }
+    bytes = PyUnicode_AsUTF8String(obj);
+    s = PyBytes_AsString(bytes);
+    print_chars(s);
+    Py_DECREF(bytes);
+}
+```
+
+Обе показанных преобразования гарантируют получение NULL-терминированных данных, но они не проверяют наличие вставленных NULL-байтов где-то ещё в строке. Так что это вам придётся проверить самостоятельно, если есть необходимость.
+
+### Обсуждение
+При любой возможности вы должны избегать написания кода, который опирается на NULL-терминированные строки, поскольку в Python нет такого требования. Почти всегда будет лучше обрабатывать строки, используя комбинацию указателя и размера. Несмотря на это, иногда вам нужно работать с легаси-кодом на C, что не оставляет выбора.
+
+Хотя его и легко использовать, с кодом форматирования *"s"* в *PyArg_ParseTuple()* вы получаете скрытый оверхед по памяти, который легко проглядеть. Когда вы пишете код, который использует такое преобразование, создаётся и навсегда прикрепляется к изначальному объекту строки строка в UTF-8. Если оригинальная строка содержит символы не из ASCII, это увеличит размер строки до тех пор, пока она будет уничтожена сборщиком мусора. Например:
+```python
+>>> import sys
+>>> s = 'Spicy Jalape\u00f1o'
+>>> sys.getsizeof(s)
+87
+>>> print_chars(s)      # Passing string
+53 70 69 63 79 20 4a 61 6c 61 70 65 c3 b1 6f
+>>> sys.getsizeof(s)    # Notice increased size
+103
+>>>
+```
+
+Если рост потребления памяти является проблемой, вам стоит переписать ваш код расширения на C, чтобы он использовал функцию *PyUnicode_AsUTF8String()*:
+```C
+static PyObject *py_print_chars(PyObject *self, PyObject *args) {
+    PyObject *o, *bytes;
+    char *s;
+
+    if (!PyArg_ParseTuple(args, "U", &o)) {
+        return NULL;
+    }
+    bytes = PyUnicode_AsUTF8String(o);
+    s = PyBytes_AsString(bytes);
+    print_chars(s);
+    Py_DECREF(bytes);
+    Py_RETURN_NONE;
+}
+```
+
+С этой модификацией строка в кодировке UTF-8 создаётся при необходимости, но после использования выбрасывается. Вот изменённое поведение:
+```python
+>>> import sys
+>>> s = 'Spicy Jalape\u00f1o'
+>>> sys.getsizeof(s)
+87
+>>> print_chars(s)
+53 70 69 63 79 20 4a 61 6c 61 70 65 c3 b1 6f
+>>> sys.getsizeof(s)
+87
+>>>
+```
+
+Если вы пытаетесь передать NULL-терминированные строки функциям, обёрнутым с помощью *ctypes*, то обратите внимание, что с *ctypes* пропускает только байты — и не проверяет их на вставленные NULL-байты. Например:
+```python
+>>> import ctypes
+>>> lib = ctypes.cdll.LoadLibrary("./libsample.so")
+>>> print_chars = lib.print_chars
+>>> print_chars.argtypes = (ctypes.c_char_p,)
+>>> print_chars(b'Hello World')
+48 65 6c 6c 6f 20 57 6f 72 6c 64
+>>> print_chars(b'Hello\x00World')
+48 65 6c 6c 6f
+>>> print_chars('Hello World')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+ctypes.ArgumentError: argument 1: <class 'TypeError'>: wrong type
+>>>
+```
+
+Если вы хотите передать строку вместо байтов, вам нужно выполнить ручное кодирование в UTF-8. Например:
+```python
+>>> print_chars('Hello World'.encode('utf-8'))
+48 65 6c 6c 6f 20 57 6f 72 6c 64
+>>>
+```
+
+Для других инструментов работы с расширениями (например, Swig, Cython) требуется внимательное изучение вопроса, если вы захотите использовать их для передачи строк в код на C.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
