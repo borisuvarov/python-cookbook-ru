@@ -8,26 +8,26 @@
 # Содержание
 
 1. Структуры данных и алгоритмы
-    1.1. Распаковка последовательности в отдельные переменные
-    1.2. Распаковка элементов из последовательностей произвольной длины
-    1.3. Оставление N последних элементов
-    1.4. Поиск N максимальных и минимальных элементов
-    1.5. Реализация очереди с приоритетом
-    1.6. Отображение ключей на несколько значений в словаре
-    1.7. Поддержание порядка в словарях
-    1.8. Вычисления в словарях
-    1.9. Поиск общих элементов в двух словарях
-    1.10. Удаление дубликатов из последовательности с сохранением порядка элементов
-    1.11. Присваивание имён срезам
-    1.12. Определение наиболее часто встречающихся элементов в последовательности
-    1.13. Сортировка списка словарей по общему ключу
-    1.14. Сортировка объектов, не поддерживающих сравнение
-    1.15. Группировка записей на основе полей
-    1.16. Фильтрование элементов последовательности
-    1.17. Извлечение подмножества из словаря
-    1.18. Отображение имен на последовательность элементов
-    1.19. Одновременное преобразование и сокращение данных
-    1.20. Объединение нескольких отображений в одно
+    - 1.1. Распаковка последовательности в отдельные переменные
+    - 1.2. Распаковка элементов из последовательностей произвольной длины
+    - 1.3. Оставление N последних элементов
+    - 1.4. Поиск N максимальных и минимальных элементов
+    - 1.5. Реализация очереди с приоритетом
+    - 1.6. Отображение ключей на несколько значений в словаре
+    - 1.7. Поддержание порядка в словарях
+    - 1.8. Вычисления в словарях
+    - 1.9. Поиск общих элементов в двух словарях
+    - 1.10. Удаление дубликатов из последовательности с сохранением порядка элементов
+    - 1.11. Присваивание имён срезам
+    - 1.12. Определение наиболее часто встречающихся элементов в последовательности
+    - 1.13. Сортировка списка словарей по общему ключу
+    - 1.14. Сортировка объектов, не поддерживающих сравнение
+    - 1.15. Группировка записей на основе полей
+    - 1.16. Фильтрование элементов последовательности
+    - 1.17. Извлечение подмножества из словаря
+    - 1.18. Отображение имен на последовательность элементов
+    - 1.19. Одновременное преобразование и сокращение данных
+    - 1.20. Объединение нескольких отображений в одно
 2. Строки и текст
     2.1. Разрезание строк, разделенных различными разделителями
     2.2. Поиск текста в начале и в конце строки
@@ -17423,7 +17423,7 @@ def fib(n):
 ...         return None
 ...
 >>> import sys
->>> sys.meta_path.insert(0, Finder()) # Insert as first entry
+>>> sys.meta_path.insert(0, Finder()) # Вставить в начало
 >>> import math
 Looking for math None
 >>> import types
@@ -17467,12 +17467,12 @@ Looking for ElementC14N None
 >>> import fib
 Looking for fib None
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 >>> import xml.superfast
 Looking for xml.superfast ['/usr/local/lib/python3.3/xml']
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 ImportError: No module named 'xml.superfast'
 >>>
 ```
@@ -17520,9 +17520,9 @@ ImportError: No module named 'xml.superfast'
 ...         return (None, [])
 ...
 >>> import sys
->>> # Add a "debug" entry to the importer cache
+>>> Добавить запись "debug" в кэш импортировщика
 >>> sys.path_importer_cache['debug'] = Finder()
->>> # Add a "debug" directory to sys.path
+>>> # Добавить каталог "debug" в sys.path
 >>> sys.path.insert(0, 'debug')
 >>> import threading
 Looking for threading
@@ -17534,7 +17534,7 @@ Looking for token
 >>>
 ```
 
-Здесь вы инсталлировали новую запись кэша для имени *debug* и инсталлировали имя *debug* в качестве первой записи в *sys.path*. В последующих операциях импортирования вы видите, как запускается ваш поисковик. Однако, поскольку он возвращает *(None, [])*, процесс обработки просто переходит к следующей записи.
+Здесь вы установили новую запись кэша для имени *debug* и установили имя *debug* в качестве первой записи в *sys.path*. В последующих операциях импортирования вы видите, как запускается ваш поисковик. Однако, поскольку он возвращает *(None, [])*, процесс обработки просто переходит к следующей записи.
 
 Наполнение *sys.path_importer_cache* контролируется списком функций, который хранится в *sys.path_hooks*. Попробуйте провести эксперимент, в котором вы очистите кэш и добавите новую функцию проверки пути в *sys.path_hooks*:
 ```python
@@ -17555,7 +17555,7 @@ Checking /Users/beazley/.local/lib/python3.3/site-packages
 Checking /usr/local/lib/python3.3/site-packages
 Looking for fib
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 >>>
 ```
@@ -17574,12 +17574,12 @@ ImportError: No module named 'fib'
 >>> sys.path_hooks[0] = check_url
 >>> import fib
 Looking for fib
-# Finder output!
+# Вывод поисковика!
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 
->>> # Notice installation of Finder in sys.path_importer_cache
+>>> # Обратите внимание на установку поисковика в sys.path_importer_cache
 >>> sys.path_importer_cache['http://localhost:15000']
 <__main__.Finder object at 0x10064c850>
 >>>
@@ -17607,9 +17607,9 @@ ImportError: No module named 'fib'
 
 Оставшаяся сложная часть этой реализации касается поведения функции *handle_url()* и её взаимодействия с используемой внутри функцией *_get_links()*. Если ваша реализация поисковика использует другие модули (например, *urllib.request*), существует вероятность того, что эти модули предпримут попытки импортирования в середине выполнения операции поисковика. Это может вызвать рекурсивный цикл выполнения *handle_url()* и других частей поисковика. Чтобы учёсть такую возможность, реализация поддерживает кэш созданных поисковиков (по одному на URL). Это позволяет избежать проблемы с созданием дублирующихся поисковиков. Следующий фрагмент кода удостоверяет, что поисковик не отвечает ни на какие запросы импортирования, пока он находится в процессе получения начального набора ссылок:
 ```python
-# Check link cache
+# Проверяем кэш ссылок
 if self._links is None:
-    self._links = []            # See discussion
+    self._links = []            # См. обсуждение
     self._links = _get_links(self._baseurl)
 ``` 
 
@@ -17629,7 +17629,7 @@ DEBUG:urlimport:Installing handle_url
 >>> import fib
 DEBUG:urlimport:Handle path? /usr/local/lib/python33.zip. [No]
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 ImportError: No module named 'fib'
 >>> import sys
 >>> sys.path.append('http://localhost:15000')
@@ -17723,7 +17723,7 @@ def logged(func):
         return func(*args, **kwargs)
     return wrapper
 
-# Example
+# Пример
 @when_imported('math')
 def add_logging(mod):
     mod.cos = logged(mod.cos)
@@ -17898,19 +17898,19 @@ name.utils']*.
 ```python
 from urllib import request, parse
 
-# Base URL being accessed
+# Базовый URL, к которому обращаемся
 url = 'http://httpbin.org/get'
 
-# Dictionary of query parameters (if any)
+# Словарь параметров запроса (если они есть)
 parms = {
     'name1' : 'value1',
     'name2' : 'value2'
 }
 
-# Encode the query string
+# Кодируем строку запроса
 querystring = parse.urlencode(parms)
 
-# Make a GET request and read the response
+# Делаем GET-запрос и читаем ответ 
 u = request.urlopen(url+'?' + querystring)
 resp = u.read()
 ```
@@ -17919,19 +17919,19 @@ resp = u.read()
 ```python
 from urllib import request, parse
 
-# Base URL being accessed
+# Базовый URL, к которому обращаемся
 url = 'http://httpbin.org/post'
 
-# Dictionary of query parameters (if any)
+# Словарь параметров запроса (если они есть)
 parms = {
     'name1' : 'value1',
     'name2' : 'value2'
 }
 
-# Encode the query string
+# Кодируем строку запроса
 querystring = parse.urlencode(parms)
 
-# Make a POST request and read the response
+# Делаем POST-запрос и читаем ответ 
 u = request.urlopen(url, querystring.encode('ascii'))
 resp = u.read()
 ``` 
@@ -17941,7 +17941,7 @@ resp = u.read()
 from urllib import request, parse
 ...
 
-# Extra headers
+# Дополнительные заголовки
 headers = {
     'User-agent' : 'none/ofyourbusiness',
     'Spam' : 'Eggs'
@@ -17949,7 +17949,7 @@ headers = {
 
 req = request.Request(url, querystring.encode('ascii'), headers=headers)
 
-# Make a request and read the response
+# Делаем запрос и читаем ответ
 u = request.urlopen(req)
 resp = u.read()
 ```  
@@ -17958,16 +17958,16 @@ resp = u.read()
 ```python
 import requests
 
-# Base URL being accessed
+# Базовый URL, к которому обращаемся
 url = 'http://httpbin.org/post'
 
-# Dictionary of query parameters (if any)
+# Словарь параметров запроса (если они есть)
 parms = {
     'name1' : 'value1',
     'name2' : 'value2'
 }
 
-# Extra headers
+# Дополнительные заголовки
 headers = {
     'User-agent' : 'none/ofyourbusiness',
     'Spam' : 'Eggs'
@@ -17975,7 +17975,7 @@ headers = {
 
 resp = requests.post(url, data=parms, headers=headers)
 
-# Decoded text returned by the request
+# Раскодированный текст, возвращённый запросом
 text = resp.text
 ```
 
@@ -18004,11 +18004,11 @@ resp = requests.get('http://pypi.python.org/pypi?:action=login',
 ```python
 import requests
 
-# First request
+# Первый запрос
 resp1 = requests.get(url)
 ...
 
-# Second requests with cookies received on first requests
+# Второй запрос с cookie, полученными при первом запросе
 resp2 = requests.get(url, cookies=resp1.cookies)
 ```
 
@@ -18050,7 +18050,7 @@ r = urllib.request.Request('http://pypi.python.org/pypi?:action=login')
 u = opener.open(r)
 resp = u.read()
 
-# From here. You can access more pages using opener
+# Далее вы можете обращаться к другим страницам, используя opener
 ...
 ```
 
@@ -18120,9 +18120,9 @@ from socketserver import StreamRequestHandler, TCPServer
 class EchoHandler(StreamRequestHandler):
     def handle(self):
         print('Got connection from', self.client_address)
-        # self.rfile is a file-like object for reading
+        # self.rfile — это файлоподобный объект для чтения
         for line in self.rfile:
-            # self.wfile is a file-like object for writing
+            # self.wfile — это файлоподобный объект для записи
             self.wfile.write(line)
 
 if __name__ == '__main__':
@@ -18161,9 +18161,9 @@ if __name__ == '__main__':
 ```python
 if __name__ == '__main__':
     serv = TCPServer(('', 20000), EchoHandler, bind_and_activate=False)
-    # Set up various socket options
+    # Установить различные параметры сокета
     serv.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-    # Bind and activate
+    # Связать и активировать
     serv.server_bind()
     serv.server_activate()
     serv.serve_forever()
@@ -18183,16 +18183,16 @@ if __name__ == '__main__':
 import socket
 
 class EchoHandler(StreamRequestHandler):
-    # Optional settings (defaults shown)
-    timeout = 5                         # Timeout on all socket operations
-    rbufsize = -1                       # Read buffer size
-    wbufsize = 0                        # Write buffer size
-    disable_nagle_algorithm = False     # Sets TCP_NODELAY socket option
+    # Необязательные установки (показаны дефолтные)
+    timeout = 5                        # Таймаут на все операции с сокетами
+    rbufsize = -1                      # Размер буфера чтения
+    wbufsize = 0                       # Размер буфера записи
+    disable_nagle_algorithm = False    # Устанавливает опцию сокета TCP_NODELAY
     def handle(self):
         print('Got connection from', self.client_address)
         try:
             for line in self.rfile:
-                # self.wfile is a file-like object for writing
+                # self.wfile — файлоподобный объект для чтения
                 self.wfile.write(line)
         except socket.timeout:
             print('Timed out!')
@@ -18236,7 +18236,7 @@ import time
 class TimeHandler(BaseRequestHandler):
 def handle(self):
     print('Got connection from', self.client_address)
-    # Get message and client socket
+    # Получаем сообщение и клиентский сокет
     msg, sock = self.request
     resp = time.ctime()
     sock.sendto(resp.encode('ascii'), self.client_address)
@@ -18379,7 +18379,7 @@ IPv4Address('123.45.67.73')
 >>> s = socket(AF_INET, SOCK_STREAM)
 >>> s.connect((a, 8080))
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 TypeError: Can't convert 'IPv4Address' object to str implicitly
 >>> s.connect((str(a), 8080))
 >>>
@@ -18460,12 +18460,12 @@ if __name__ == '__main__':
     from resty import PathDispatcher
     from wsgiref.simple_server import make_server
 
-    # Create the dispatcher and register functions
+    # Создаем диспетчер и регистрируем функции
     dispatcher = PathDispatcher()
     dispatcher.register('GET', '/hello', hello_world)
     dispatcher.register('GET', '/localtime', localtime)
 
-    # Launch a basic server
+    # Запускаем базовый сервер
     httpd = make_server('', 8080, dispatcher)
     print('Serving on port 8080...')
     httpd.serve_forever()
@@ -18517,7 +18517,7 @@ def wsgi_app(environ, start_response):
 def wsgi_app(environ, start_response):
     method = environ['REQUEST_METHOD']
     path = environ['PATH_INFO']
-    # Parse the query parameters
+    # Парсим параметры запроса
     params = cgi.FieldStorage(environ['wsgi.input'], environ=environ)
     ...
 ```
@@ -18572,11 +18572,11 @@ class WSGIApplication:
 ```python
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
-    # Create the dispatcher and register functions
+    # Создаём диспетчер и регистрируем функции
     dispatcher = PathDispatcher()
     ...
 
-    # Launch a basic server
+    # Запускаем базовый сервер
     httpd = make_server('', 8080, dispatcher)
     print('Serving on port 8080...')
     httpd.serve_forever()
@@ -18621,7 +18621,7 @@ class KeyValueServer:
     def serve_forever(self):
         self._serv.serve_forever()
 
-# Example
+# Пример
 if __name__ == '__main__':
     kvserv = KeyValueServer(('', 15000))
     kvserv.serve_forever()
@@ -18773,9 +18773,9 @@ class RPCHandler:
     def handle_connection(self, connection):
         try:
             while True:
-                # Receive a message
+                # Получаем сообщение
                 func_name, args, kwargs = pickle.loads(connection.recv())
-                # Run the RPC and send a response
+                # Запускаем RPC и посылаем ответ
                 try:
                     r = self._functions[func_name](*args,**kwargs)
                     connection.send(pickle.dumps(r))
@@ -18798,19 +18798,19 @@ def rpc_server(handler, address, authkey):
         t.daemon = True
         t.start()
 
-# Some remote functions
+# Удалённые функции
 def add(x, y):
     return x + y
 
 def sub(x, y):
     return x - y
 
-# Register with a handler
+# Регистрируем с обработчиком
 handler = RPCHandler()
 handler.register_function(add)
 handler.register_function(sub)
 
-# Run the server
+# Запускаем сервер
 rpc_server(handler, ('localhost', 17000), authkey=b'peekaboo')
 ```
 
@@ -18844,9 +18844,9 @@ class RPCProxy:
 -1
 >>> proxy.sub([1, 2], 4)
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
-    File "rpcserver.py", line 37, in do_rpc
-        raise result
+  File "<stdin>", line 1, in <module>
+  File "rpcserver.py", line 37, in do_rpc
+    raise result
 TypeError: unsupported operand type(s) for -: 'list' and 'int'
 >>>
 ```
@@ -18875,9 +18875,9 @@ class RPCHandler:
     def handle_connection(self, connection):
         try:
             while True:
-                # Receive a message
+                # Получаем сообщение
                 func_name, args, kwargs = json.loads(connection.recv())
-                # Run the RPC and send a response
+                # Запускаем RPC и посылаем ответ
                 try:
                     r = self._functions[func_name](*args,**kwargs)
                     connection.send(json.dumps(r))
@@ -18916,9 +18916,9 @@ import os
 
 def client_authenticate(connection, secret_key):
     '''
-    Authenticate client to a remote service.
-    connection represents a network connection.
-    secret_key is a key known only to both client/server.
+    Аутентифицирует клиент на удалённом сервере. 
+    connection представляет сетевое соединение.
+    secret_key — это ключ, известный только клиенту и серверу.
     '''
     message = connection.recv(32)
     hash = hmac.new(secret_key, message)
@@ -18927,7 +18927,7 @@ def client_authenticate(connection, secret_key):
 
 def server_authenticate(connection, secret_key):
     '''
-    Request client authentication.
+    Запрашивает аутетентификацию клиента.
     '''
     message = os.urandom(32)
     connection.send(message)
@@ -18998,8 +18998,8 @@ resp = s.recv(1024)
 from socket import socket, AF_INET, SOCK_STREAM
 import ssl
 
-KEYFILE = 'server_key.pem'      # Private key of the server
-CERTFILE = 'server_cert.pem'    # Server certificate (given to client)
+KEYFILE = 'server_key.pem'      # Приватный ключ сервера
+CERTFILE = 'server_cert.pem'    # Сертификат сервера (передаваемый клиенту)
 
 def echo_client(s):
     while True:
@@ -19015,13 +19015,13 @@ def echo_server(address):
     s.bind(address)
     s.listen(1)
 
-    # Wrap with an SSL layer requiring client certs
+    # Оборачивает слоем SSL, требуя клиентских сертификатов
     s_ssl = ssl.wrap_socket(s,
                             keyfile=KEYFILE,
                             certfile=CERTFILE,
                             server_side=True
                             )
-    # Wait for connections
+    # Ждёт соединений
     while True:
         try:
             c,a = s_ssl.accept()
@@ -19057,8 +19057,8 @@ import ssl
 
 class SSLMixin:
     '''
-    Mixin class that adds support for SSL to existing servers based
-    on the socketserver module.
+    Класс-миксин, который добавляет поддержку SSL существующим серверам,
+    основанным на модулe socketserver.
     '''
     def __init__(self, *args,
                  keyfile=None, certfile=None, ca_certs=None,
@@ -19084,7 +19084,7 @@ class SSLMixin:
 Чтобы использовать этот миксин, вы должн примешать его другим классам сервера. Например, вот как определить XML-RPC-сервер, который работает через SSL:
 
 ```python
-# XML-RPC server with SSL
+# XML-RPC-сервер с SSL
 
 from xmlrpc.server import SimpleXMLRPCServer
 
@@ -19128,8 +19128,8 @@ class KeyValueServer:
         self._serv.serve_forever()
 
 if __name__ == '__main__':
-    KEYFILE='server_key.pem'    # Private key of the server
-    CERTFILE='server_cert.pem'  # Server certificate
+    KEYFILE='server_key.pem'    # Приватный ключ сервера
+    CERTFILE='server_cert.pem'  # Сертификат сервера
     kvserv = KeyValueServer(('', 15000),
                              keyfile=KEYFILE,
                              certfile=CERTFILE),
@@ -19169,15 +19169,15 @@ class VerifyCertSafeTransport(SafeTransport):
         self._ssl_context.verify_mode = ssl.CERT_REQUIRED
 
     def make_connection(self, host):
-        # Items in the passed dictionary are passed as keyword
-        # arguments to the http.client.HTTPSConnection() constructor.
-        # The context argument allows an ssl.SSLContext instance to
-        # be passed with information about the SSL configuration
+        # Элементы в передаваемом словаре передаются как именованные
+        # аргументы в конструктор http.client.HTTPSConnection().
+        # Аргумент context позволяет экземпляру ssl.SSLContext передаваться
+        # с информацией о конфигурации SSL.
         s = super().make_connection((host, {'context': self._ssl_context}))
         
         return s
 
-# Create the client proxy
+# Создаем клиентский прокси
 s = ServerProxy('https://localhost:15000',
                  transport=VerifyCertSafeTransport('server_cert.pem'),
                  allow_none=True)
@@ -19185,7 +19185,7 @@ s = ServerProxy('https://localhost:15000',
 
 Как показано выше, сервер предоставляет сертификат клиенту, и клиент его проверяет. Эта верификация может быть двунаправленной. Если сервер хочет верифицировать клиента, измените процесс его запуска на следующий:
 ```python
-# Create the client proxy
+# Создаем клиентский прокси
 s = ServerProxy('https://localhost:15000',
                  transport=VerifyCertSafeTransport('server_cert.pem',
                                                    'client_cert.pem',
@@ -19350,12 +19350,12 @@ from multiprocessing.reduction import send_handle
 import socket
 
 def server(work_address, port):
-    # Wait for the worker to connect
+    # Ждёт подсоединения воркера
     work_serv = Listener(work_address, authkey=b'peekaboo')
     worker = work_serv.accept()
     worker_pid = worker.recv()
 
-    # Now run a TCP/IP server and send clients to worker
+    # Теперь запускаем TCP/IP-сервер и посылаем клиентов воркеру
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
     s.bind(('', port))
@@ -19417,7 +19417,7 @@ import struct
 
 def send_fd(sock, fd):
     '''
-    Send a single file descriptor.
+    Посылает один файловый дескриптор.
     '''
     sock.sendmsg([b'x'],
                  [(socket.SOL_SOCKET, socket.SCM_RIGHTS, struct.pack('i', fd))])
@@ -19425,13 +19425,13 @@ def send_fd(sock, fd):
     assert ack == b'OK'
 
 def server(work_address, port):
-    # Wait for the worker to connect
+    # Ждёт подсоединения воркера
     work_serv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     work_serv.bind(work_address)
     work_serv.listen(1)
     worker, addr = work_serv.accept()
 
-    # Now run a TCP/IP server and send clients to worker
+    # Теперь запускаем TCP/IP-сервер и посылаем клиентов воркеру
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
     s.bind(('',port))
@@ -19459,7 +19459,7 @@ import struct
 
 def recv_fd(sock):
     '''
-    Receive a single file descriptor
+    Получает один файловый дескриптор.
     '''
     msg, ancdata, flags, addr = sock.recvmsg(1,
                                     socket.CMSG_LEN(struct.calcsize('i')))
@@ -19505,23 +19505,23 @@ if __name__ == '__main__':
 ```python
 class EventHandler:
     def fileno(self):
-        'Return the associated file descriptor'
+        'Возвращает ассоциированный файловый дескриптор'
         raise NotImplemented('must implement')
     
     def wants_to_receive(self):
-        'Return True if receiving is allowed'
+        'Возвращает True если получение разрешено'
         return False
     
     def handle_receive(self):
-        'Perform the receive operation'
+        'Выполняет операцию получения'
         pass
     
     def wants_to_send(self):
-        'Return True if sending is requested'
+        'Возвращает True, если отсылка запрошена'
         return False
     
     def handle_send(self):
-        'Send outgoing data'
+        'Отсылает исходящие данные'
         pass
 ```
 
@@ -19607,7 +19607,7 @@ class TCPServer(EventHandler):
     
     def handle_receive(self):
         client, addr = self.sock.accept()
-        # Add the client to the event loop's handler list
+        # Добавляет клиента в список обработчиков цикла событий
         self.handler_list.append(self.client_handler(client, self.handler_list))
 
 class TCPClient(EventHandler):
@@ -19621,7 +19621,7 @@ class TCPClient(EventHandler):
     
     def close(self):
         self.sock.close()
-        # Remove myself from the event loop's handler list
+        # Удалиться из списка обработчиков цикла событий
         self.handler_list.remove(self)
     
     def wants_to_send(self):
@@ -19683,12 +19683,12 @@ class ThreadPoolHandler(EventHandler):
     def fileno(self):
         return self.done_sock.fileno()
     
-    # Callback that executes when the thread is done
+    # Коллбэк, который выполняется после завершения потока
     def _complete(self, callback, r):
         self.pending.append((callback, r.result()))
         self.signal_done_sock.send(b'x')
         
-    # Run a function in a thread pool
+    # Запускает функцию в пуле потоков
     def run(self, func, args=(), kwargs={},*,callback):
         r = self.pool.submit(func, *args, **kwargs)
         r.add_done_callback(lambda r: self._complete(callback, r))
@@ -19696,9 +19696,9 @@ class ThreadPoolHandler(EventHandler):
     def wants_to_receive(self):
         return True
     
-    # Run callback functions of completed work
+    # Запускает коллбэки завершённой работы
     def handle_receive(self):
-        # Invoke all pending callback functions
+        # Вызывает все коллбэки в очереди
         for callback, result in self.pending:
             callback(result)
             self.done_sock.recv(1)
@@ -19709,7 +19709,7 @@ class ThreadPoolHandler(EventHandler):
 
 Вот простой сервер, который демонстрирует использование пула потоков для выполнения длительных вычислений:
 ```python
-# A really bad Fibonacci implementation
+# Очень плохая реализация поиска чисел Фибоначчи
 def fib(n):
     if n < 2:
         return 1
@@ -19788,13 +19788,13 @@ def recv_into(arr, source):
 
 Вся идея этого рецепта в том, что вы можете пропихнуть огромный массив данных через соединение. В этом случае массивы могут быть созданы с помощью модуля *array* или *numpy*. Например:
 ```python
-# Server
+# Сервер
 >>> import numpy
 >>> a = numpy.arange(0.0, 50000000.0)
 >>> send_from(a, c)
 >>>
 
-# Client
+# Клиент
 >>> import numpy
 >>> a = numpy.zeros(shape=50000000, dtype=float)
 >>> a[0:10]
@@ -19835,7 +19835,7 @@ Python уже давно поддерживает различные подхо�
 ### Решение
 Библиотека *threading* может быть использована для выполнения любого вызываемого объекта Python в отдельном потоке. Чтобы сделать это, вы создаете экземпляр *Thread* и предоставляете ему вызываемый объект, который хотите выполнить. Вот простой пример:
 ```python
-# Code to execute in an independent thread
+# Код для выполнения в независимом потоке
 import time
 
 def countdown(n):
@@ -19844,7 +19844,7 @@ def countdown(n):
         n -= 1
         time.sleep(5)
 
-# Create and launch a thread
+# Создать и запустить поток
 from threading import Thread
 t = Thread(target=countdown, args=(10,))
 t.start()
@@ -19894,8 +19894,8 @@ c = CountdownTask()
 t = Thread(target=c.run, args=(10,))
 t.start()
 ...
-c.terminate()   # Signal termination
-t.join()        # Wait for actual termination (if needed)
+c.terminate()   # Сигнал завершения 
+t.join()        # Ждать реального завершения (если необходимо)
 ```
 
 Отправка запросов на завершение треда может быть сложной в координации, если треды выполняют блокирующие операции, такие как ввод-вывод. Например, если поток заблокирован на неопределённое время операцией ввода-вывода, он может никогда не вернуться, чтобы посмотреть, не убит ли он. Чтобы корректно разобраться с этим случаем, вам нужно аккуратно программировать треды с использованием циклов с таймаутами. Например:
@@ -19906,17 +19906,17 @@ class IOTask:
     
     def run(self, sock):
         # sock is a socket
-        sock.settimeout(5)      # Set timeout period
+        sock.settimeout(5)      # Установить таймаут
         while self._running:
-            # Perform a blocking I/O operation w/ timeout
+            # Выполнить блокирующую операцию ввода-вывода с таймаутом
             try:
                 data = sock.recv(8192)
                 break
             except socket.timeout:
                 continue
-            # Continued processing
+            # Продолжение обработки
             ...
-        # Terminated
+        # Завершено
         return
 ```
 
@@ -19967,7 +19967,7 @@ p.start()
 from threading import Thread, Event
 import time
 
-# Code to execute in an independent thread
+# Код для выполнения в независимом потоке
 def countdown(n, started_evt):
     print('countdown starting')
     started_evt.set()
@@ -19976,15 +19976,15 @@ def countdown(n, started_evt):
         n -= 1
         time.sleep(5)
 
-# Create the event object that will be used to signal startup
+# Создать объект события, который будет использован для сигнала о запуске
 started_evt = Event()
 
-# Launch the thread and pass the startup event
+# Запустить поток и передать событие запуска
 print('Launching countdown')
 t = Thread(target=countdown, args=(10,started_evt))
 t.start()
 
-# Wait for the thread to start
+# Ждать запуска потока
 started_evt.wait()
 print('countdown is running')
 ``` 
@@ -20012,7 +20012,7 @@ class PeriodicTimer:
 
     def run(self):
         '''
-        Run the timer and notify waiting threads after each interval
+        Запустить таймер и уведомлять ждущие потоки после каждого интервала
         '''
         while True:
             time.sleep(self._interval)
@@ -20022,18 +20022,18 @@ class PeriodicTimer:
     
     def wait_for_tick(self):
         '''
-        Wait for the next tick of the timer
+        Ждать следующего срабатывания таймера
         '''
         with self._cv:
             last_flag = self._flag
             while last_flag == self._flag:
                 self._cv.wait()
 
-# Example use of the timer
+# Пример использования таймера
 ptimer = PeriodicTimer(5)
 ptimer.start()
 
-# Two threads that synchronize on the timer
+# Два потока, синхронизирующихся по таймеру
 def countdown(nticks):
     while nticks > 0:
         ptimer.wait_for_tick()
@@ -20055,14 +20055,14 @@ threading.Thread(target=countup, args=(5,)).start()
 
 Например, рассмотрим такой код, использующий семафоры:
 ```python
-# Worker thread
+# Поток-воркер
 def worker(n, sema):
-    # Wait to be signaled
+    # Ждёт сигнала
     sema.acquire()
-    # Do some work
+    # Выполняет работу
     print('Working', n)
 
-# Create some threads
+# Создаем несколько потоков
 sema = threading.Semaphore(0)
 nworkers = 10
 for n in range(nworkers):
@@ -20091,22 +20091,22 @@ Working 1
 from queue import Queue
 from threading import Thread
 
-# A thread that produces data
+# Поток, который производит данные
 def producer(out_q):
     while True:
-        # Produce some data
+        # Производим данные
         ...
         out_q.put(data)
 
-# A thread that consumes data
+# Поток, который потребляет данные
 def consumer(in_q):
     while True:
-        # Get some data
+        # Получаем данные
         data = in_q.get()
-        # Process the data
+        # Обрабатываем данные
         ...
 
-# Create the shared queue and launch both threads
+# Создаем разделяемую (shared) очередь и запускаем оба потока
 q = Queue()
 t1 = Thread(target=consumer, args=(q,))
 t2 = Thread(target=producer, args=(q,))
@@ -20121,31 +20121,31 @@ t2.start()
 from queue import Queue
 from threading import Thread
 
-# Object that signals shutdown
+# Объект, который сигнализирует об отключении
 _sentinel = object()
 
-# A thread that produces data
+# Поток, который производит данные
 def producer(out_q):
     while running:
-        # Produce some data
+        # Производим данные
         ...
         out_q.put(data)
         
-    # Put the sentinel on the queue to indicate completion
+    # Поместить стража в очередь, чтобы сигнализировать о завершении
     out_q.put(_sentinel)
 
-# A thread that consumes data
+# Поток, который потребляет данные
 def consumer(in_q):
     while True:
-        # Get some data
+        # Получаем данные
         data = in_q.get()
 
-        # Check for termination
+        # Проверяем на предмет сигнала о завершении
         if data is _sentinel:
             in_q.put(_sentinel)
             break
 
-        # Process the data
+        # Обрабатываем данные
         ...
 ```
 
@@ -20180,30 +20180,30 @@ class PriorityQueue:
 from queue import Queue
 from threading import Thread
 
-# A thread that produces data
+# Поток, который производит данные 
 def producer(out_q):
     while running:
-        # Produce some data
+        # Произвести данные
         ...
         out_q.put(data)
 
-# A thread that consumes data
+# Поток, который потребляет данные
 def consumer(in_q):
     while True:
-        # Get some data
+        # Получаем данные
         data = in_q.get()
-        # Process the data
+        # Обрабатываем данные
         ...
-        # Indicate completion
+        # Сигнализируем о завершении
         in_q.task_done()
 
-# Create the shared queue and launch both threads
+# Создаём разделяемую (shared) очередь и запускаем оба потока
 q = Queue()
 t1 = Thread(target=consumer, args=(q,))
 t2 = Thread(target=producer, args=(q,))
 t1.start()
 t2.start()
-# Wait for all produced items to be consumed
+# Ждём, пока все произведённые элементы будут потреблены
 q.join()
 ```
 
@@ -20212,26 +20212,26 @@ q.join()
 from queue import Queue
 from threading import Thread, Event
 
-# A thread that produces data
+# Поток, который производит данные
 def producer(out_q):
     while running:
-        # Produce some data
+        # Производим данные
         ...
-        # Make an (data, event) pair and hand it to the consumer
+        # Создаём пару (data, event) и передаём её потребителю
         evt = Event()
         out_q.put((data, evt))
         ...
-        # Wait for the consumer to process the item
+        # Ждём, пока потребитель не обработает данные
         evt.wait()
 
-# A thread that consumes data
+# Поток, который потребляет данные
 def consumer(in_q):
     while True:
-        # Get some data
+        # Получаем данные
         data, evt = in_q.get()
-        # Process the data
+        # Обрабатываем данные
         ...
-        # Indicate completion
+        # Сигнализируем о завершении
         evt.set()
 ``` 
 
@@ -20244,19 +20244,19 @@ from queue import Queue
 from threading import Thread
 import copy
 
-# A thread that produces data
+# Поток, который производит данные
 def producer(out_q):
     while True:
-        # Produce some data
+        # Производим данные
         ...
         out_q.put(copy.deepcopy(data))
 
-# A thread that consumes data
+# Поток, который потребляет данные
 def consumer(in_q):
     while True:
-        # Get some data
+        # Получаем данные
         data = in_q.get()
-        # Process the data
+        # Обрабатываем данные
         ...
 ```   
 
@@ -20299,7 +20299,7 @@ def consumer(q):
     while _running:
         try:
             item = q.get(timeout=5.0)
-            # Process item
+            # Обрабатываем элемент
             ...
         except queue.Empty:
             pass
@@ -20318,7 +20318,7 @@ import threading
 
 class SharedCounter:
     '''
-    A counter object that can be shared by multiple threads.
+    Объёкт счётчика, который может быть общим (shared) для нескольких потоков.
     '''
     def __init__(self, initial_value = 0):
         self._value = initial_value
@@ -20326,14 +20326,14 @@ class SharedCounter:
     
     def incr(self,delta=1):
         '''
-        Increment the counter with locking
+        Инкрементирует счётчик с блокировкой.
         '''
         with self._value_lock:
             self._value += delta
         
     def decr(self,delta=1):
         '''
-        Decrement the counter with locking
+        Декрементирует счётчик с блокировкой.
         '''
         with self._value_lock:
             self._value -= delta
@@ -20350,7 +20350,7 @@ import threading
 
 class SharedCounter:
     '''
-    A counter object that can be shared by multiple threads.
+    Объёкт счётчика, который может быть общим (shared) для нескольких потоков.
     '''
     def __init__(self, initial_value = 0):
         self._value = initial_value
@@ -20358,7 +20358,7 @@ class SharedCounter:
 
     def incr(self,delta=1):
         '''
-        Increment the counter with locking
+        Инкрементирует счётчик с блокировкой.
         '''
         self._value_lock.acquire()
         self._value += delta
@@ -20366,7 +20366,7 @@ class SharedCounter:
 
     def decr(self,delta=1):
         '''
-        Decrement the counter with locking
+        Декрементирует счётчик с блокировкой.
         '''
         self._value_lock.acquire()
         self._value -= delta
@@ -20383,7 +20383,7 @@ import threading
 
 class SharedCounter:
     '''
-    A counter object that can be shared by multiple threads.
+    Объёкт счётчика, который может быть общим (shared) для нескольких потоков.
     '''
     _lock = threading.RLock() 
     def __init__(self, initial_value = 0):
@@ -20391,14 +20391,14 @@ class SharedCounter:
    
     def incr(self,delta=1):
         '''
-        Increment the counter with locking
+        Инкрементирует счётчик с блокировкой.
         '''
         with SharedCounter._lock:
          self._value += delta
    
     def decr(self,delta=1):
         '''
-        Decrement the counter with locking
+        Декрементирует счётчик с блокировкой.
         '''
         with SharedCounter._lock:
             self.incr(-delta)
@@ -20413,7 +20413,7 @@ class SharedCounter:
 from threading import Semaphore
 import urllib.request
 
-# At most, five threads allowed to run at once
+# Самое большее 5 потоков могут выполняться одновременно
 _fetch_url_sema = Semaphore(5)
 def fetch_url(url):
     with _fetch_url_sema:
@@ -20434,20 +20434,22 @@ def fetch_url(url):
 import threading
 from contextlib import contextmanager
 
-# Thread-local state to stored information on locks already acquired
+# Локальное для потока состояние для хранения информации
+# об уже полученных блокировках
 _local = threading.local()
 
 @contextmanager
 def acquire(*locks):
-    # Sort locks by object identifier
+    # Сортирует блокировки по идентификатору объекта
     locks = sorted(locks, key=lambda x: id(x))
 
     # Make sure lock order of previously acquired locks is not violated
+    Убеждается, что порядок блокировки ранее приобретённых блокировок не нарушен
     acquired = getattr(_local,'acquired',[])
     if acquired and max(id(lock) for lock in acquired) >= id(locks[0]):
         raise RuntimeError('Lock Order Violation')
     
-    # Acquire all of the locks
+    # Получает все блокировки
     acquired.extend(locks)
     _local.acquired = acquired
 
@@ -20457,6 +20459,7 @@ def acquire(*locks):
         yield
     finally:
         # Release locks in reverse order of acquisition
+        Освобождает блокировки в порядке, обратном их получению
         for lock in reversed(locks):
             lock.release()
         del acquired[-len(locks):]
@@ -20522,16 +20525,16 @@ t2.start()
 ```python
 Exception in thread Thread-1:
 Traceback (most recent call last):
-    File "/usr/local/lib/python3.3/threading.py", line 639, in _bootstrap_inner
-        self.run()
-    File "/usr/local/lib/python3.3/threading.py", line 596, in run
-        self._target(*self._args, **self._kwargs)
-    File "deadlock.py", line 49, in thread_1
-        with acquire(y_lock):
-    File "/usr/local/lib/python3.3/contextlib.py", line 48, in __enter__
-        return next(self.gen)
-    File "deadlock.py", line 15, in acquire
-        raise RuntimeError("Lock Order Violation")
+  File "/usr/local/lib/python3.3/threading.py", line 639, in _bootstrap_inner
+    self.run()
+  File "/usr/local/lib/python3.3/threading.py", line 596, in run
+    self._target(*self._args, **self._kwargs)
+  File "deadlock.py", line 49, in thread_1
+    with acquire(y_lock):
+  File "/usr/local/lib/python3.3/contextlib.py", line 48, in __enter__
+    return next(self.gen)
+  File "deadlock.py", line 15, in acquire
+    raise RuntimeError("Lock Order Violation")
 RuntimeError: Lock Order Violation
 >>>
 ```
@@ -20551,17 +20554,17 @@ RuntimeError: Lock Order Violation
 ```python
 import threading
 
-# The philosopher thread
+# Поток-философ
 def philosopher(left, right):
     while True:
         with acquire(left,right):
             print(threading.currentThread(), 'eating')
 
-# The chopsticks (represented by locks)
+# Палочки (представлены блокировками)
 NSTICKS = 5
 chopsticks = [threading.Lock() for n in range(NSTICKS)]
 
-# Create all of the philosophers
+# Создаём всех философов
 for n in range(NSTICKS):
     t = threading.Thread(target=philosopher,
                          args=(chopsticks[n],chopsticks[(n+1) % NSTICKS]))
@@ -20647,7 +20650,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 def echo_client(sock, client_addr):
     '''
-    Handle a client connection
+    Обрабатывает клиентское соединение
     '''
     print('Got connection from', client_addr)
     while True:
@@ -20678,7 +20681,7 @@ from queue import Queue
 
 def echo_client(q):
     '''
-    Handle a client connection
+    Обрабатывает клиентское соединение
     '''
     sock, client_addr = q.get()
     print('Got connection from', client_addr)
@@ -20691,14 +20694,14 @@ def echo_client(q):
     sock.close()
 
 def echo_server(addr, nworkers):
-    # Launch the client workers
+    # Запускает клиентских воркеров
     q = Queue()
     for n in range(nworkers):
         t = Thread(target=echo_client, args=(q,))
         t.daemon = True
         t.start()
     
-    # Run the server
+    # Запускаем сервер
     sock = socket(AF_INET, SOCK_STREAM)
     sock.bind(addr)
     sock.listen(5)
@@ -20720,11 +20723,11 @@ def fetch_url(url):
     return data
 
 pool = ThreadPoolExecutor(10)
-# Submit work to the pool
+# Отправить работу в пул
 a = pool.submit(fetch_url, 'http://www.python.org')
 b = pool.submit(fetch_url, 'http://www.pypy.org')
 
-# Get the results back
+# Получить результаты
 x = a.result()
 y = b.result()
 ```
@@ -20739,7 +20742,7 @@ from socket import socket, AF_INET, SOCK_STREAM
 
 def echo_client(sock, client_addr):
     '''
-    Handle a client connection
+    Обрабатывает клиентское соединение
     '''
     print('Got connection from', client_addr)
     while True:
@@ -20751,7 +20754,7 @@ def echo_client(sock, client_addr):
     sock.close()
 
 def echo_server(addr, nworkers):
-    # Run the server
+    # Запускаем сервер
     sock = socket(AF_INET, SOCK_STREAM)
     sock.bind(addr)
     sock.listen(5)
@@ -20817,7 +20820,7 @@ import glob
 
 def find_robots(filename):
     '''
-    Find all of the hosts that access robots.txt in a single log file
+    Находит в одном лог-файле всех хостов, который обращались к robots.txt
     '''
     robots = set()
     with gzip.open(filename) as f:
@@ -20829,7 +20832,7 @@ def find_robots(filename):
 
 def find_all_robots(logdir):
     '''
-    Find all hosts across and entire sequence of files
+    Находит всех хостов во всех файлах
     '''
     files = glob.glob(logdir+'/*.log.gz')
     all_robots = set()
@@ -20856,7 +20859,7 @@ from concurrent import futures
 
 def find_robots(filename):
     '''
-    Find all of the hosts that access robots.txt in a single log file
+    Находит в одном лог-файле всех хостов, который обращались к robots.txt
     '''
     robots = set()
     with gzip.open(filename) as f:
@@ -20868,7 +20871,7 @@ def find_robots(filename):
 
 def find_all_robots(logdir):
     '''
-    Find all hosts across and entire sequence of files
+    Находит всех хостов во всех файлах
     '''
     files = glob.glob(logdir+'/*.log.gz')
     all_robots = set()
@@ -20900,32 +20903,32 @@ with ProcessPoolExecutor() as pool:
 
 Работа, которая отправляется в пул, должна быть определена в форме функции. Есть два метода отправки. Если вы пытаетесь распараллелить генератор списка или операцию *map()*, используйте *pool.map()*:
 ```python
-# A function that performs a lot of work
+# Функция, которая делает много работы
 def work(x):
     ...
     return result
 
-# Nonparallel code
+# Непараллельный код
 results = map(work, data)
 
-# Parallel implementation
+# Параллельная реализация
 with ProcessPoolExecutor() as pool:
     results = pool.map(work, data)
 ```
 
 Или же вы можете вручную отправлять (сабмитить) единичные задачи, используя метод pool.submit():
 ```python
-# Some function
+# Какая-то функция
 def work(x):
     ...
     return result
 
 with ProcessPoolExecutor() as pool:
     ...
-    # Example of submitting work to the pool
+    # Пример отправки работы в пул
     future_result = pool.submit(work, arg)
   
-    # Obtaining the result (blocks until done)
+    # Получение результата (блокирует до завершения)
     r = future_result.result()
     ...
 ```
@@ -20967,12 +20970,12 @@ with ProcessPoolExecutor() as pool:
 
 Сказав всё это, перейдем к описанию приёмов работы. Есть две типовые стратегии обхода ограничений GIL. Во-первых, если вы работаете полностью в Python, вы можете использовать модуль *multiprocessing*, чтобы создать пул процессов и использовать его наподобие сопроцессора. Предположим, например, что у вас есть такой код на базе потоков:
 ```python
-# Performs a large calculation (CPU bound)
+# Выполняет тяжелые вычисления (завязана на CPU)
 def some_work(args):
     ...
     return result
 
-# A thread that calls the above function
+# Поток, который вызывает вышеприведённую функцию
 def some_thread():
     while True:
         ...
@@ -20983,22 +20986,22 @@ def some_thread():
 Вот как вы могли бы изменить код, чтобы использовать пул:
 
 ```python
-# Processing pool (see below for initiazation)
+# Пул обработки (инициализацию см. ниже)
 pool = None
 
-# Performs a large calculation (CPU bound)
+# Выполняет тяжелые вычисления (завязана на CPU)
 def some_work(args):
     ...
     return result
 
-# A thread that calls the above function
+# Поток, который вызывает вышеприведённую функцию
 def some_thread():
     while True:
         ...
         r = pool.apply(some_work, (args))
         ...
 
-# Initiaze the pool
+# Инициализация пула
 if __name__ == '__main__':
     import multiprocessing
     pool = multiprocessing.Pool()
@@ -21049,7 +21052,7 @@ PyObject *pyfunc(PyObject *self, PyObject *args) {
 from queue import Queue
 from threading import Thread, Event
 
-# Sentinel used for shutdown
+# Страж, использующийся для отключения
 class ActorExit(Exception):
     pass
 
@@ -21059,13 +21062,13 @@ class Actor:
     
     def send(self, msg):
         '''
-        Send a message to the actor
+        Посылает сообщение в актор
         '''
         self._mailbox.put(msg)
         
     def recv(self):
         '''
-        Receive an incoming message
+        Получает входящее сообщение
         '''
         msg = self._mailbox.get()
         if msg is ActorExit:
@@ -21074,13 +21077,13 @@ class Actor:
         
     def close(self):
         '''
-        Close the actor, thus shutting it down
+        Закрывает актор и отключает его
         '''
         self.send(ActorExit)
 
     def start(self):
         '''
-        Start concurrent execution
+        Запускает конкурентное выполнение
         '''
         self._terminated = Event()
         t = Thread(target=self._bootstrap)
@@ -21100,19 +21103,19 @@ class Actor:
     
     def run(self):
         '''
-        Run method to be implemented by the user
+        Запускает метод, который реализует пользователь
         '''
         while True:
             msg = self.recv()
 
-# Sample ActorTask
+# Пример ActorTask
 class PrintActor(Actor):
     def run(self):
         while True:
             msg = self.recv()
             print('Got:', msg)
 
-# Sample use
+# Пример использования
 p = PrintActor()
 p.start()
 p.send('Hello')
@@ -21128,14 +21131,14 @@ p.join()
 def print_actor():
     while True:
         try:
-            msg = yield     # Get a message
+            msg = yield     # Получаем сообщение
             print('Got:', msg)
         except GeneratorExit:
             print('Actor terminating')
 
-# Sample use
+# Пример использования
 p = print_actor()
-next(p)             # Advance to the yield (ready to receive)
+next(p)             # Продвигаемся к yield (готовы к получению)
 p.send('Hello')
 p.send('World')
 p.close()
@@ -21150,18 +21153,18 @@ def run(self):
         tag, *payload = self.recv()
         getattr(self,'do_'+tag)(*payload)
     
-    # Methods correponding to different message tags
+    # Методы, соответствующие различным тегам сообщений
     def do_A(self, x):
         print('Running A', x)
 
     def do_B(self, x, y):
         print('Running B', x, y)
 
-# Example
+# Пример
 a = TaggedActor()
 a.start()
-a.send(('A', 1))        # Invokes do_A(1)
-a.send(('B', 2, 3))     # Invokes do_B(2,3)
+a.send(('A', 1))        # Вызывает do_A(1)
+a.send(('B', 2, 3))     # Вызывает do_B(2,3)
 ``` 
 
 А вот другой пример — актор, который позволяет произвольной функции выполняться в воркере, а результатам — отправляться обратно с использованием специального объекта *Result*:
@@ -21191,7 +21194,7 @@ class Worker(Actor):
             func, args, kwargs, r = self.recv()
             r.set_result(func(*args, **kwargs))
 
-# Example use
+# Пример использования
 worker = Worker()
 worker.start()
 r = worker.submit(pow, 2, 3)
@@ -21223,10 +21226,10 @@ class Exchange:
         for subscriber in self._subscribers:
             subscriber.send(msg)
     
-# Dictionary of all created exchanges
+# Словарь всех созданных пунктов обмена
 _exchanges = defaultdict(Exchange)
 
-# Return the Exchange instance associated with a given name
+# Вернуть экземпляр Exchange, ассоциированный с переданным именем
 def get_exchange(name):
     return _exchanges[name]
 ```
@@ -21235,7 +21238,7 @@ def get_exchange(name):
 
 Вот просто пример, который демонстрирует использование пункта обмена:
 ```python
-# Example of a task. Any object with a send() method
+# Пример задачи. Любой объект с методом send()
 
 class Task:
     ...
@@ -21245,18 +21248,18 @@ class Task:
 task_a = Task()
 task_b = Task()
 
-# Example of getting an exchange
+# Пример получения пункта обмена
 exc = get_exchange('name')
 
-# Examples of subscribing tasks to it
+# Пример подписывания задач на него
 exc.attach(task_a)
 exc.attach(task_b)
 
-# Example of sending messages
+# Пример отсылки сообщений
 exc.send('msg1')
 exc.send('msg2')
 
-# Example of unsubscribing
+# Пример отписки
 exc.detach(task_a)
 exc.detach(task_b)
 ```
@@ -21323,14 +21326,14 @@ class Exchange:
         for subscriber in self._subscribers:
             subscriber.send(msg)
 
-# Dictionary of all created exchanges
+# Словарь всех созданных пунктов обмена
 _exchanges = defaultdict(Exchange)
 
-# Return the Exchange instance associated with a given name
+# Возвращает экземпляр Exchange, ассоциированный с переданным именем
 def get_exchange(name):
     return _exchanges[name]
 
-# Example of using the subscribe() method
+# Пример использования метода subscribe() 
 exc = get_exchange('name')
 with exc.subscribe(task_a, task_b):
     ...
@@ -21338,7 +21341,7 @@ with exc.subscribe(task_a, task_b):
     exc.send('msg2')
     ...
 
-# task_a and task_b detached here
+# task_a и task_b открепляются здесь
 ```
 
 В конце стоит отметить, что у идеи пункта обмена есть огромное количество возможностей для расширения. Например, пункты обмена могут реализовывать весь набор каналов обмена сообщениями или применять правила паттерн-матчинга (сопоставления с образцом) к именам пунктов обмена. Пункты обмена также могут быть расширены до приложений распределённых вычислений (например, переправки сообщений задачам на разных компьютерах и т.п.) 
@@ -21352,7 +21355,7 @@ with exc.subscribe(task_a, task_b):
 
 Чтобы проиллюстрировать эту идею, рассмотрите две функции-генератора, использующих простой *yield*:
 ```python
-# Two simple generator functions
+# Два простых генератора
 def countdown(n):
     while n > 0:
         print('T-minus', n)
@@ -21378,25 +21381,26 @@ class TaskScheduler:
         
     def new_task(self, task):
         '''
-        Admit a newly started task to the scheduler
+        Допускает новую запущенную задачу в планировщик
         '''
         self._task_queue.append(task)
     
     def run(self):
         '''
         Run until there are no more tasks
+        Работает, пока не останется задач
         '''
         while self._task_queue:
             task = self._task_queue.popleft()
             try:
-                # Run until the next yield statement
+                # Работает до следующей инструкции yield
                 next(task)
                 self._task_queue.append(task)
             except StopIteration:
-                # Generator is no longer executing
+                # Генератор более не выполняется
                 pass
 
-# Example use
+# Пример использования
 sched = TaskScheduler()
 sched.new_task(countdown(10))
 sched.new_task(countdown(5))
@@ -21430,12 +21434,12 @@ from collections import deque
 
 class ActorScheduler:
     def __init__(self):
-        self._actors = { }          # Mapping of names to actors
-        self._msg_queue = deque()   # Message queue
+        self._actors = { }          # Отображение имён на акторы
+        self._msg_queue = deque()   # Очередь сообщений
     
     def new_actor(self, name, actor):
         '''
-        Admit a newly started actor to the scheduler and give it a name
+        Допускает новый запущенный актор в планировщик и даёт ему имя
         '''
         self._msg_queue.append((actor,None))
         self._actors[name] = actor
@@ -21450,7 +21454,7 @@ class ActorScheduler:
    
     def run(self):
         '''
-        Run as long as there are pending messages.
+        Работает до тех пор, пока в очереди есть сообщения.
         '''
         while self._msg_queue:
             actor, msg = self._msg_queue.popleft()
@@ -21459,7 +21463,7 @@ class ActorScheduler:
             except StopIteration:
                 pass
 
-# Example use
+# Пример использования
 if __name__ == '__main__':
     def printer():
         while True:
@@ -21468,21 +21472,21 @@ if __name__ == '__main__':
         
     def counter(sched):
         while True:
-            # Receive the current count
+            # Получить текущий счёт
             n = yield
             if n == 0:
                 break
-            # Send to the printer task
+            # Послать задаче-принтеру
             sched.send('printer', n)
-            # Send the next count to the counter task (recursive)
+            # Послать следующий счёт задаче-счётчику (рекурсивно)
             sched.send('counter', n-1)
         
     sched = ActorScheduler()
-    # Create the initial actors
+    # Создать первоначальные акторы
     sched.new_actor('printer', printer())
     sched.new_actor('counter', counter(sched))
     
-    # Send an initial message to the counter to initiate
+    # Послать начальное сообщение в счётчик для инициации
     sched.send('counter', 10000)
     sched.run()
 ```
@@ -21494,22 +21498,22 @@ if __name__ == '__main__':
 from collections import deque
 from select import select
 
-# This class represents a generic yield event in the scheduler
+# Эток класс представляет общее yield-событие в планировщике
 class YieldEvent:
     def handle_yield(self, sched, task):
         pass
     def handle_resume(self, sched, task):
         pass
 
-# Task Scheduler
+# Планировщик задач
 class Scheduler:
     def __init__(self):
-        self._numtasks = 0          # Total num of tasks
-        self._ready = deque()       # Tasks ready to run
-        self._read_waiting = {}     # Tasks waiting to read
-        self._write_waiting = {}    # Tasks waiting to write
+        self._numtasks = 0          # Общее количество задач
+        self._ready = deque()       # Задачи, готовые к запуску
+        self._read_waiting = {}     # Задачи, ждущие чтения
+        self._write_waiting = {}    # Задачи, ждущие записи
 
-    # Poll for I/O events and restart waiting tasks
+    # Опрашивает на события ввода-вывода и перезапускает ждущие задачи
     def _iopoll(self):
         rset,wset,eset = select(self._read_waiting,
                                 self._write_waiting,[])
@@ -21522,36 +21526,37 @@ class Scheduler:
     
     def new(self,task):
         '''
-        Add a newly started task to the scheduler
+        Добавляет новую запущенную задачу в планировщик
         '''
         self._ready.append((task, None))
         self._numtasks += 1
 
     def add_ready(self, task, msg=None):
         '''
-        Append an already started task to the ready queue.
-        msg is what to send into the task when it resumes.
+        Добавляет уже запущенную задачу в очередь готовых.
+        msg — это то, что посылается в задачу, когда она 
+        возобновляется.
         '''
         self._ready.append((task, msg))
 
-    # Add a task to the reading set
+    # Добавляет задачу в множество чтения
     def _read_wait(self, fileno, evt, task):
         self._read_waiting[fileno] = (evt, task)
 
-    # Add a task to the write set
+    # Добавляет задачу в множество записи
     def _write_wait(self, fileno, evt, task):
         self._write_waiting[fileno] = (evt, task)
     
     def run(self):
         '''
-        Run the task scheduler until there are no tasks
+        Запускает планировщик задач, пока задач не останется
         '''
         while self._numtasks:
             if not self._ready:
                 self._iopoll()
             task, msg = self._ready.popleft()
             try:
-                # Run the coroutine to the next yield
+                # Запустить корутину к следующему yield
                 r = task.send(msg)
                 if isinstance(r, YieldEvent):
                     r.handle_yield(self, task)
@@ -21561,7 +21566,7 @@ class Scheduler:
                 self._numtasks -= 1
 
 
-# Example implementation of coroutine-based socket I/O
+# Пример реализации сокетного ввода-вывода на основе корутин
 class ReadSocket(YieldEvent):
     def __init__(self, sock, nbytes):
         self.sock = sock
@@ -21591,7 +21596,7 @@ class AcceptSocket(YieldEvent):
         r = self.sock.accept()
         sched.add_ready(task, r)
 
-# Wrapper around a socket object for use with yield
+# Обёртка вокруг объекта сокета для использования с yield
 class Socket(object):
     def __init__(self, sock):
         self._sock = sock
@@ -21608,8 +21613,8 @@ if __name__ == '__main__':
     from socket import socket, AF_INET, SOCK_STREAM
     import time
 
-    # Example of a function involving generators. This should
-    # be called using line = yield from readline(sock)
+    # Пример функции, использующей генераторы. Это нужно вызывать
+    # с использованием line = yield from readline(sock)
     def readline(sock):
         chars = []
         while True:
@@ -21621,7 +21626,7 @@ if __name__ == '__main__':
                 break
         return b''.join(chars)
     
-    # Echo server using generators
+    # Эхо-сервер, использующий генераторы
     class EchoServer:
         def __init__(self,addr,sched):
             self.sched = sched
@@ -21668,7 +21673,8 @@ def some_generator():
 ```python
 f = some_generator()
 
-# Initial result. Is None to start since nothing has been computed
+# Первоначальный результат. Это None на старте, 
+# поскольку ничего ещё не вычислено
 result = None
 while True:
     try:
@@ -21705,11 +21711,12 @@ import os
 class PollableQueue(queue.Queue):
     def __init__(self):
         super().__init__()
-        # Create a pair of connected sockets
+        # Создаёт пару соединённых сокетов
         if os.name == 'posix':
             self._putsocket, self._getsocket = socket.socketpair()
         else:
             # Compatibility on non-POSIX systems
+            Для совместимости с не-POSIX-системами
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.bind(('127.0.0.1', 0))
             server.listen(1)
@@ -21741,7 +21748,7 @@ import threading
 
 def consumer(queues):
     '''
-    Consumer that reads data on multiple queues simultaneously
+    Консьюмер, который одновременно читает данные из нескольких очередей 
     '''
     while True:
         can_read, _, _ = select.select(queues,[],[])
@@ -21756,7 +21763,7 @@ t = threading.Thread(target=consumer, args=([q1,q2,q3],))
 t.daemon = True
 t.start()
 
-# Feed data to the queues
+# Скармливаем данные очередям
 q1.put(1)
 q2.put(10)
 q3.put('hello')
@@ -21778,7 +21785,7 @@ def consumer(queues):
                 item = q.get()
                 print('Got:', item)
 
-        # Sleep briefly to avoid 100% CPU
+        # Ненадолго засыпаем, чтобы избежать 100%-ной загрузки CPU
         time.sleep(0.01)
 ```
 
@@ -21790,7 +21797,7 @@ import select
 
 def event_loop(sockets, queues):
     while True:
-        # polling with a timeout
+        # Опрашивание с таймаутом
         can_read, _, _ = select.select(sockets, [], [], 0.01)
         for r in can_read:
             handle_read(r)
@@ -21824,7 +21831,7 @@ def daemonize(pidfile, *, stdin='/dev/null',
     if os.path.exists(pidfile):
         raise RuntimeError('Already running')
     
-    # First fork (detaches from parent)
+    # Первый форк (отделяется от родителя)
     try:
         if os.fork() > 0:
             raise SystemExit(0)     # Parent exit
@@ -21834,18 +21841,18 @@ def daemonize(pidfile, *, stdin='/dev/null',
     os.chdir('/')
     os.umask(0)
     os.setsid()
-    # Second fork (relinquish session leadership)
+    # Второй форк (уступает лидерство в сессии)
     try:
         if os.fork() > 0:
             raise SystemExit(0)
     except OSError as e:
         raise RuntimeError('fork #2 failed.')
     
-    # Flush I/O buffers
+    # Сброс буферов ввода-вывода
     sys.stdout.flush()
     sys.stderr.flush()
     
-    # Replace file descriptors for stdin, stdout, and stderr
+    # Заменяет файловые дескрипторы для stdin, stdout и stderr
     with open(stdin, 'rb', 0) as f:
         os.dup2(f.fileno(), sys.stdin.fileno())
     with open(stdout, 'ab', 0) as f:
@@ -21853,14 +21860,14 @@ def daemonize(pidfile, *, stdin='/dev/null',
     with open(stderr, 'ab', 0) as f:
         os.dup2(f.fileno(), sys.stderr.fileno())
     
-    # Write the PID file
+    # Записывает PID-файл
     with open(pidfile,'w') as f:
         print(os.getpid(),file=f)
     
-    # Arrange to have the PID file removed on exit/signal
+    # Устраиваем так, чтобы удалить PID-файл по выходу/сигналу
     atexit.register(lambda: os.remove(pidfile))
     
-    # Signal handler for termination (required)
+    # Обработчик сигнала для завершения (требуется)
     def sigterm_handler(signo, frame):
         raise SystemExit(1)
     
@@ -21932,7 +21939,7 @@ daemonize('daemon.pid',
 
 Такой вызов был бы более загадочным:
 ```python
-# Illegal. Must use keyword arguments
+# Недопустимо. Необходимо использовать именованные аргументы
 daemonize('daemon.pid',
           '/dev/null', '/tmp/daemon.log','/tmp/daemon.log')
 ```
@@ -21971,9 +21978,9 @@ with fileinput.input() as f_input:
 ```
 ...то вы уже можете принимать ввод в скрипт всеми путями, описанными выше. Если вы сохраните скрипт как *filein.py* и дадите ему права на выполнение, вы можете сделать всё нижеперечисленное и получить ожидаемый вывод:
 ```
-$ ls | ./filein.py           # Prints a directory listing to stdout.
-$ ./filein.py /etc/passwd    # Reads /etc/passwd to stdout.
-$ ./filein.py < /etc/passwd  # Reads /etc/passwd to stdout.
+$ ls | ./filein.py           # Выводит содержимое каталога в stdout.
+$ ./filein.py /etc/passwd    # Читает /etc/passwd to stdout.
+$ ./filein.py < /etc/passwd  # Читает /etc/passwd to stdout.
 ```
 
 ### Обсуждение
@@ -21985,7 +21992,7 @@ $ ./filein.py < /etc/passwd  # Reads /etc/passwd to stdout.
 ...     print(f.filename(), f.lineno(), line, end='')
 ...
 /etc/passwd 1 ##
-/etc/passwd 2 # User Database
+/etc/passwd 2 # База пользователей
 /etc/passwd 3 #
 
 <other output omitted>
@@ -22024,8 +22031,8 @@ raise SystemExit(1)
 ```python
 # search.py
 '''
-Hypothetical command-line tool for searching a collection of
-files for one or more text patterns.
+Гипотетический инструмент командной строки для поиска в коллекции
+файлов по одному или более текстовых шаблонов.
 '''
 import argparse
 parser = argparse.ArgumentParser(description='Search some files')
@@ -22048,7 +22055,7 @@ parser.add_argument('--speed', dest='speed', action='store',
 
 args = parser.parse_args()
 
-# Output the collected arguments
+# Выводим собранные аргументы
 print(args.filenames)
 print(args.patterns)
 print(args.verbose)
@@ -22159,7 +22166,7 @@ import getpass
 user = getpass.getuser()
 passwd = getpass.getpass()
 
-if svc_login(user, passwd):     # You must write svc_login()
+if svc_login(user, passwd):     # Вы должны написать svc_login()
     print('Yay!')
 else:
     print('Boo!')
@@ -22219,8 +22226,8 @@ out_text = out_bytes.decode('utf-8')
 try:
     out_bytes = subprocess.check_output(['cmd','arg1','arg2'])
 except subprocess.CalledProcessError as e:
-    out_bytes = e.output        # Output generated before error
-    code      = e.returncode    # Return code
+    out_bytes = e.output        # Вывод, сгенерированный до ошибки
+    code      = e.returncode    # Код возврата
 ``` 
 
 По умолчанию *check_output()* возвращает только вывод, записанный в стандартный поток вывода. Если вы хотите собрать и стандартный поток вывода, и стандартный поток ошибок, используйте аргумент *stderr*:
@@ -22249,22 +22256,22 @@ out_bytes = subprocess.check_output('grep python | wc > out', shell=True)
 ```python
 import subprocess
 
-# Some text to send
+# Какой-то текст для отсылки
 text = b'''
 hello world
 this is a test
 goodbye
 '''
 
-# Launch a command with pipes
+# Запускаем команду с каналами
 p = subprocess.Popen(['wc'],
         stdout = subprocess.PIPE,
         stdin = subprocess.PIPE)
 
-# Send the data and get the output
+# Посылаем данные и получаем вывод
 stdout, stderr = p.communicate(text)
 
-# To interpret as text, decode
+# Декодируем, чтобы интепретировать текст
 out = stdout.decode('utf-8')
 err = stderr.decode('utf-8')
 ```
@@ -22280,16 +22287,16 @@ err = stderr.decode('utf-8')
 ```python
 import shutil
 
-# Copy src to dst. (cp src dst)
+# Копируем src в dst. (cp src dst)
 shutil.copy(src, dst)
 
-# Copy files, but preserve metadata (cp -p src dst)
+# Копируем данные, сохраняя метаданные (cp -p src dst)
 shutil.copy2(src, dst)
 
-# Copy directory tree (cp -R src dst)
+# Копируем дерево каталогов (cp -R src dst)
 shutil.copytree(src, dst)
 
-# Move src to dst (mv src dst)
+# Перемещаем src в dst (mv src dst)
 shutil.move(src, dst)
 ```
 
@@ -22344,9 +22351,9 @@ try:
     shutil.copytree(src, dst)
 except shutil.Error as e:
     for src, dst, msg in e.args[0]:
-        # src is source name
-        # dst is destination name
-        # msg is error message from exception
+        # src — имя источника
+        # dst — имя назначения 
+        # msg — сообщение об ошибке из исключения 
         print(dst, src, msg)
 ```
 
@@ -22454,7 +22461,7 @@ include=%(prefix)s/include
 bin=%(prefix)s/bin
 prefix=/usr/local
 
-# Setting related to debug configuration
+# Установки, связанные с отладочной конфигурацией
 [debug]
 log_errors=true
 show_warnings=False
@@ -22568,11 +22575,11 @@ log_errors=False
 
 Этот файл может быть объединён с предыдущей конфигурацией путём чтения их по отдельности. Например:
 ```python
->>> # Previously read configuration
+>>> # Ранее прочитанная конфигурация
 >>> cfg.get('installation', 'prefix')
 '/usr/local'
 
->>> # Merge in user-specific configuration
+>>> # Слияние в определённую пользователем конфигурацию
 >>> import os
 >>> cfg.read(os.path.expanduser('~/.config.ini'))
 ['/Users/beazley/.config.ini']
@@ -22607,19 +22614,19 @@ False
 import logging
 
 def main():
-    # Configure the logging system
+    # Конфигурируем логирующую систему
     logging.basicConfig(
         filename='app.log',
         level=logging.ERROR
     )
 
-    # Variables (to make the calls that follow work)
+    # Переменные (чтобы заставить работать следующие вызовы)
     hostname = 'www.python.org'
     item = 'spam'
     filename = 'data.csv'
     mode = 'r'
     
-    # Example logging calls (insert into your program)
+    # Примеры логирующих вызовов (вставьте в вашу программу)
     logging.critical('Host %s unknown', hostname)
     logging.error("Couldn't find %r", item)
     logging.warning('Feature is deprecated')
@@ -22661,7 +22668,7 @@ import logging
 import logging.config
 
 def main():
-    # Configure the logging system
+    # Конфигурируем логирующую систему
     logging.config.fileConfig('logconfig.ini')
     ...
 ```
@@ -22721,7 +22728,7 @@ import logging
 log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
-# Example function (for testing)
+# Пример функции (для тестирования)
 def func():
     log.critical('A Critical Error!')
     log.debug('A debug message')
@@ -22758,7 +22765,7 @@ CRITICAL:somelib:A Critical Error!
 >>> somelib.func()
 CRITICAL:somelib:A Critical Error!
 
->>> # Change the logging level for 'somelib' only
+>>> # Изменяем уровень логирования только для 'somelib'
 >>> logging.getLogger('somelib').level=logging.DEBUG
 >>> somelib.func()
 CRITICAL:somelib:A Critical Error!
@@ -22821,14 +22828,14 @@ def countdown(n):
     while n > 0:
         n -= 1
 
-# Use 1: Explicit start/stop
+# Пример 1: Явный запуск/остановка
 t = Timer()
 t.start()
 countdown(1000000)
 t.stop()
 print(t.elapsed)
 
-# Use 2: As a context manager
+# Пример 2: Как менеджер контекста
 with t:
     countdown(1000000)
 print(t.elapsed)
@@ -22870,7 +22877,7 @@ def time_exceeded(signo, frame):
     raise SystemExit(1)
 
 def set_max_runtime(seconds):
-    # Install the signal handler and set a resource limit
+    # Устанавливает обработчик сигнала и лимит ресурса
     soft, hard = resource.getrlimit(resource.RLIMIT_CPU)
     resource.setrlimit(resource.RLIMIT_CPU, (seconds, hard))
     signal.signal(signal.SIGXCPU, time_exceeded)
@@ -22918,12 +22925,12 @@ True
 
 Это откроет запрошенную страницу с помощью дефолтного браузера. Если вы хотите получить больше контроля над открытием страницы, вы можете использовать одну из следующих функций:
 ```python
->>> # Open the page in a new browser window
+>>> # Открыть страницу в новом окне браузера
 >>> webbrowser.open_new('http://www.python.org')
 True
 >>>
 
->>> # Open the page in a new browser tab
+>>> # Открыть страницу в новой вкладке браузера
 >>> webbrowser.open_new_tab('http://www.python.org')
 True
 >>>
@@ -23007,14 +23014,14 @@ import example
 
 @patch('example.func')
 def test1(x, mock_func):
-    example.func(x)             # Uses patched example.func
+    example.func(x)             # Использует пропатченную example.func
     mock_func.assert_called_with(x)
 ```
 
 Также она может быть использована как менеджер контекста:
 ```python
 with patch('example.func') as mock_func:
-    example.func(x)     # Uses patched example.func
+    example.func(x)     # Использует пропатченную example.func
     mock_func.assert_called_with(x)
 ```
 
@@ -23077,9 +23084,9 @@ patched_value
 >>> m.assert_called_with(1, 2, debug=True)
 >>> m.assert_called_with(1, 2)
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
-    File ".../unittest/mock.py", line 726, in assert_called_with
-        raise AssertionError(msg)
+  File "<stdin>", line 1, in <module>
+  File ".../unittest/mock.py", line 726, in assert_called_with
+    raise AssertionError(msg)
 AssertionError: Expected call: mock(1, 2)
 Actual call: mock(1, 2, debug=True)
 >>>
@@ -23159,7 +23166,7 @@ if __name__ == '__main__':
 ```python
 import unittest
 
-# A simple function to illustrate
+# Простая функция для примера
 def parse_int(s):
     return int(s)
 
@@ -23386,7 +23393,7 @@ except OSError as e:
 ```python
 >>> f = open('missing')
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 FileNotFoundError: [Errno 2] No such file or directory: 'missing'
 >>> try:
 ...     f = open('missing')
@@ -23557,14 +23564,14 @@ class CustomError(Exception):
 >>>
 example()
 Traceback (most recent call last):
-    File "<stdin>", line 3, in example
+  File "<stdin>", line 3, in example
 ValueError: invalid literal for int() with base 10: 'N/A'
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
-    File "<stdin>", line 5, in example
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 5, in example
 RuntimeError: A parsing error occurred
 >>
 ```
@@ -23590,14 +23597,14 @@ except RuntimeError as e:
 >>>
 >>> example2()
 Traceback (most recent call last):
-    File "<stdin>", line 3, in example2
+  File "<stdin>", line 3, in example2
 ValueError: invalid literal for int() with base 10: 'N/A'
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
-    File "<stdin>", line 5, in example2
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 5, in example2
 NameError: global name 'err' is not defined
 >>>
 ```
@@ -23614,8 +23621,8 @@ NameError: global name 'err' is not defined
 >>>
 example3()
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
-    File "<stdin>", line 5, in example3
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 5, in example3
 RuntimeError: A parsing error occurred
 >>>
 ``` 
@@ -23660,8 +23667,8 @@ except SomeException:
 >>> example()
 Didn't work
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
-    File "<stdin>", line 3, in example
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 3, in example
 ValueError: invalid literal for int() with base 10: 'N/A'
 >>>
 ``` 
@@ -23672,9 +23679,9 @@ ValueError: invalid literal for int() with base 10: 'N/A'
 try:
     ... 
 except Exception as e:
-    # Process exception information in some way
+    # Как-то обработать информацию об исключении
     ...
-    # Propagate the exception
+    # Продолжить распространение исключения
     raise
 ```
 
@@ -23706,10 +23713,10 @@ example.py:5: DeprecationWarning: logfile argument is deprecated
 ```python
 bash % python3 -W error example.py
 Traceback (most recent call last):
-    File "example.py", line 10, in <module>
-        func(2, 3, logfile='log.txt')
-    File "example.py", line 5, in func
-        warnings.warn('logfile argument is deprecated', DeprecationWarning)
+  File "example.py", line 10, in <module>
+    func(2, 3, logfile='log.txt')
+  File "example.py", line 5, in func
+    warnings.warn('logfile argument is deprecated', DeprecationWarning)
 DeprecationWarning: logfile argument is deprecated
 bash %
 ```
@@ -23750,10 +23757,10 @@ func('Hello')
 ```python
 bash % python3 -i sample.py
 Traceback (most recent call last):
-    File "sample.py", line 6, in <module>
-        func('Hello')
-    File "sample.py", line 4, in func
-        return n + 10
+  File "sample.py", line 6, in <module>
+    func('Hello')
+  File "sample.py", line 4, in func
+    return n + 10
 TypeError: Can't convert 'int' object to str implicitly
 >>> func(10)
 20
@@ -23979,7 +23986,7 @@ import csv
 
 with open(sys.argv[1]) as f:
     for row in csv.reader(f):
-        # Some kind of processing
+        # Какая-то обработка
         ...
 ``` 
 
@@ -23993,7 +24000,7 @@ import csv
 def main(filename):
     with open(filename) as f:
         for row in csv.reader(f):
-            # Some kind of processing
+            # Какая-то обработка
             ...
 
 main(sys.argv[1])
@@ -24014,7 +24021,7 @@ def compute_roots(nums):
         result.append(math.sqrt(n))
     return result
 
-# Test
+# Проверка
 nums = range(1000000)
 for n in range(100):
     r = compute_roots(nums)
@@ -24053,14 +24060,14 @@ def compute_roots(nums):
 
 Локальность аргументов также применяется при работе с классами. В общем случае поиск значения типа *self.name* будет заметно медленнее, чем доступ к локальной переменной. Во внутреннем цикле может окупиться перемещение атрибутов, к которым часто осуществляется доступ, в локальные переменные. Например:
 ```python
-# Slower
+# Медленно
 class SomeClass:
     ...
     def method(self):
         for x in s:
             op(self.value)
 
-# Faster
+# Быстро
 class SomeClass:
     ...
     def method(self):
@@ -24146,7 +24153,7 @@ b = dict(name='AAPL', shares=100, price=534.22)
 /* sample.c */_method
 #include <math.h>
 
-/* Compute the greatest common divisor */
+/* Вычисляет наибольший общий делитель */
 int gcd(int x, int y) {
     int g = y;
     while (x > 0) {
@@ -24157,7 +24164,7 @@ int gcd(int x, int y) {
     return g;
 }
 
-/* Test if (x0,y0) is in the Mandelbrot set or not */
+/* Проверяет, является ли (x0,y0) множеством Мандельброта */
 int in_mandel(double x0, double y0, int n) {
     double x=0,y=0,xtemp;
     while (n > 0) {
@@ -24170,14 +24177,14 @@ int in_mandel(double x0, double y0, int n) {
     return 1;
 }
 
-/* Divide two numbers */
+/* Делит одно число на другое */
 int divide(int a, int b, int *remainder) {
     int quot = a / b;
     *remainder = a % b;
     return quot;
 }
 
-/* Average values in an array */
+/* Усредняет значения массива */
 double avg(double *a, int n) {
     int i;
     double total = 0.0;
@@ -24187,12 +24194,12 @@ double avg(double *a, int n) {
     return total / n;
 }
 
-/* A C data structure */
+/* Структура данных C */
 typedef struct Point {
     double x,y;
 } Point;
 
-/* Function involving a C data structure */
+/* Функция с использованием структуры данных C */
 double distance(Point *p1, Point *p2) {
     return hypot(p1->x - p2->x, p1->y - p2->y);
 }
@@ -24215,7 +24222,7 @@ double distance(Point *p1, Point *p2) {
 import ctypes
 import os
 
-# Try to locate the .so file in the same directory as this file
+# Пытаемся найти .so-файл в том же каталоге, что и этот файл 
 _file = 'libsample.so'
 _path = os.path.join(*(os.path.split(__file__)[:-1] + (_file,)))
 _mod = ctypes.cdll.LoadLibrary(_path)
@@ -24241,7 +24248,7 @@ def divide(x, y):
     return quot,rem.value
 
 # void avg(double *, int n)
-# Define a special type for the 'double *' argument
+# Определяет специальный тип для аргумента 'double *'
 class DoubleArrayType:
     def from_param(self, param):
     typename = type(param).__name__
@@ -24252,21 +24259,21 @@ class DoubleArrayType:
     else:
         raise TypeError("Can't convert %s" % typename)
 
-    # Cast from array.array objects
+    # Переколдовывает (cast) из объектов array.array
     def from_array(self, param):
         if param.typecode != 'd':
             raise TypeError('must be an array of doubles')
         ptr, _ = param.buffer_info()
         return ctypes.cast(ptr, ctypes.POINTER(ctypes.c_double))
 
-    # Cast from lists/tuples
+    # Переколдовывает (cast) из списков/кортежей
     def from_list(self, param):
         val = ((ctypes.c_double)*len(param))(*param)
         return val
     
     from_tuple = from_list
 
-    # Cast from a numpy array
+    # Переколдовывает (cast) из массивов numpy
     def from_ndarray(self, param):
         return param.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
 
@@ -24348,7 +24355,7 @@ in_mandel.restype = ctypes.c_int
 >>> x = 0
 >>> divide(10, 3, x)
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 ctypes.ArgumentError: argument 3: <class 'TypeError'>: expected LP_c_int
 instance instead of int
 >>>
@@ -24516,7 +24523,7 @@ static PyObject *py_divide(PyObject *self, PyObject *args) {
     return Py_BuildValue("(ii)", quotient, remainder);
 }
 
-/* Module method table */
+/* Таблица методов модуля */
 static PyMethodDef SampleMethods[] = {
     {"gcd", py_gcd, METH_VARARGS, "Greatest common divisor"},
     {"in_mandel", py_in_mandel, METH_VARARGS, "Mandelbrot test"},
@@ -24524,16 +24531,16 @@ static PyMethodDef SampleMethods[] = {
     { NULL, NULL, 0, NULL}
 };
 
-/* Module structure */
+/* Структура модуля */
 static struct PyModuleDef samplemodule = {
     PyModuleDef_HEAD_INIT,
-    "sample",               /* name of module */
-    "A sample module",      /* Doc string (may be NULL) */
-    -1,                     /* Size of per-interpreter state or -1 */
-    SampleMethods           /* Method table */
+    "sample",               /* Имя модуля */
+    "A sample module",      /* Cтрока документирования (может быть NULL) */
+    -1,                     /* Размер состояния на каждый интерпретатор или -1 */
+    SampleMethods           /* Таблица методов */
 };
 
-/* Module initialization function */
+/* Функция инициализации модуля */
 PyMODINIT_FUNC
 PyInit_sample(void) {
     return PyModule_Create(&samplemodule);
@@ -24605,10 +24612,10 @@ static PyObject *py_func(PyObject *self, PyObject *args) {
 
 Функция *Py_BuildValue()* используется для создания объектов Python из типов данных С. Она также принимает код формата, чтобы обозначит нужный тип. В функциях расширения это используется возвращения результатов обратно в Python. *Py_BuildValue()* может создавать более сложные объекты, такие как кортежи и словари. В коде *py_divide()* показан пример возвращения кортежа. Однако есть и другие примеры:
 ```c
-return Py_BuildValue("i", 34);         // Return an integer
-return Py_BuildValue("d", 3.4);        // Return a double
-return Py_BuildValue("s", "Hello");    // Null-terminated UTF-8 string
-return Py_BuildValue("(ii)", 3, 4);    // Tuple (3, 4)
+return Py_BuildValue("i", 34);         // Возвращает целое число
+return Py_BuildValue("d", 3.4);        // Возвращает double
+return Py_BuildValue("s", "Hello");    // Нуль-терминированная строка в UTF-8
+return Py_BuildValue("(ii)", 3, 4);    // Кортеж (3, 4)
 ```
 
 В конце любого модуля расширения вы обнаружите таблицу функций, похожую на *SampleMethods* из решения, показанного в этом рецепте. В этой таблице перечислены функции C, имена для использования в Python, а также строки документации. Все модули должны определять такую таблицу, поскольку она используется при инициализации модуля. 
@@ -24625,7 +24632,7 @@ return Py_BuildValue("(ii)", 3, 4);    // Tuple (3, 4)
 ### Решение
 Чтобы получать и обрабатывать массивы переносимым способом, вы должны писать код, который использует [буферный протокол](http://docs.python.org/3/c-api/buffer.html). Вот пример самописной функции расширения на C, которая принимает массив данных и вызывает функцию *avg(double \*buf, int len)* из кода, приведённого во введении в эту главу:
 ```c
-/* Call double avg(double *, int) */
+/* Вызов double avg(double *, int) */
 static PyObject *py_avg(PyObject *self, PyObject *args) {
     PyObject *bufobj;
     Py_buffer view;
@@ -24635,7 +24642,7 @@ static PyObject *py_avg(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    /* Attempt to extract buffer information from it */
+    /* Попытка извлечь информацию из буфера */
     if (PyObject_GetBuffer(bufobj, &view,
         PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1) {
         return NULL;
@@ -24647,17 +24654,17 @@ static PyObject *py_avg(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    /* Check the type of items in the array */
+    /* Проверка типа элементов в массиве */
     if (strcmp(view.format,"d") != 0) {
         PyErr_SetString(PyExc_TypeError, "Expected an array of doubles");
         PyBuffer_Release(&view);
         return NULL;
     }
 
-    /* Pass the raw buffer and size to the C function */
+    /* Передает сырой буфер и размер в функцию на C */
     result = avg(view.buf, view.shape[0]);
 
-    /* Indicate we're done working with the buffer */
+    /* Сигнализирует, что мы закончили работать с буфером */
     PyBuffer_Release(&view);
     return Py_BuildValue("d", result);
 }
@@ -24673,20 +24680,20 @@ static PyObject *py_avg(PyObject *self, PyObject *args) {
 2.0
 >>> avg([1,2,3])
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 TypeError: 'list' does not support the buffer interface
 >>> avg(b'Hello')
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 TypeError: Expected an array of doubles
 >>> a = numpy.array([[1.,2.,3.],[4.,5.,6.]])
 >>> avg(a[:,2])
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 ValueError: ndarray is not contiguous
 >>> sample.avg(a)
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 TypeError: Expected a 1-dimensional array
 >>> sample.avg(a[0])
 2.0
@@ -24701,16 +24708,16 @@ TypeError: Expected a 1-dimensional array
 Для массивов, байтовых строк и других подобных объектов структура *Py_buffer* наполняется информацией о лежащей в основе памяти. Это включает указатель на память, размер, размер элемента, формат и другие детали. Вот определение этой структуры:
 ```c
 typedef struct bufferinfo {
-    void *buf;               /* Pointer to buffer memory */
-    PyObject *obj;           /* Python object that is the owner */
-    Py_ssize_t len;          /* Total size in bytes */
-    Py_ssize_t itemsize;     /* Size in bytes of a single item */
-    int readonly;            /* Read-only access flag */
-    int ndim;                /* Number of dimensions */
-    char *format;            /* struct code of a single item */
-    Py_ssize_t *shape;       /* Array containing dimensions */
-    Py_ssize_t *strides;     /* Аrray containing strides */
-    Py_ssize_t *suboffsets;  /* Array containing suboffsets */
+    void *buf;               /* Указатель на память буфера */
+    PyObject *obj;           /* Объект Python, являющийся владельцем */
+    Py_ssize_t len;          /* Общий размер в байтах */
+    Py_ssize_t itemsize;     /* Размер одного элемента в байтах */
+    int readonly;            /* Флаг доступа только на чтение */
+    int ndim;                /* Количество измерений */
+    char *format;            /* Код struct одного элемента */
+    Py_ssize_t *shape;       /* Массив, содержащий измерения */
+    Py_ssize_t *strides;     /* Массив, содержащий размер шага */
+    Py_ssize_t *suboffsets;  /* Массив, содержащий подсдвиги (suboffsets) */
 } Py_buffer;
 ```
 
@@ -24720,7 +24727,7 @@ typedef struct bufferinfo {
 
 Перед возвращением конечного результата лежащий в основе буфер должен быть освобождён с помощью *PyBuffer_Release()*. Этот шаг необходим для правильного управления счётчиками ссылок объектов.
 
-Повторимся: этот рецепт показывает лишь небольшой фрагмент кода, принимающего массив. При работе с массивами вы можете столкнуться с проблемами, связанными с многомерными данными, фрагментированными данными, различными типами данных и другими вопросами, требующими изучения. Обратитесь к [официальной документации](http://docs.python.org/3/c-api/buffer.html) за подробностями.
+Повторимся: этот рецепт показывает лишь небольшой фрагмент кода, принимающего массив. При работе с массивами вы можете столкнуться с проблемами, связанными с многомерными данными, размером шага данных, различными типами данных и другими вопросами, требующими изучения. Обратитесь к [официальной документации](http://docs.python.org/3/c-api/buffer.html) за подробностями.
 
 Если вам нужно написать много расширений, в которых используется работа с массивами, то вам, возможно, легче будет реализовать их на Cython. См. **рецепт 15.11.**
 
@@ -24740,12 +24747,12 @@ extern double distance(Point *p1, Point *p2);
 
 Вот пример кода расширения, который оборачивает структуру *Point* и функцию *distance()* с помощью капсул:
 ```c
-/* Destructor function for points */
+/* Функция-деструктор для точек */
 static void del_Point(PyObject *obj) {
     free(PyCapsule_GetPointer(obj,"Point"));
 }
 
-/* Utility functions */
+/* Вспомогательные функции */
 static Point *PyPoint_AsPoint(PyObject *obj) {
     return (Point *) PyCapsule_GetPointer(obj, "Point");
 }
@@ -24754,7 +24761,7 @@ static PyObject *PyPoint_FromPoint(Point *p, int must_free) {
     return PyCapsule_New(p, "Point", must_free ? del_Point : NULL);
 }
 
-/* Create a new Point object */
+/* Создаёт новый объект Point */
 static PyObject *py_Point(PyObject *self, PyObject *args) {
     Point *p;
     double x,y;
@@ -24818,12 +24825,12 @@ static PyObject *py_distance(PyObject *self, PyObject *args) {
 ### Решение
 Этот рецепт фокусируется на коде, написанном для работы с объектами *Point*, который был представлен в **рецепте 15.4.** Как вы помните, этот код на C включает некоторые полезные функции:
 ```c
-/* Destructor function for points */
+/* Функция-деструктор для точек */
 static void del_Point(PyObject *obj) {
     free(PyCapsule_GetPointer(obj,"Point"));
 }
 
-/* Utility functions */
+/* Вспомогательные функции */
 static Point *PyPoint_AsPoint(PyObject *obj) {
     return (Point *) PyCapsule_GetPointer(obj, "Point");
 }
@@ -24844,23 +24851,23 @@ static PyObject *PyPoint_FromPoint(Point *p, int must_free) {
 extern "C" {
 #endif
 
-/* Public API Table */
+/* Таблица публичного API */
 typedef struct {
     Point *(*aspoint)(PyObject *);
     PyObject *(*frompoint)(Point *, int);
 } _PointAPIMethods;
 
 #ifndef PYSAMPLE_MODULE
-/* Method table in external module */
+/* Таблица методов во внешнем модуле */
 static _PointAPIMethods *_point_api = 0;
 
-/* Import the API table from sample */
+/* Импортирование таблицы API из примера */
 static int import_sample(void) {
     _point_api = (_PointAPIMethods *) PyCapsule_Import("sample._point_api",0);
     return (_point_api != NULL) ? 1 : 0;
 }
 
-/* Macros to implement the programming interface */
+/* Макросы для реализации программного интерфейса */
 #define PyPoint_AsPoint(obj) (_point_api->aspoint)(obj)
 #define PyPoint_FromPoint(obj) (_point_api->frompoint)(obj)
 #endif
@@ -24881,13 +24888,13 @@ static int import_sample(void) {
 #include "pysample.h"
 
 ...
-/* Destructor function for points */
+/* Функция-деструктор для точек */
 static void del_Point(PyObject *obj) {
     printf("Deleting point\n");
     free(PyCapsule_GetPointer(obj,"Point"));
 }
 
-/* Utility functions */
+/* Вспомогательные функции */
 static Point *PyPoint_AsPoint(PyObject *obj) {
     return (Point *) PyCapsule_GetPointer(obj, "Point");
 }
@@ -24902,7 +24909,7 @@ static _PointAPIMethods _point_api = {
 };
 ...
 
-/* Module initialization function */
+/* Функция инициализации модуля */
 PyMODINIT_FUNC
 PyInit_sample(void) {
     PyObject *m;
@@ -24912,7 +24919,7 @@ PyInit_sample(void) {
     if (m == NULL)
         return NULL;
 
-    /* Add the Point C API functions */
+    /* Добавляет функции Point C API  */
     py_point_api = PyCapsule_New((void *) &_point_api, "sample._point_api", NULL);
     if (py_point_api) {
         PyModule_AddObject(m, "_point_api", py_point_api);
@@ -24925,10 +24932,10 @@ PyInit_sample(void) {
 ```c
 /* ptexample.c */
 
-/* Include the header associated with the other module */
+/* Включаем заголовок, ассоциированный с другим модулем */
 #include "pysample.h"
 
-/* An extension function that uses the exported API */
+/* Существующая функция, которая использует экспортированный API */
 static PyObject *print_point(PyObject *self, PyObject *args) {
     PyObject *obj;
     Point *p;
@@ -24936,7 +24943,7 @@ static PyObject *print_point(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    /* Note: This is defined in a different module */
+    /* Заметьте: это определено в другом модуле */
     p = PyPoint_AsPoint(obj);
     if (!p) {
         return NULL;
@@ -24952,13 +24959,13 @@ static PyMethodDef PtExampleMethods[] = {
 
 static struct PyModuleDef ptexamplemodule = {
 PyModuleDef_HEAD_INIT,
-    "ptexample",                    /* name of module */
-    "A module that imports an API", /* Doc string (may be NULL) */
-    -1,                             /* Size of per-interpreter state or -1 */
-    PtExampleMethods                /* Method table */
+    "ptexample",                    /* Имя модуля */
+    "A module that imports an API", /* Строка документаци (может быть NULL) */
+    -1,                             /* Размер состояния на каждый интерпретатор или -1 */
+    PtExampleMethods                /* Таблица методов */
 };
 
-/* Module initialization function */
+/* Функция инициализации модуля */
 PyMODINIT_FUNC
 PyInit_ptexample(void) {
     PyObject *m;
@@ -24966,7 +24973,7 @@ PyInit_ptexample(void) {
     m = PyModule_Create(&ptexamplemodule);
     if (m == NULL)
         return NULL;
-    /* Import sample, loading its API functions */
+    /* Импортирует пример, загружает его функции API */
     if (!import_sample()) {
         return NULL;
     }
@@ -25021,9 +25028,9 @@ setup(name='ptexample',
 ```c
 #include <Python.h>
 
-/* Execute func(x,y) in the Python interpreter. The
-   arguments and return result of the function must
-   be Python floats */
+/* Выполняет func(x,y) в интерпретаторе Python. Аргументы 
+   и возвращаемый результат функции должны быть числами 
+   с плавающей точкой (Python floats). */
 
 double call_func(PyObject *func, double x, double y) {
     PyObject *args;
@@ -25031,48 +25038,48 @@ double call_func(PyObject *func, double x, double y) {
     PyObject *result = 0;
     double retval;
 
-    /* Make sure we own the GIL */
+    /* Проверяем, что мы владеем GIL */
     PyGILState_STATE state = PyGILState_Ensure();
 
-    /* Verify that func is a proper callable */
+    /* Проверяем, что func — подходящий вызываемый объект */
     if (!PyCallable_Check(func)) {
         fprintf(stderr,"call_func: expected a callable\n");
         goto fail;
     }
     
-    /* Build arguments */
+    /* Строим аргументы */
     args = Py_BuildValue("(dd)", x, y);
     kwargs = NULL;
     
-    /* Call the function */
+    /* Вызываем функцию */
     result = PyObject_Call(func, args, kwargs);
     Py_DECREF(args);
     Py_XDECREF(kwargs);
     
-    /* Check for Python exceptions (if any) */
+    /* Проверяем на исключения Python (если они есть) */
     if (PyErr_Occurred()) {
         PyErr_Print();
         goto fail;
     }
     
-    /* Verify the result is a float object */
+    /* Проверяем, что результат — объект float */
     if (!PyFloat_Check(result)) {
         fprintf(stderr,"call_func: callable didn't return a float\n");
         goto fail;
     }
     
-    /* Create the return value */
+    /* Создаём возвращаемое значение */
     retval = PyFloat_AsDouble(result);
     Py_DECREF(result);
     
-    /* Restore previous GIL state and return */
+    /* Восстанавливаем предыдущее состояние GIL и возвращаем значение */
     PyGILState_Release(state);
     return retval;
 
   fail:
     Py_XDECREF(result);
     PyGILState_Release(state);
-    abort(); // Change to something more appropriate
+    abort(); // Изменить на что-то более приемлемое
 }
 ``` 
 
@@ -25082,10 +25089,10 @@ double call_func(PyObject *func, double x, double y) {
 ```c
 #include <Python.h>
 
-/* Definition of call_func() same as above */
+/* Определение call_func() такое же, как и выше */
 ...
 
-/* Load a symbol from a module */
+/* Загрузить символ из модуля */
 PyObject *import_name(const char *modname, const char *symbol) {
     PyObject *u_name, *module;
     u_name = PyUnicode_FromString(modname);
@@ -25094,20 +25101,20 @@ PyObject *import_name(const char *modname, const char *symbol) {
     return PyObject_GetAttrString(module, symbol);
 }
 
-/* Simple embedding example */
+/* Простой пример встраивания */
 int main() {
     PyObject *pow_func;
     double x;
 
     Py_Initialize();
-    /* Get a reference to the math.pow function */
+    /* Получить ссылку на функцию math.pow */
     pow_func = import_name("math","pow");
 
-    /* Call it using our call_func() code */
+    /* Вызвать её, используя наш код call_func() */
     for (x = 0.0; x < 10.0; x += 0.1) {
         printf("%0.2f %0.2f\n", x, call_func(pow_func,x,2.0));
     }
-    /* Done */
+    /* Готово */
     Py_DECREF(pow_func);
     Py_Finalize();
     return 0;
@@ -25133,7 +25140,7 @@ all::
 
 А вот немного отличающийся пример, который показывает функцию расширения, которая принимает вызываемый объект и аргументы, а затем передаёт их в функцию *call_func()* для целей тестирования:
 ```c
-/* Extension function for testing the C-Python callback */
+/* Функция расширения для проверки коллбэка C-Python */
 PyObject *py_call_func(PyObject *self, PyObject *args) {
     PyObject *func;
     double x, y, result;
@@ -25163,7 +25170,7 @@ PyObject *py_call_func(PyObject *self, PyObject *args) {
 ```c
 double call_func(PyObject *func, double x, double y) {
     ...
-    /* Verify that func is a proper callable */
+    /* Проверяем, что func — правильный вызываемый объект */
     if (!PyCallable_Check(func)) {
         fprintf(stderr,"call_func: expected a callable\n");
         goto fail;
@@ -25180,11 +25187,11 @@ double call_func(PyObject *func, double x, double y) {
     PyObject *kwargs;
     ...
 
-    /* Build arguments */
+    /* Строим аргументы */
     args = Py_BuildValue("(dd)", x, y);
     kwargs = NULL;
 
-    /* Call the function */
+    /* Вызываем функцию */
     result = PyObject_Call(func, args, kwargs);
     Py_DECREF(args);
     Py_XDECREF(kwargs);
@@ -25196,7 +25203,7 @@ double call_func(PyObject *func, double x, double y) {
 После вызова функции Python, вы должны проверить, не возникли ли исключения. Для этого вам пригодится функция *PyErr_Occurred()*. Но определить, что сделать в ответ на исключение, достаточно трудно. Поскольку вы работаете из C, у вас просто нет всей системы исключений, которая есть в Python. Так что вы можете установить код статуса ошибки, логировать ошибку или выполнить какую-то другую имеющую смысл обработку. В решении этого рецепта при отсутствии простой альтернативы вызывается *abort()* (кроме того, чёткие C-разработчики оценят крутое падение программы):
 ```c
 ...
-/* Check for Python exceptions (if any) */
+/* Проверка на исключения Python (если они есть) */
 if (PyErr_Occurred()) {
     PyErr_Print();
     goto fail;
@@ -25215,12 +25222,12 @@ double call_func(PyObject *func, double x, double y) {
     ...
     double retval;
 
-    /* Make sure we own the GIL */
+    /* Убеждаемся, что владеем GIL */
     PyGILState_STATE state = PyGILState_Ensure();
     ...
-    /* Code that uses Python C API functions */
+    /* Код, который использует функции Python C API */
     ...
-    /* Restore previous GIL state and return */
+    /* Восстанавливаем предыдушее состояние GIL и возвращаем значение */
     PyGILState_Release(state);
     return retval;
 
@@ -25249,7 +25256,7 @@ double call_func(PyObject *func, double x, double y) {
     PyObject *pyfunc(PyObject *self, PyObject *args) {
     ...
     Py_BEGIN_ALLOW_THREADS
-    // Threaded C code. Must not use Python API functions
+    // Многопоточный код на C. Нельзя использовать функции Python API
     ...
     Py_END_ALLOW_THREADS
     ...
@@ -25280,12 +25287,12 @@ GIL может быть безопасно освобождён только е�
 Для любого кода на C, который использует объекты Python или Python C API, убедитесь для начала, что вы правильно приобретаете и освобождаете GIL. Это делается с помощью *PyGILState_Ensure()* и *PyGILState_Release()*, как показано тут:
 ```c
 ..
-/* Make sure we own the GIL */
+/* Убедимся, что владеем GIL */
 PyGILState_STATE state = PyGILState_Ensure();
 
-/* Use functions in the interpreter */
+/* Используем функции в интерпретаторе */
 ...
-/* Restore previous GIL state and return */
+/* Восстанавливаем предыдущее состояние GIL и возвращаем значение */
 PyGILState_Release(state);
 ...
 ```
@@ -25327,9 +25334,9 @@ extern double distance(Point *p1, Point *p2);
 #include "sample.h"
 %}
 
-/* Customizations */
+/* Кастомизации */
 %extend Point {
-    /* Constructor for Point objects */
+    /* Конструктор объектов Point */
     Point(double x, double y) {
         Point *p = (Point *) malloc(sizeof(Point));
         p->x = x;
@@ -25338,11 +25345,11 @@ extern double distance(Point *p1, Point *p2);
     };
 };
 
-/* Map int *remainder as an output argument */
+/* Отобразить int *remainder как выходной аргумент */
 %include typemaps.i
 %apply int *OUTPUT { int * remainder };
 
-/* Map the argument pattern (double *a, int n) to arrays */
+/* Отобразить шаблон аргументов (double *a, int n) на массивы */
 %typemap(in) (double *a, int n)(Py_buffer view) {
     view.obj = NULL;
     if (PyObject_GetBuffer($input, &view, PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1) {
@@ -25362,7 +25369,7 @@ extern double distance(Point *p1, Point *p2);
     }
 }
 
-/* C declarations to be included in the extension module */
+/* Объявления C для включения в модуль расширения */
 extern int gcd(int, int);
 extern int in_mandel(double x0, double y0, int n);
 extern int divide(int a, int b, int *remainder);
@@ -25482,7 +25489,7 @@ extern double distance(Point *p1, Point *p2);
 
 Если это опустить, объекты *Point* придётся создавать намного более неуклюжим способом:
 ```python
->>> # Usage if %extend Point is omitted
+>>> # Использование, если %extend Point опущено
 >>> p1 = sample.Point()
 >>> p1.x = 2.0
 >>> p1.y = 3
@@ -25515,7 +25522,7 @@ extern double distance(Point *p1, Point *p2);
 ```c
 # csample.pxd
 #
-# Declarations of "external" C functions and structures
+# Объявления "внешних" функций и структур C 
 
 cdef extern from "sample.h":
     int gcd(int, int)
@@ -25536,14 +25543,14 @@ cdef extern from "sample.h":
 ```c
 # sample.pyx
 
-# Import the low-level C declarations
+# Импортируем низкоуровневые объявления C
 cimport csample
 
-# Import some functionality from Python and the C stdlib
+# Импортируем некую функциональность из Python и C stdlib
 from cpython.pycapsule cimport *
 from libc.stdlib cimport malloc, free
 
-# Wrappers
+# Обёртки
 def gcd(unsigned int x, unsigned int y):
     return csample.gcd(x, y)
 
@@ -25565,12 +25572,12 @@ def avg(double[:] a):
         result = csample.avg(<double *> &a[0], sz)
     return result
 
-# Destructor for cleaning up Point objects
+# Деструктор для зачистки объектов Point
 cdef del_Point(object obj):
     pt = <csample.Point *> PyCapsule_GetPointer(obj,"Point")
     free(<void *> pt)
 
-# Create a Point object and return as a capsule
+# Создание объекта Point и возвращение в форме капсулы
 def Point(double x,double y):
     cdef csample.Point *p
     p = <csample.Point *> malloc(sizeof(csample.Point))
@@ -25663,9 +25670,9 @@ def gcd(unsigned int x, unsigned int y):
 ```python
 >>> sample.gcd(-10,2)
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
-    File "sample.pyx", line 7, in sample.gcd (sample.c:1284)
-        def gcd(unsigned int x,unsigned int y):
+  File "<stdin>", line 1, in <module>
+  File "sample.pyx", line 7, in sample.gcd (sample.c:1284)
+    def gcd(unsigned int x,unsigned int y):
 OverflowError: can't convert negative value to unsigned int
 >>>
 ```
@@ -25793,7 +25800,7 @@ cimport cython
 @cython.wraparound(False)
 cpdef clip(double[:] a, double min, double max, double[:] out):
     '''
-    Clip the values in a to be between min and max. Result in out
+    Вырезает значения в a так, чтобы они были между min и max. Результат в out
     '''
     if min > max:
         raise ValueError("min must be <= max")
@@ -25828,7 +25835,7 @@ setup(
 
 Вы обнаружите, что получившаяся функция обрезает массивы и работает с многими различными типами объектов массивов. Например:
 ```python
-# array module example
+# Пример с модулем array
 >>> import sample
 >>> import array
 >>> a = array.array('d',[1,-3,4,7,2,0])
@@ -25838,7 +25845,7 @@ array('d', [1.0, -3.0, 4.0, 7.0, 2.0, 0.0])
 >>> a
 array('d', [1.0, 1.0, 4.0, 4.0, 2.0, 1.0])
 
->>> # numpy example
+>>> # Пример с numpy
 >>> import numpy
 >>> b = numpy.random.uniform(-10,10,size=1000000)
 >>> b
@@ -25943,7 +25950,7 @@ cpdef clip2d(double[:,:] a, double min, double max, double[:,:] out):
                 out[i,j] = a[i,j]
 ```
 
-Надеемся, что от читателя не ускользнуло, что весь код в этом рецепте не привязан к какой-либо конкретной библиотеке для работы с массивами (например, NumPy). Это даёт коду большую гибкость. Однако также стоит заметить, что работа с массивами может быть намного более сложной, если в игру вступают многомерность, фрагментация, сдвиги и другие факторы. Обсуждение этих тем лежит за пределами этого рецепта, но дополнительные сведения вы сможете найти в [PEP 3118](http://www.python.org/dev/peps/pep-3118). Также обязательно стоит прочесть раздел [документации Cython](http://docs.cython.org/src/userguide/memoryviews.html) по «типизированным просмотрщикам памяти» (typed memoryviews).
+Надеемся, что от читателя не ускользнуло, что весь код в этом рецепте не привязан к какой-либо конкретной библиотеке для работы с массивами (например, NumPy). Это даёт коду большую гибкость. Однако также стоит заметить, что работа с массивами может быть намного более сложной, если в игру вступают многомерность, размер шага, сдвиги и другие факторы. Обсуждение этих тем лежит за пределами этого рецепта, но дополнительные сведения вы сможете найти в [PEP 3118](http://www.python.org/dev/peps/pep-3118). Также обязательно стоит прочесть раздел [документации Cython](http://docs.cython.org/src/userguide/memoryviews.html) по «типизированным просмотрщикам памяти» (typed memoryviews).
 
 ## 15.12. Превращение указателя на функцию в вызываемый объект
 ### Задача
@@ -25954,12 +25961,12 @@ cpdef clip2d(double[:,:] a, double min, double max, double[:,:] out):
 ```python
 >>> import ctypes
 >>> lib = ctypes.cdll.LoadLibrary(None)
->>> # Get the address of sin() from the C math library
+>>> # Получить адрес sin() из библиотеки C math
 >>> addr = ctypes.cast(lib.sin, ctypes.c_void_p).value
 >>> addr
 140735505915760
 
->>> # Turn the address into a callable function
+>>> # Превратить адрес в вызываемую функцию
 >>> functype = ctypes.CFUNCTYPE(ctypes.c_double, ctypes.c_double)
 >>> func = functype(addr)
 >>> func
@@ -26050,11 +26057,11 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 48 65 6c 6c 6f 20 57 6f 72 6c 64
 >>> print_chars(b'Hello\x00World')
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 TypeError: must be bytes without null bytes, not bytes
 >>> print_chars('Hello World')
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 TypeError: 'str' does not support the buffer interface
 >>>
 ```
@@ -26080,31 +26087,31 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 53 70 69 63 79 20 4a 61 6c 61 70 65 c3 b1 6f
 >>> print_chars('Hello\x00World')
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 TypeError: must be str without null characters, not str
 >>> print_chars(b'Hello World')
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 TypeError: must be str, not bytes
 >>>
 ```
 
 Если по какой-то причине вы работаете напрямую с PyObject \* и не можете использовать *PyArg_ParseTuple()*, следующий пример кода показывает, как вы можете проверить и извлечь подходящую ссылку  char \* из байтового или строкового объекта:
 ```c
-/* Some Python Object (obtained somehow) */
+/* Как-то полученный какой-то объект Python */
 PyObject *obj;
 
-/* Conversion from bytes */
+/* Преобразование из байтов */
 {
     char *s;
     s = PyBytes_AsString(o);
     if (!s) {
-        return NULL;  /* TypeError already raised */
+        return NULL;  /* TypeError уже возбуждёно */
     }
     print_chars(s);
 }
 
-/* Conversion to UTF-8 bytes from a string */
+/* Преобразование в байты UTF-8 из строки */
 {
     PyObject *bytes;
     char *s;
@@ -26130,9 +26137,9 @@ PyObject *obj;
 >>> s = 'Spicy Jalape\u00f1o'
 >>> sys.getsizeof(s)
 87
->>> print_chars(s)      # Passing string
+>>> print_chars(s)      # Передаем строку
 53 70 69 63 79 20 4a 61 6c 61 70 65 c3 b1 6f
->>> sys.getsizeof(s)    # Notice increased size
+>>> sys.getsizeof(s)    # Заметьте, что размер увеличился 
 103
 >>>
 ```
@@ -26179,7 +26186,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 48 65 6c 6c 6f
 >>> print_chars('Hello World')
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 ctypes.ArgumentError: argument 1: <class 'TypeError'>: wrong type
 >>>
 ```
@@ -26268,7 +26275,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
     char *s;
     Py_ssize_t len;
 
-    /* accepts bytes, bytearray, or other byte-like object */
+    /* Принимает байты, байтовый массив или другой байтоподобный объект */
     if (!PyArg_ParseTuple(args, "y#", &s, &len)) {
         return NULL;
     }
@@ -26390,8 +26397,8 @@ static PyObject *py_print_wchars(PyObject *self, PyObject *args) {
 ### Решение
 Для строк C, представленных как пара char \*, вы должны выбрать, хотите ли вы представить строку как сырую байтовую строку или строку Unicode. Байтовые объекты могут быть созданы с помощью *Py_BuildValue()*:
 ```c
-char *s;    /* Pointer to C string data */
-int   len;  /* Length of data */
+char *s;    /* Указатель на строковые данные C */
+int   len;  /* Длина данных */
 
 /* Make a bytes object */
 PyObject *obj = Py_BuildValue("y#", s, len);
@@ -26406,15 +26413,15 @@ PyObject *obj = Py_BuildValue("s#", s, len);
 ```c
 PyObject *obj = PyUnicode_Decode(s, len, "encoding", "errors");
 
-/* Examples /*
+/* Примеры /*
 obj = PyUnicode_Decode(s, len, "latin-1", "strict");
 obj = PyUnicode_Decode(s, len, "ascii", "ignore");
 ```
 
 Если у вас есть широкая строка, представленная как wchar_t \*, len pair, то есть несколько способов. Во-первых, вы можете использовать *Py_BuildValue()*:
 ```c
-wchar_t *w;     /* Wide character string */
-int len;        /* Length */
+wchar_t *w;     /* Строка широких символов */
+int len;        /* Длина */
 
 PyObject *obj = Py_BuildValue("u#", w, len);
 ```
@@ -26438,11 +26445,11 @@ PyObject *obj = PyUnicode_FromWideChar(w, len);
 ### Решение
 Вот некоторые данные C и функция, которые демонстрируют суть проблемы:
 ```c
-/* Some dubious string data (malformed UTF-8) */
+/* Какие-то сомнительные строковые данные (искаженные UTF-8) */
 const char *sdata = "Spicy Jalape\xc3\xb1o\xae";
 int slen = 16;
 
-/* Output character data */
+/* Вывод символьных данных */
 void print_chars(char *s, int len) {
     int n = 0;
     while (n < len) {
@@ -26457,14 +26464,14 @@ void print_chars(char *s, int len) {
 
 Теперь предположим, что вы хотите преобразовать содержимое *sdata* в строку Python. Также предположим, что позже вы захотите передать эту строку в функцию print_chars() через расширение. Вот как сделать это, в точности сохранив изначальные данные — даже с учётом, что есть проблемы с кодировкой:
 ```c
-/* Return the C string back to Python */
+/* Возврат строки C обратно в Python */
 static PyObject *py_retstr(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "")) {
         return NULL;
     }
     return PyUnicode_Decode(sdata, slen, "utf-8", "surrogateescape");
 }
-/* Wrapper for the print_chars() function */
+/* Обёртка для функции print_chars() */
 static PyObject *py_print_chars(PyObject *self, PyObject *args) {
     PyObject *obj, *bytes;
     char *s = 0;
@@ -26522,7 +26529,7 @@ static PyObject *py_print_chars(PyObject *self, PyObject *args) {
 >>> s = raw.decode('utf-8', 'surrogateescape')
 >>> print(s)
 Traceback (most recent call last):
-    File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <module>
 UnicodeEncodeError: 'utf-8' codec can't encode character '\udcae'
 in position 14: surrogates not allowed
 >>>
@@ -26558,10 +26565,10 @@ static PyObject *py_get_filename(PyObject *self, PyObject *args) {
         return NULL;
     }
     PyBytes_AsStringAndSize(bytes, &filename, &len);
-    /* Use filename */
+    /* Используем имя файла */
     ...
 
-    /* Cleanup and return */
+    /* Очистка и возврат */
     Py_DECREF(bytes)
     Py_RETURN_NONE;
 }
@@ -26569,26 +26576,26 @@ static PyObject *py_get_filename(PyObject *self, PyObject *args) {
 
 Если у вас уже есть PyObject \*, который вы хотите преобразовать в имя файла, используйте такой код:
 ```c
-PyObject *obj;  /* Object with the filename */
+PyObject *obj;  /* Объект с именем файла */
 PyObject *bytes;
 char *filename;
 Py_ssize_t len;
 
 bytes = PyUnicode_EncodeFSDefault(obj);
 PyBytes_AsStringAndSize(bytes, &filename, &len);
-/* Use filename */
+/* Используем имя файла */
 ...
 
-/* Cleanup */
+/* Подчистка */
 Py_DECREF(bytes);
 ```
 
 Если вам нужно вернуть имя файла обратно в Python, используйте следующий код:
 ```c
-/* Turn a filename into a Python object */
+/* Превращаение имени файла в объект Python */
 
-char *filename;      /* Already set */
-int   filename_len;  /* Already set */
+char *filename;      /* Уже установлено */
+int   filename_len;  /* Уже установлено */
 
 PyObject *obj = PyUnicode_DecodeFSDefaultAndSize(filename, filename_len);
 ```
@@ -26604,7 +26611,7 @@ PyObject *obj = PyUnicode_DecodeFSDefaultAndSize(filename, filename_len);
 ### Решение
 Чтобы преобразовать файл в целочисленный файловый дескриптор, используйте *PyFile_FromFd()*:
 ```c
-PyObject *fobj;     /* File object (already obtained somehow) */
+PyObject *fobj;     /* Файловый объект (полученный каким-то образом) */
 int fd = PyObject_AsFileDescriptor(fobj);
 if (fd < 0) {
     return NULL;
@@ -26617,7 +26624,7 @@ if (fd < 0) {
 
 Если вам нужно преобразовать целочисленный файловый дескриптор обратно в объект Python, используйте *PyFile_FromFd()*:
 ```c
-int fd;     /* Existing file descriptor (already open) */
+int fd;     /* Существующий файловый дескриптор (уже открытый) */
 PyObject *fobj = PyFile_FromFd(fd, "filename","r",-1,NULL,NULL,NULL,1);
 ```
 
@@ -26640,7 +26647,7 @@ PyObject *fobj = PyFile_FromFd(fd, "filename","r",-1,NULL,NULL,NULL,1);
 Вот пример функции расширения на С, которая просто потребляет все данные из файлоподобного объекта и сбрасывает их в стандартный поток вывода, чтобы вы могли их увидеть:
 ```c
 #define CHUNK_SIZE 8192
-/* Consume a "file-like" object and write bytes to stdout */
+/* Потребляем файлоподобный объект и записываем байты в stdout */
 static PyObject *py_consume_file(PyObject *self, PyObject *args) {
     PyObject *obj;
     PyObject *read_meth;
@@ -26651,12 +26658,12 @@ static PyObject *py_consume_file(PyObject *self, PyObject *args) {
         return NULL;
     }
 
-    /* Get the read method of the passed object */
+    /* Получить метод чтения переданного объекта */
     if ((read_meth = PyObject_GetAttrString(obj, "read")) == NULL) {
         return NULL;
     }
 
-    /* Build the argument list to read() */
+    /* Построение списка аргументов для read() */
     read_args = Py_BuildValue("(i)", CHUNK_SIZE);
     while (1) {
         PyObject *data;
@@ -26664,36 +26671,36 @@ static PyObject *py_consume_file(PyObject *self, PyObject *args) {
         char *buf;
         Py_ssize_t len;
 
-        /* Call read() */
+        /* Вызов read() */
         if ((data = PyObject_Call(read_meth, read_args, NULL)) == NULL) {
             goto final;
         }
-        /* Check for EOF */
+        /* Проверка EOF */
         if (PySequence_Length(data) == 0) {
             Py_DECREF(data);
             break;
         }
 
-        /* Encode Unicode as Bytes for C */
+        /* Кодируем Unicode в Bytes для C */
         if ((enc_data=PyUnicode_AsEncodedString(data,"utf-8","strict"))==NULL) {
             Py_DECREF(data);
             goto final;
         }
 
-        /* Extract underlying buffer data */
+        /* Извлекаем данные буфера */
         PyBytes_AsStringAndSize(enc_data, &buf, &len);
 
-        /* Write to stdout (replace with something more useful) */
+        /* Записываем в stdout (заменить чем-то более полезным) */
         write(1, buf, len);
 
-        /* Cleanup */
+        /* Подчистка */
         Py_DECREF(enc_data);
         Py_DECREF(data);
     }
     result = Py_BuildValue("");
 
     final:
-        /* Cleanup */
+        /* Подчистка */
         Py_DECREF(read_meth);
         Py_DECREF(read_args);
         return result;
@@ -26719,12 +26726,12 @@ World
 При всех операциях ввода-вывода вам нужно думать над «подкапотной» кодировкой и различием между байтами и Unicode. Этот рецепт показывает, как прочесть файл в текстовом режиме и декодировать получившийся текст в байтовую кодировку, которая может быть использована в C. Если вы хотите прочесть файл в бинарном режиме, нужно внести в код лишь косметические изменения. Например:
 ```c
 ...
-    /* Call read() */
+    /* Вызов read() */
     if ((data = PyObject_Call(read_meth, read_args, NULL)) == NULL) {
         goto final;
     }
 
-    /* Check for EOF */
+    /* Проверка на EOF */
     if (PySequence_Length(data) == 0) {
         Py_DECREF(data);
         break;
@@ -26736,7 +26743,7 @@ World
         goto final;
     }
 
-/* Extract underlying buffer data */
+/* Извлекаем данные буфера */
 PyBytes_AsStringAndSize(data, &buf, &len);
 ...
 ```
@@ -26768,7 +26775,7 @@ static PyObject *py_consume_iterable(PyObject *self, PyObject *args) {
     }
     
     while ((item = PyIter_Next(iter)) != NULL) {
-        /* Use item */
+        /* Используем элемент */
         ...
         Py_DECREF(item);
     }
@@ -26803,10 +26810,10 @@ bash % python3 -Xfaulthandler program.py
 Fatal Python error: Segmentation fault
 
 Current thread 0x00007fff71106cc0:
-    File "example.py", line 6 in foo
-    File "example.py", line 10 in bar
-    File "example.py", line 14 in spam
-    File "example.py", line 19 in <module>
+  File "example.py", line 6 in foo
+  File "example.py", line 10 in bar
+  File "example.py", line 14 in spam
+  File "example.py", line 19 in <module>
 Segmentation fault
 ```
 
